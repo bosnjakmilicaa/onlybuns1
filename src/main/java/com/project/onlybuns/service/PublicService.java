@@ -8,15 +8,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PublicService {
 
-    @Autowired
-    private PostRepository postRepository;
+    private final PostRepository postRepository;
+    private final UserProfileRepository userProfileRepository;
 
     @Autowired
-    private UserProfileRepository userProfileRepository;
+    public PublicService(PostRepository postRepository, UserProfileRepository userProfileRepository) {
+        this.postRepository = postRepository;
+        this.userProfileRepository = userProfileRepository;
+    }
 
     // Pregled svih objava
     public List<Post> getAllPosts() {
@@ -24,7 +28,7 @@ public class PublicService {
     }
 
     // Pregled profila korisnika
-    public UserProfile getUserProfile(String username) {
-        return userProfileRepository.findByUsername(username);
+    public Optional<UserProfile> getUserProfile(String username) {
+        return Optional.ofNullable(userProfileRepository.findByUsername(username));
     }
 }
