@@ -1,10 +1,12 @@
 package com.project.onlybuns.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@DiscriminatorValue("registered_user")
 public class RegisteredUser extends User {
 
     private String profileInfo;  // Profile information
@@ -16,7 +18,7 @@ public class RegisteredUser extends User {
             inverseJoinColumns = @JoinColumn(name = "post_id") // Column for posts
     )
     private List<Post> likedPosts = new ArrayList<>(); // List of posts liked by the user
-
+    @JsonManagedReference
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Post> posts = new ArrayList<>(); // List of posts created by the user
 
