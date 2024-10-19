@@ -3,7 +3,9 @@ package com.project.onlybuns.model;
 import jakarta.persistence.*;
 
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED) // Ovo omogućava nasleđivanje u JPA
+@Table(name = "users") // Only the root class should have this annotation
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE) // Define inheritance strategy
+@DiscriminatorColumn(name = "user_type") // Discriminator column for subclasses
 public abstract class User {
 
     @Id
@@ -13,13 +15,17 @@ public abstract class User {
     private String username;
     private String password;
 
+    // No-argument constructor
     public User() {
     }
 
+    // Constructor with parameters
     public User(String username, String password) {
         this.username = username;
         this.password = password;
     }
+
+    // Getters and Setters
     public Long getId() {
         return id;
     }
