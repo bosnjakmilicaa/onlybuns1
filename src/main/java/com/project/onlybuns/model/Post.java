@@ -2,6 +2,7 @@ package com.project.onlybuns.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,9 @@ public class Post {
     private RegisteredUser user; // Connection to RegisteredUser
 
 
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<Comment> comments = new ArrayList<>(); // Comments associated with the post
 
     @JsonIgnore
