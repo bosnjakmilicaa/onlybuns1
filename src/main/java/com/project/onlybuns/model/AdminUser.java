@@ -2,38 +2,36 @@ package com.project.onlybuns.model;
 
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import jakarta.persistence.OneToMany;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@DiscriminatorValue("admin") // Set value for user type differentiation
+@DiscriminatorValue("admin")
 public class AdminUser extends User {
 
+    @Email // Validates that the email is in a proper format
+    @NotBlank(message = "Email is required")
+    private String email; // Email address for login
+
+    private boolean isActive; // Status of the admin's account
+
+    @OneToMany(mappedBy = "adminUser") // mappedBy should point to the correct field in RegisteredUser
+    private List<RegisteredUser> registeredUsers = new ArrayList<>(); // List of registered users managed by this admin
+
     public AdminUser() {
-        super();
+        super("", ""); // Call superclass constructor with default values
+        this.isActive = false; // By default, admin user is not active
     }
 
-    @GetMapping("/my-endpoint")
-    public ResponseEntity<String> myEndpoint() {
-        return ResponseEntity.ok("This is my endpoint!");
+    public AdminUser(String username, String password, String email) {
+        super(username, password); // Call superclass constructor with parameters
+        this.email = email;
+        this.isActive = false; // New admin starts inactive
     }
 
-    public AdminUser(String username, String password) {
-        super(username, password);
-    }
-
-    // Methods for managing users, posts, and reports
-    public void deletePost(Long postId, List<Post> posts) {
-        posts.removeIf(post -> post.getId().equals(postId));
-    }
-
-    public void registerAdmin(AdminUser newAdmin, List<AdminUser> admins) {
-        admins.add(newAdmin);
-    }
-
-    public List<Post> viewReports(List<Post> posts) {
-        return posts; // Returns all posts as a report
-    }
+    // ... ostali metodi i getteri/setteri
 }
