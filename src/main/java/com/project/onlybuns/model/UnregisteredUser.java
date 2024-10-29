@@ -70,7 +70,7 @@ public class UnregisteredUser extends User {
     }
 
     // Method to validate user input during registration
-    public boolean validateRegistration() {
+    /*public boolean validateRegistration() {
         // Add validation logic for email, username, and password
         // For example, check if fields are not empty, if email is valid, etc.
         if (email == null || email.isEmpty() || !email.contains("@")) {
@@ -84,5 +84,48 @@ public class UnregisteredUser extends User {
         }
         // More validation can be added as needed
         return true;
+    }*/
+
+
+
+    public boolean validateRegistration() {
+        // Provera da li je email prazan i da li ima validan format
+        if (email == null || email.isEmpty() || !email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            return false; // Nevalidan email
+        }
+
+        // Provera da li je korisničko ime prazno
+        if (getUsername() == null || getUsername().isEmpty()) {
+            return false; // Korisničko ime ne sme biti prazno
+        }
+
+        // Provera da li je korisničko ime dovoljno dugačko
+        if (getUsername().length() < 3) {
+            return false; // Korisničko ime mora imati bar 3 karaktera
+        }
+
+        // Provera da li je lozinka prazna ili kraća od 6 karaktera
+        if (getPassword() == null || getPassword().length() < 6) {
+            return false; // Lozinka mora imati bar 6 karaktera
+        }
+
+        // Provera da li je ime prazno
+        if (firstName == null || firstName.isEmpty()) {
+            return false; // Ime ne sme biti prazno
+        }
+
+        // Provera da li je prezime prazno
+        if (lastName == null || lastName.isEmpty()) {
+            return false; // Prezime ne sme biti prazno
+        }
+
+        // Provera da li je adresa prazna
+        if (address == null || address.isEmpty()) {
+            return false; // Adresa ne sme biti prazna
+        }
+
+        // Ako sve validacije prođu, vraća true
+        return true;
     }
+
 }
