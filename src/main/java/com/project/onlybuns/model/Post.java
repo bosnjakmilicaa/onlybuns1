@@ -23,8 +23,6 @@ public class Post {
     @JsonBackReference
     private RegisteredUser user; // Connection to RegisteredUser
 
-
-
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Comment> comments = new ArrayList<>(); // Comments associated with the post
@@ -86,5 +84,10 @@ public class Post {
 
     public void setLikedByUsers(List<RegisteredUser> likedByUsers) {
         this.likedByUsers = likedByUsers;
+    }
+
+    // Return user ID from the RegisteredUser object
+    public Long getUserId() {
+        return user != null ? user.getId() : null; // Return user ID or null if user is not set
     }
 }
