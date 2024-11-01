@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -65,11 +66,7 @@ public class AuthController {
     }*/
 
     @PostMapping("/register") // POST "/auth/register"
-    public ResponseEntity<?> registerUser(@Valid @RequestBody UserDTO userDTO) {
-
-        if (userService.existsByUsername(userDTO.getUsername())) {
-            return ResponseEntity.badRequest().body("Error: Username is already taken!");
-        }
+    public ResponseEntity<?> registerUser(@Validated @RequestBody UserDTO userDTO) {
 
         // Proveri da li korisničko ime već postoji
         if (userService.existsByUsername(userDTO.getUsername())) {
@@ -81,12 +78,13 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Error: Email is already in use!");
         }
 
-        // Šifruj lozinku pre nego što je sačuvamo
+        // Heširaj lozinku pre nego što je sačuvamo
+        String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
 
         // Sačuvaj korisnika u bazi podataka
         RegisteredUser registeredUser = new RegisteredUser();
         registeredUser.setUsername(userDTO.getUsername());
-        registeredUser.setPassword(userDTO.getPassword()); // Šifrovana lozinka
+        registeredUser.setPassword(encodedPassword); // Šifrovana lozinka
         registeredUser.setEmail(userDTO.getEmail());
         registeredUser.setFirstName(userDTO.getFirstName());
         registeredUser.setLastName(userDTO.getLastName());
