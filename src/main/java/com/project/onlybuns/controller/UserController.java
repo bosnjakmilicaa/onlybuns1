@@ -1,6 +1,7 @@
 package com.project.onlybuns.controller;
 
 import com.project.onlybuns.model.RegisteredUser;
+import com.project.onlybuns.model.User;
 import com.project.onlybuns.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,17 +21,24 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<RegisteredUser>> getAllUsers() {
-        List<RegisteredUser> users = userService.findAll();
+    public ResponseEntity<List<User>> getAllUsers() {
+        List<User> users = userService.findAllUsers();
         return ResponseEntity.ok(users);
     }
 
-    @GetMapping("/{id}")
+    /*@GetMapping
+    public ResponseEntity<List<RegisteredUser>> getAllUsers() {
+        List<RegisteredUser> users = userService.findAll();
+        return ResponseEntity.ok(users);
+    }*/
+
+
+    /*@GetMapping("/{id}")
     public ResponseEntity<RegisteredUser> getUserById(@PathVariable Long id) {
         return userService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
-    }
+    }*/
 
     @PostMapping
     public ResponseEntity<RegisteredUser> createUser(@RequestBody RegisteredUser user) {
@@ -44,9 +52,9 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/username/{username}")
+    /*@GetMapping("/username/{username}")
     public ResponseEntity<RegisteredUser> getUserByUsername(@PathVariable String username) {
         RegisteredUser user = userService.findByUsername(username);
         return (user != null) ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
-    }
+    }*/
 }

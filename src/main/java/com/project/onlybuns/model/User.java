@@ -15,6 +15,9 @@ public abstract class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Transient
+    private String userType;
+
     @NotBlank(message = "Username cannot be blank")
     @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
     private String username;
@@ -22,6 +25,11 @@ public abstract class User {
     @NotBlank(message = "Password cannot be blank")
     @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
+
+
+    @Transient
+    private String confirmPassword;
+
 
     @Email(message = "Email should be valid")
     @NotBlank(message = "Email cannot be blank")
@@ -53,9 +61,29 @@ public abstract class User {
         this.isActive = false; // Podrazumevano nije aktiviran
     }
 
+
+    public User(String username, String password, String confirmPassword, String email, String firstName, String lastName, String address) {
+        this.username = username;
+        this.password = password;
+        this.confirmPassword = confirmPassword;
+        this.email = email;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.address = address;
+        this.isActive = false; // Podrazumevano nije aktiviran
+    }
     public User(String username, String password) {
         this.username = username;
         this.password = password;
+    }
+
+
+    public String getConfirmPassword() {
+        return confirmPassword;
+    }
+
+    public void setConfirmPassword(String confirmPassword) {
+        this.confirmPassword = confirmPassword;
     }
     // Getters and Setters
     public Long getId() {
@@ -112,6 +140,10 @@ public abstract class User {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getUserType() {
+        return this.getClass().getSimpleName(); // Vraća naziv klase (tip korisnika)
     }
 
     public boolean isActive() {
