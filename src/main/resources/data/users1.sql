@@ -19,3 +19,18 @@ VALUES
 INSERT INTO users (email, password, username, user_type, first_name, last_name, address, is_active)
 VALUES
     ('testuser7@example.com', 'password123', 'tester7', 'registered_user', 'Test', 'User7', '452 Test Avenue', TRUE);
+
+INSERT INTO posts(user_id, content) VALUES (4, 'content1');
+INSERT INTO posts(user_id, content) VALUES (5, 'content1');
+INSERT INTO posts(user_id, content) VALUES (5, 'content2');
+INSERT INTO posts(user_id, content) VALUES (5, 'content3');
+INSERT INTO posts(user_id, content) VALUES (7, 'content1');
+INSERT INTO posts(user_id, content) VALUES (7, 'content2');
+
+
+INSERT INTO comments(post_id,user_id, content) VALUES (1,7, 'com1');
+INSERT INTO comments(post_id,user_id, content) VALUES (1,5, 'com2');
+INSERT INTO comments(post_id,user_id, content) VALUES (2,7, 'com1');
+INSERT INTO comments(post_id,user_id, content) VALUES (1,4, 'com3');
+INSERT INTO comments(post_id,user_id, content) VALUES (6,7, 'com1');
+INSERT INTO comments(post_id,user_id, content) VALUES (5,5, 'com1');
