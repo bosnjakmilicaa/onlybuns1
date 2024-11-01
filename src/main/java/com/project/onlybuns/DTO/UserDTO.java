@@ -1,22 +1,11 @@
-package com.project.onlybuns.model;
+package com.project.onlybuns.DTO;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-@Entity
-@Table(name = "users")
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "user_type")
-public abstract class User {
+public class UserDTO {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    // Uklonjen userType atribut
     @NotBlank(message = "Username cannot be blank")
     @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
     private String username;
@@ -24,9 +13,6 @@ public abstract class User {
     @NotBlank(message = "Password cannot be blank")
     @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
-
-    @Transient
-    private String confirmPassword;
 
     @Email(message = "Email should be valid")
     @NotBlank(message = "Email cannot be blank")
@@ -40,35 +26,21 @@ public abstract class User {
 
     private String address;
 
-    private boolean isActive; // Da li je nalog aktiviran
-
     // No-argument constructor
-    public User() {
-        this.isActive = false; // Podrazumevano nije aktiviran
+    public UserDTO() {
     }
 
     // Constructor with parameters
-    public User(String username, String password, String email, String firstName, String lastName, String address) {
+    public UserDTO(String username, String password, String email, String firstName, String lastName, String address) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
         this.address = address;
-        this.isActive = false; // Podrazumevano nije aktiviran
     }
-
-
 
     // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getUsername() {
         return username;
     }
@@ -84,14 +56,6 @@ public abstract class User {
     public void setPassword(String password) {
         this.password = password;
     }
-
-    public User(String username, String password) {
-        this.username = username;
-        this.password = password;
-        this.isActive = false; // Podrazumevano nije aktiviran
-    }
-
-
 
     public String getEmail() {
         return email;
@@ -124,18 +88,5 @@ public abstract class User {
     public void setAddress(String address) {
         this.address = address;
     }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
-    public String getUserType() {
-        return this.getClass().getSimpleName(); // Vraća naziv klase (tip korisnika)
-    }
-
 
 }

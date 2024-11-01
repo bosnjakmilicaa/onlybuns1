@@ -54,4 +54,7 @@ public class RegisteredUser extends User {
     public void setAdminUser(AdminUser adminUser) {
         this.adminUser = adminUser;
     }
+
+
+
 }

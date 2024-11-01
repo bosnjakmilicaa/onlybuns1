@@ -45,6 +45,12 @@ public class UserController {
         RegisteredUser createdUser = userService.save(user);
         return ResponseEntity.ok(createdUser);
     }
+    @PostMapping("/update-passwords")
+    public ResponseEntity<String> updatePasswords() {
+        userService.updatePasswords();
+        return ResponseEntity.ok("Passwords updated successfully.");
+    }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {

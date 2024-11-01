@@ -15,7 +15,7 @@ VALUES
     ('testuser5@example.com', 'password123', 'tester5', 'registered_user', 'Test', 'User5', '451 Test Avenue', TRUE);
 INSERT INTO users (email, password, username, user_type, first_name, last_name, address, is_active)
 VALUES
-    ('testuser6@example.com', 'password123', 'tester4', 'unregistered_user', 'Test', 'User6', '450 Test Avenue', TRUE);
+    ('testuser6@example.com', 'password123', 'tester8', 'unregistered_user', 'Test', 'User6', '450 Test Avenue', TRUE);
 INSERT INTO users (email, password, username, user_type, first_name, last_name, address, is_active)
 VALUES
     ('testuser7@example.com', 'password123', 'tester7', 'registered_user', 'Test', 'User7', '452 Test Avenue', TRUE);
