@@ -32,10 +32,41 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    /*@PostMapping("/register") // POST "/auth/register"
+    public ResponseEntity<?> registerUser(@Valid @RequestBody UserDTO userDTO) {
+
+        if (userService.existsByUsername(userDTO.getUsername())) {
+            return ResponseEntity.badRequest().body("Error: Username is already taken!");
+        }
+
+        // Proveri da li korisničko ime već postoji
+        if (userService.existsByUsername(userDTO.getUsername())) {
+            return ResponseEntity.badRequest().body("Error: Username is already taken!");
+        }
+
+        // Proveri da li e-mail već postoji
+        if (userService.existsByEmail(userDTO.getEmail())) {
+            return ResponseEntity.badRequest().body("Error: Email is already in use!");
+        }
+
+        // Šifruj lozinku pre nego što je sačuvamo
+
+        // Sačuvaj korisnika u bazi podataka
+        RegisteredUser registeredUser = new RegisteredUser();
+        registeredUser.setUsername(userDTO.getUsername());
+        registeredUser.setPassword(userDTO.getPassword()); // Šifrovana lozinka
+        registeredUser.setEmail(userDTO.getEmail());
+        registeredUser.setFirstName(userDTO.getFirstName());
+        registeredUser.setLastName(userDTO.getLastName());
+        registeredUser.setAddress(userDTO.getAddress());
+        userService.save(registeredUser);
+
+        return ResponseEntity.ok("User registered successfully!");
+    }*/
+
     @PostMapping("/register") // POST "/auth/register"
     public ResponseEntity<?> registerUser(@Valid @RequestBody UserDTO userDTO) {
-        // Proveri da li je korisnik tipa Unregistered
-        // Možda želite dodati polje userType u UserDTO ili ga obraditi drugačije
+
         if (userService.existsByUsername(userDTO.getUsername())) {
             return ResponseEntity.badRequest().body("Error: Username is already taken!");
         }

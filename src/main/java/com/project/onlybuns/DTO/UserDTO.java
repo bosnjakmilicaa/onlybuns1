@@ -1,5 +1,6 @@
 package com.project.onlybuns.DTO;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -18,9 +19,11 @@ public class UserDTO {
     @NotBlank(message = "Email cannot be blank")
     private String email;
 
+    @JsonProperty("first_name")
     @NotBlank(message = "First name cannot be blank")
     private String firstName;
 
+    @JsonProperty("last_name")
     @NotBlank(message = "Last name cannot be blank")
     private String lastName;
 
