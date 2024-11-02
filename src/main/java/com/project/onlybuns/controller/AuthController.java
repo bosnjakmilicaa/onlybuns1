@@ -19,10 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 public class AuthController {
@@ -108,7 +105,7 @@ public class AuthController {
         }
     }*/
 
-    @PostMapping("/login") // POST "/auth/login"
+   /* @PostMapping("/login") // POST "/auth/login"
     public ResponseEntity<?> loginUser(@RequestBody Map<String, String> userInput, HttpSession session) {
         try {
             // Proveri da li je korisnik već ulogovan
@@ -119,6 +116,14 @@ public class AuthController {
 
             String email = userInput.get("email");
             String password = userInput.get("password");
+
+            if (email == null || email.isEmpty()) {
+                return ResponseEntity.badRequest().body("Error: Email must be provided!");
+            }
+
+            if (password == null || password.isEmpty()) {
+                return ResponseEntity.badRequest().body("Error: Password must be provided!");
+            }
 
             Optional<User> optionalUser = userService.findByEmail(email);
 
@@ -148,7 +153,58 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error: An unexpected error occurred.");
         }
+    }*/
+
+    @PostMapping("/login") // POST "/auth/login"
+    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> userInput, HttpSession session) {
+        try {
+            // Proveri da li je korisnik već ulogovan
+            if (session.getAttribute("user") != null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Collections.singletonMap("message", "Error: User is already logged in!"));
+            }
+
+            String email = userInput.get("email");
+            String password = userInput.get("password");
+
+            if (email == null || email.isEmpty()) {
+                return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Email must be provided!"));
+            }
+
+            if (password == null || password.isEmpty()) {
+                return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Password must be provided!"));
+            }
+
+            Optional<User> optionalUser = userService.findByEmail(email);
+
+            if (optionalUser.isPresent()) {
+                User existingUser = optionalUser.get();
+
+                if (passwordEncoder.matches(password, existingUser.getPassword())) {
+                    String userType = existingUser instanceof AdminUser ? "ADMIN" : "REGISTERED";
+                    // Kreiraj sesiju
+                    session.setAttribute("user", existingUser);
+                    session.setAttribute("userType", userType);
+
+                    // Pripremi odgovor
+                    Map<String, String> response = new HashMap<>();
+                    response.put("message", "User logged in successfully!");
+                    response.put("userType", userType); // Dodaj tip korisnika
+
+                    return ResponseEntity.ok(response); // Vraća odgovor sa tipom korisnika
+                } else {
+                    return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Invalid password!"));
+                }
+            } else {
+                return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: User not found!"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("message", "Error: An unexpected error occurred."));
+        }
     }
+
 
 
     @PostMapping("/updatePasswords")
