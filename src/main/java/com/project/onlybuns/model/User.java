@@ -50,19 +50,21 @@ public abstract class User {
     //private int followersCount; // Broj pratilaca
 
     // Getters and Setters
-    public int getPostsCount() {
-        return postsCount;
+
+    public Integer getPostsCount() {
+        return postsCount != null ? postsCount : 0; // Vraća 0 ako je null
     }
 
-    public void setPostsCount(int postsCount) {
+    public void setPostsCount(Integer postsCount) {
         this.postsCount = postsCount;
     }
 
-    public int getFollowersCount() {
-        return followersCount;
+
+    public Integer getFollowersCount() {
+        return followersCount!=null ? followersCount:0;
     }
 
-    public void setFollowersCount(int followersCount) {
+    public void setFollowersCount(Integer followersCount) {
         this.followersCount = followersCount;
     }
 
