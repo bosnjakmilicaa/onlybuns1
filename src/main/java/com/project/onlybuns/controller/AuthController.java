@@ -5,6 +5,7 @@ import com.project.onlybuns.model.AdminUser;
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.model.User;
 import com.project.onlybuns.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -33,41 +34,10 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    /*@PostMapping("/register") // POST "/auth/register"
-    public ResponseEntity<?> registerUser(@Valid @RequestBody UserDTO userDTO) {
 
-        if (userService.existsByUsername(userDTO.getUsername())) {
-            return ResponseEntity.badRequest().body("Error: Username is already taken!");
-        }
-
-        // Proveri da li korisničko ime već postoji
-        if (userService.existsByUsername(userDTO.getUsername())) {
-            return ResponseEntity.badRequest().body("Error: Username is already taken!");
-        }
-
-        // Proveri da li e-mail već postoji
-        if (userService.existsByEmail(userDTO.getEmail())) {
-            return ResponseEntity.badRequest().body("Error: Email is already in use!");
-        }
-
-        // Šifruj lozinku pre nego što je sačuvamo
-
-        // Sačuvaj korisnika u bazi podataka
-        RegisteredUser registeredUser = new RegisteredUser();
-        registeredUser.setUsername(userDTO.getUsername());
-        registeredUser.setPassword(userDTO.getPassword()); // Šifrovana lozinka
-        registeredUser.setEmail(userDTO.getEmail());
-        registeredUser.setFirstName(userDTO.getFirstName());
-        registeredUser.setLastName(userDTO.getLastName());
-        registeredUser.setAddress(userDTO.getAddress());
-        userService.save(registeredUser);
-
-        return ResponseEntity.ok("User registered successfully!");
-    }*/
 
     @PostMapping("/register") // POST "/auth/register"
-    public ResponseEntity<?> registerUser(@Validated @RequestBody UserDTO userDTO) {
-
+    public ResponseEntity<?> registerUser(@Validated @RequestBody UserDTO userDTO, HttpSession session) {
         // Proveri da li korisničko ime već postoji
         if (userService.existsByUsername(userDTO.getUsername())) {
             return ResponseEntity.badRequest().body("Error: Username is already taken!");
@@ -84,66 +54,103 @@ public class AuthController {
         // Sačuvaj korisnika u bazi podataka
         RegisteredUser registeredUser = new RegisteredUser();
         registeredUser.setUsername(userDTO.getUsername());
-        registeredUser.setPassword(encodedPassword); // Šifrovana lozinka
+        registeredUser.setPassword(encodedPassword);
         registeredUser.setEmail(userDTO.getEmail());
         registeredUser.setFirstName(userDTO.getFirstName());
         registeredUser.setLastName(userDTO.getLastName());
         registeredUser.setAddress(userDTO.getAddress());
         userService.save(registeredUser);
 
-        return ResponseEntity.ok("User registered successfully!");
+        // Kreiraj sesiju za registrovanog korisnika
+        session.setAttribute("user", registeredUser);
+        session.setAttribute("userType", "REGISTERED");
+
+        return ResponseEntity.ok("User registered successfully and session started!");
     }
 
 
 
-    // Pretpostavljam da ovo radite negde pri registraciji korisnika
 
 
-
-
-
-    @PostMapping("/login") // POST "/auth/login"
-    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> userInput) {
+    /*@PostMapping("/login") // POST "/auth/login"
+    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> userInput, HttpSession session) {
         try {
-            // Uzmite korisničko ime i lozinku iz Map
-            String username = userInput.get("username");
+            String email = userInput.get("email");
             String password = userInput.get("password");
 
-            // Pronađi korisnika po korisničkom imenu
-            Optional<User> optionalUser = userService.findByUsername(username);
+            Optional<User> optionalUser = userService.findByEmail(email);
 
             if (optionalUser.isPresent()) {
                 User existingUser = optionalUser.get();
 
-                // Ispisivanje informacija za debagovanje
-                System.out.println("Found user: " + existingUser.getUsername());
-                System.out.println("Stored password: " + existingUser.getPassword());
-                System.out.println("Provided password: " + password);
-
-                // Proveri da li je lozinka tačna
                 if (passwordEncoder.matches(password, existingUser.getPassword())) {
-                    // Proveri tip korisnika
                     if (existingUser instanceof RegisteredUser || existingUser instanceof AdminUser) {
-                        // Uspesno prijavljen
+                        // Kreiraj sesiju
+                        session.setAttribute("user", existingUser);
+                        session.setAttribute("userType", existingUser instanceof AdminUser ? "ADMIN" : "REGISTERED");
                         return ResponseEntity.ok("User logged in successfully!");
                     } else {
                         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                                 .body("Error: Only registered users or admins can log in!");
                     }
                 } else {
-                    // Greška: lozinka nije tačna
                     return ResponseEntity.badRequest().body("Error: Invalid password!");
                 }
             } else {
-                // Greška: korisnik nije pronađen
                 return ResponseEntity.badRequest().body("Error: User not found!");
             }
         } catch (Exception e) {
-            // Loguj izuzetak
-            e.printStackTrace(); // Ili koristi neki logger
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error: An unexpected error occurred.");
         }
+    }*/
+
+    @PostMapping("/login") // POST "/auth/login"
+    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> userInput, HttpSession session) {
+        try {
+            // Proveri da li je korisnik već ulogovan
+            if (session.getAttribute("user") != null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Error: User is already logged in!");
+            }
+
+            String email = userInput.get("email");
+            String password = userInput.get("password");
+
+            Optional<User> optionalUser = userService.findByEmail(email);
+
+            if (optionalUser.isPresent()) {
+                User existingUser = optionalUser.get();
+
+                if (passwordEncoder.matches(password, existingUser.getPassword())) {
+                    if (existingUser instanceof RegisteredUser || existingUser instanceof AdminUser) {
+                        // Kreiraj sesiju
+                        session.setAttribute("user", existingUser);
+                        session.setAttribute("userType", existingUser instanceof AdminUser ? "ADMIN" : "REGISTERED");
+                        return ResponseEntity.ok("User logged in successfully!");
+                    } else {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                                .body("Error: Only registered users or admins can log in!");
+                    }
+                } else {
+                    return ResponseEntity.badRequest().body("Error: Invalid password!");
+                }
+            } else {
+                return ResponseEntity.badRequest().body("Error: User not found!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error: An unexpected error occurred.");
+        }
+    }
+
+
+    @PostMapping("/logout") // POST "/auth/logout"
+    public ResponseEntity<?> logoutUser(HttpSession session) {
+        session.invalidate(); // Poništi sesiju
+        return ResponseEntity.ok("User logged out successfully!");
     }
 
 

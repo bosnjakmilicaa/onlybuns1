@@ -13,7 +13,7 @@ import java.util.List;
 @DiscriminatorValue("admin")
 public class AdminUser extends User {
 
-    @Email // Validates that the email is in a proper format
+    /*@Email // Validates that the email is in a proper format
     @NotBlank(message = "Email is required")
     private String email; // Email address for login
 
@@ -31,6 +31,21 @@ public class AdminUser extends User {
         super(username, password); // Call superclass constructor with parameters
         this.email = email;
         this.isActive = false; // New admin starts inactive
+    }*/
+
+    private String email;
+
+    private boolean isActive;
+
+    public AdminUser() {
+        super("", "");
+        this.isActive = false;
+    }
+
+    public AdminUser(String username, String password, String email) {
+        super(username, password);
+        this.email = email;
+        this.isActive = false;
     }
 
     // ... ostali metodi i getteri/setteri

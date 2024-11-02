@@ -113,6 +113,10 @@ public class UserService {
         return  userRepository.findByUsername(username);
     }
 
+    public Optional<User> findByEmail(String username) {
+        return  userRepository.findByEmail(username);
+    }
+
 
 
     /*public RegisteredUser findByUsername(String username) {
