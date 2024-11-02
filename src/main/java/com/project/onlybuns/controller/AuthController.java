@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -124,15 +126,17 @@ public class AuthController {
                 User existingUser = optionalUser.get();
 
                 if (passwordEncoder.matches(password, existingUser.getPassword())) {
-                    if (existingUser instanceof RegisteredUser || existingUser instanceof AdminUser) {
-                        // Kreiraj sesiju
-                        session.setAttribute("user", existingUser);
-                        session.setAttribute("userType", existingUser instanceof AdminUser ? "ADMIN" : "REGISTERED");
-                        return ResponseEntity.ok("User logged in successfully!");
-                    } else {
-                        return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                                .body("Error: Only registered users or admins can log in!");
-                    }
+                    String userType = existingUser instanceof AdminUser ? "ADMIN" : "REGISTERED";
+                    // Kreiraj sesiju
+                    session.setAttribute("user", existingUser);
+                    session.setAttribute("userType", userType);
+
+                    // Pripremi odgovor
+                    Map<String, String> response = new HashMap<>();
+                    response.put("message", "User logged in successfully!");
+                    response.put("userType", userType); // Dodaj tip korisnika
+
+                    return ResponseEntity.ok(response); // Vraća odgovor sa tipom korisnika
                 } else {
                     return ResponseEntity.badRequest().body("Error: Invalid password!");
                 }
@@ -145,6 +149,29 @@ public class AuthController {
                     .body("Error: An unexpected error occurred.");
         }
     }
+
+
+    @PostMapping("/updatePasswords")
+    public ResponseEntity<?> updatePasswords() {
+        updateOldPasswords();
+        return ResponseEntity.ok("Old passwords updated successfully!");
+    }
+
+    public void updateOldPasswords() {
+        List<User> users = userService.findAll(); // Uzimanje svih korisnika
+        for (User user : users) {
+            // Proveri da li je trenutna lozinka "password123"
+            if (user.getPassword().equals("password123")) {
+                // Dodeli novu lozinku
+                String newPassword = "newPassword123"; // Postavi novu lozinku
+                String encodedPassword = passwordEncoder.encode(newPassword);
+                user.setPassword(encodedPassword);
+                userService.save(user); // Sačuvaj ažuriranog korisnika
+            }
+        }
+    }
+
+
 
 
     @PostMapping("/logout") // POST "/auth/logout"

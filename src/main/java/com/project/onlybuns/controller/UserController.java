@@ -2,7 +2,9 @@ package com.project.onlybuns.controller;
 
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.model.User;
+import com.project.onlybuns.repository.UserRepository;
 import com.project.onlybuns.service.UserService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +27,46 @@ public class UserController {
         List<User> users = userService.findAllUsers();
         return ResponseEntity.ok(users);
     }
+
+    private boolean isAdmin(HttpSession session) {
+        return session.getAttribute("userType") != null && session.getAttribute("userType").equals("ADMIN");
+    }
+
+    /*@GetMapping("/search")
+    public ResponseEntity<List<User>> searchUsers(
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) Integer minPosts,
+            @RequestParam(required = false) Integer maxPosts,
+            HttpSession session) {
+        if (isAdmin(session)) {
+            List<User> users = userService.searchUsers(firstName, lastName, email, minPosts, maxPosts);
+            return ResponseEntity.ok(users);
+        } else {
+            return ResponseEntity.status(403).build(); // Forbidden
+        }
+    }*/
+
+    @GetMapping("/search")
+    public ResponseEntity<List<User>> searchUsers(
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) Integer minPosts,
+            @RequestParam(required = false) Integer maxPosts,
+            @RequestParam(required = false) Boolean sortByFollowers,
+            HttpSession session) {
+        if (isAdmin(session)) {
+            List<User> users = userService.searchUsers(firstName, lastName, email, minPosts, maxPosts, sortByFollowers);
+            return ResponseEntity.ok(users);
+        } else {
+            return ResponseEntity.status(403).build(); // Forbidden
+        }
+    }
+
+
+
 
     /*@GetMapping
     public ResponseEntity<List<RegisteredUser>> getAllUsers() {

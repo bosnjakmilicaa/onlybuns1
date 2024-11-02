@@ -42,9 +42,36 @@ public abstract class User {
 
     private boolean isActive; // Da li je nalog aktiviran
 
+    @Column(name = "posts_count")
+    private Integer postsCount; // Broj objava
+
+    @Column(name = "followers_count")
+    private Integer followersCount;
+    //private int followersCount; // Broj pratilaca
+
+    // Getters and Setters
+    public int getPostsCount() {
+        return postsCount;
+    }
+
+    public void setPostsCount(int postsCount) {
+        this.postsCount = postsCount;
+    }
+
+    public int getFollowersCount() {
+        return followersCount;
+    }
+
+    public void setFollowersCount(int followersCount) {
+        this.followersCount = followersCount;
+    }
+
+
     // No-argument constructor
     public User() {
         this.isActive = false; // Podrazumevano nije aktiviran
+        this.followersCount = 0;
+        this.postsCount =0;
     }
 
     // Constructor with parameters
