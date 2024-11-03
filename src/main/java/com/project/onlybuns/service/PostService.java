@@ -4,10 +4,12 @@ import com.project.onlybuns.model.Post;
 import com.project.onlybuns.model.PostNotFoundException;
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.repository.PostRepository;
+import com.project.onlybuns.repository.RegisteredUserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,6 +67,18 @@ public class PostService {
     public void delete(Long id) {
         postRepository.deleteById(id); // Ova metoda ne treba da vraća ništa
     }
+    @Autowired
+    private RegisteredUserRepository registeredUserRepository; // Dodajte ovo
+
+    public List<Post> findByUserId(Long userId) {
+        RegisteredUser user = registeredUserRepository.findById(userId)
+                .orElse(null); // Pronađite korisnika po ID-ju
+
+        if (user != null) {
+            return postRepository.findByUser(user); // Koristite korisnika da dobijete postove
+        }
+        return Collections.emptyList(); // Vratite praznu listu ako korisnik nije pronađen
+    }
 
 
     public void likePost(Long id, RegisteredUser user) {
@@ -76,6 +90,7 @@ public class PostService {
         if (post.getLikedByUsers().contains(user)) {
             throw new RuntimeException("User has already liked this post.");
         }
+
 
         // Dodaj korisnika u listu lajkova objave
         post.getLikedByUsers().add(user);

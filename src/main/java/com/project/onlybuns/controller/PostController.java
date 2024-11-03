@@ -3,6 +3,7 @@ package com.project.onlybuns.controller;
 import com.project.onlybuns.model.Post;
 import com.project.onlybuns.model.Comment;
 import com.project.onlybuns.model.RegisteredUser;
+import com.project.onlybuns.model.User;
 import com.project.onlybuns.service.PostService;
 import com.project.onlybuns.service.CommentService;
 import jakarta.servlet.http.HttpSession;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +29,36 @@ public class PostController {
         this.postService = postService;
         this.commentService = commentService;
     }
+
+
+    /*@GetMapping("/my-posts")
+    public ResponseEntity<List<Post>> getPostsByUserId(@AuthenticationPrincipal RegisteredUser user) {
+        List<Post> userPosts = postService.findByUserId(user.getId());
+        return ResponseEntity.ok(userPosts);
+    }*/
+
+    @GetMapping("/my-posts")
+    public ResponseEntity<?> getPostsByUserId(HttpSession session) {
+        User user = (User) session.getAttribute("user"); // Dobavi korisnika iz sesije
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Collections.singletonMap("message", "Error: User not logged in!"));
+        }
+
+        // Proveri tip korisnika
+        String userType = (String) session.getAttribute("userType");
+        if (!"REGISTERED".equals(userType)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Collections.singletonMap("message", "Error: Access denied for non-registered users!"));
+        }
+
+        Long userId = user.getId(); // Uzmimo userId iz korisnika
+
+        List<Post> userPosts = postService.findByUserId(userId);
+        return ResponseEntity.ok(userPosts);
+    }
+
 
     @GetMapping
     public ResponseEntity<List<Post>> getAllPosts() {

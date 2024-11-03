@@ -195,6 +195,7 @@ public class AuthController {
                     String userType = existingUser instanceof AdminUser ? "ADMIN" : "REGISTERED";
                     // Kreiraj sesiju
                     session.setAttribute("user", existingUser);
+                    session.setAttribute("userId", existingUser.getId());
                     session.setAttribute("userType", userType);
 
                     // Pripremi odgovor
