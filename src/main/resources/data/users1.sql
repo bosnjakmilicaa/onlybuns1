@@ -20,12 +20,12 @@ INSERT INTO users (email, password, username, user_type, first_name, last_name, 
 VALUES
     ('testuser7@example.com', 'password123', 'tester7', 'registered_user', 'Test', 'User7', '452 Test Avenue', TRUE);
 
-INSERT INTO posts(user_id, content) VALUES (4, 'content1');
-INSERT INTO posts(user_id, content) VALUES (5, 'content1');
-INSERT INTO posts(user_id, content) VALUES (5, 'content2');
-INSERT INTO posts(user_id, content) VALUES (5, 'content3');
-INSERT INTO posts(user_id, content) VALUES (7, 'content1');
-INSERT INTO posts(user_id, content) VALUES (7, 'content2');
+INSERT INTO posts(is_deleted,user_id, description,image_url) VALUES (false,4, 'content1','https://www.google.com/imgres?q=zec&imgurl=http%3A%2F%2Fwww.royalshop.rs%2Fwp-content%2Fuploads%2F2015%2F04%2Fzeka.jpg&imgrefurl=https%3A%2F%2Fwww.royalshop.rs%2Fzec-kao-izbor-ljubimca%2F&docid=JyODmMCwEUF0SM&tbnid=mM-sb87XRJu_7M&vet=12ahUKEwiDhZKJs8CJAxWb3gIHHU0HCwMQM3oECBYQAA..i&w=700&h=525&hcb=2&ved=2ahUKEwiDhZKJs8CJAxWb3gIHHU0HCwMQM3oECBYQAA');
+INSERT INTO posts(is_deleted,user_id, description,image_url) VALUES (false,5, 'content1','https://www.google.com/imgres?q=zec&imgurl=http%3A%2F%2Fwww.royalshop.rs%2Fwp-content%2Fuploads%2F2015%2F04%2Fzeka.jpg&imgrefurl=https%3A%2F%2Fwww.royalshop.rs%2Fzec-kao-izbor-ljubimca%2F&docid=JyODmMCwEUF0SM&tbnid=mM-sb87XRJu_7M&vet=12ahUKEwiDhZKJs8CJAxWb3gIHHU0HCwMQM3oECBYQAA..i&w=700&h=525&hcb=2&ved=2ahUKEwiDhZKJs8CJAxWb3gIHHU0HCwMQM3oECBYQAA');
+INSERT INTO posts(is_deleted,user_id, description,image_url) VALUES (false,5, 'content2','https://www.google.com/imgres?q=zec&imgurl=http%3A%2F%2Fwww.royalshop.rs%2Fwp-content%2Fuploads%2F2015%2F04%2Fzeka.jpg&imgrefurl=https%3A%2F%2Fwww.royalshop.rs%2Fzec-kao-izbor-ljubimca%2F&docid=JyODmMCwEUF0SM&tbnid=mM-sb87XRJu_7M&vet=12ahUKEwiDhZKJs8CJAxWb3gIHHU0HCwMQM3oECBYQAA..i&w=700&h=525&hcb=2&ved=2ahUKEwiDhZKJs8CJAxWb3gIHHU0HCwMQM3oECBYQAA');
+INSERT INTO posts(is_deleted,user_id, description,image_url) VALUES (false,5, 'content3','https://www.google.com/imgres?q=zec&imgurl=http%3A%2F%2Fwww.royalshop.rs%2Fwp-content%2Fuploads%2F2015%2F04%2Fzeka.jpg&imgrefurl=https%3A%2F%2Fwww.royalshop.rs%2Fzec-kao-izbor-ljubimca%2F&docid=JyODmMCwEUF0SM&tbnid=mM-sb87XRJu_7M&vet=12ahUKEwiDhZKJs8CJAxWb3gIHHU0HCwMQM3oECBYQAA..i&w=700&h=525&hcb=2&ved=2ahUKEwiDhZKJs8CJAxWb3gIHHU0HCwMQM3oECBYQAA');
+INSERT INTO posts(is_deleted,user_id, description,image_url) VALUES (false,7, 'content1','https://www.google.com/imgres?q=zec&imgurl=http%3A%2F%2Fwww.royalshop.rs%2Fwp-content%2Fuploads%2F2015%2F04%2Fzeka.jpg&imgrefurl=https%3A%2F%2Fwww.royalshop.rs%2Fzec-kao-izbor-ljubimca%2F&docid=JyODmMCwEUF0SM&tbnid=mM-sb87XRJu_7M&vet=12ahUKEwiDhZKJs8CJAxWb3gIHHU0HCwMQM3oECBYQAA..i&w=700&h=525&hcb=2&ved=2ahUKEwiDhZKJs8CJAxWb3gIHHU0HCwMQM3oECBYQAA');
+INSERT INTO posts(is_deleted,user_id, description,image_url) VALUES (false,7, 'content2','https://www.google.com/imgres?q=zec&imgurl=http%3A%2F%2Fwww.royalshop.rs%2Fwp-content%2Fuploads%2F2015%2F04%2Fzeka.jpg&imgrefurl=https%3A%2F%2Fwww.royalshop.rs%2Fzec-kao-izbor-ljubimca%2F&docid=JyODmMCwEUF0SM&tbnid=mM-sb87XRJu_7M&vet=12ahUKEwiDhZKJs8CJAxWb3gIHHU0HCwMQM3oECBYQAA..i&w=700&h=525&hcb=2&ved=2ahUKEwiDhZKJs8CJAxWb3gIHHU0HCwMQM3oECBYQAA');
 
 
 INSERT INTO comments(post_id,user_id, content) VALUES (1,7, 'com1');
