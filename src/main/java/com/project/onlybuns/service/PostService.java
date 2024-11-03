@@ -81,6 +81,7 @@ public class PostService {
     }
 
 
+
     public void likePost(Long id, RegisteredUser user) {
         // Prvo proveri da li post postoji
         Post post = postRepository.findById(id)

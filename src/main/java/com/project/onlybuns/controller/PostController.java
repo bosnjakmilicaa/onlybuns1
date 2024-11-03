@@ -80,7 +80,7 @@ public class PostController {
         return ResponseEntity.ok(createdPost);
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody Post updatedPost, HttpSession session) {
         // Proveri da li je korisnik prijavljen i da li je registrovan
         RegisteredUser loggedUser = (RegisteredUser) session.getAttribute("user");

@@ -2,10 +2,13 @@ package com.project.onlybuns.controller;
 
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.service.RegisteredUserService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -20,6 +23,19 @@ public class RegisteredUserController {
     }
 
     @GetMapping
+    public ResponseEntity<?> getAllRegisteredUsers(HttpSession session) {
+        // Proveri da li je ulogovani korisnik administrator
+        Object userType = session.getAttribute("userType");
+        if (userType != null && userType.equals("ADMIN")) {
+            List<RegisteredUser> registeredUsers = registeredUserService.findAll();
+            return ResponseEntity.ok(registeredUsers);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Collections.singletonMap("message", "Error: You do not have permission to access this resource."));
+        }
+    }
+
+    @GetMapping("/all")
     public ResponseEntity<List<RegisteredUser>> getAllUsers() {
         List<RegisteredUser> users = registeredUserService.findAll();
         return ResponseEntity.ok(users);
