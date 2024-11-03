@@ -1,10 +1,14 @@
 package com.project.onlybuns.controller;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+
 import com.project.onlybuns.DTO.UserDTO;
 import com.project.onlybuns.model.AdminUser;
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.model.User;
 import com.project.onlybuns.service.UserService;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.crypto.SecretKey;
 import java.util.*;
 
 @RestController
@@ -197,11 +202,13 @@ public class AuthController {
                     session.setAttribute("user", existingUser);
                     session.setAttribute("userId", existingUser.getId());
                     session.setAttribute("userType", userType);
+                    String token = generateToken(existingUser); // Ova metoda treba da kreira token
 
                     // Pripremi odgovor
                     Map<String, String> response = new HashMap<>();
                     response.put("message", "User logged in successfully!");
                     response.put("userType", userType); // Dodaj tip korisnika
+                    response.put("token", token); // Dodajte token u odgovor
 
                     return ResponseEntity.ok(response); // Vraća odgovor sa tipom korisnika
                 } else {
@@ -215,6 +222,20 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("message", "Error: An unexpected error occurred."));
         }
+    }
+
+
+    public String generateToken(User user) {
+        // Generišite sigurni ključ
+        SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+
+        // Možete sačuvati secretKey na bezbednom mestu ili ga proslediti kao parametar
+        return Jwts.builder()
+                .setSubject(user.getEmail())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 dan
+                .signWith(secretKey) // Koristite generisani ključ
+                .compact();
     }
 
 
