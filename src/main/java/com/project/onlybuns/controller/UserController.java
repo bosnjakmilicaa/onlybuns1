@@ -48,22 +48,6 @@ public class UserController {
         }
     }*/
 
-    @GetMapping("/search")
-    public ResponseEntity<List<User>> searchUsers(
-            @RequestParam(required = false) String firstName,
-            @RequestParam(required = false) String lastName,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) Integer minPosts,
-            @RequestParam(required = false) Integer maxPosts,
-            @RequestParam(required = false) Boolean sortByFollowers,
-            HttpSession session) {
-        if (isAdmin(session)) {
-            List<User> users = userService.searchUsers(firstName, lastName, email, minPosts, maxPosts, sortByFollowers);
-            return ResponseEntity.ok(users);
-        } else {
-            return ResponseEntity.status(403).build(); // Forbidden
-        }
-    }
 
 
 

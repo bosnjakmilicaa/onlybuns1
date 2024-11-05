@@ -1,4 +1,5 @@
 package com.project.onlybuns.controller;
+import com.project.onlybuns.service.UserService;
 import org.springframework.security.core.Authentication;
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.service.RegisteredUserService;
@@ -17,10 +18,13 @@ import java.util.List;
 public class RegisteredUserController {
 
     private final RegisteredUserService registeredUserService;
+    private final UserService registeredUserService1;
 
     @Autowired
-    public RegisteredUserController(RegisteredUserService registeredUserService) {
+    public RegisteredUserController(RegisteredUserService registeredUserService,UserService registeredUserService1) {
         this.registeredUserService = registeredUserService;
+        this.registeredUserService1 = registeredUserService1;
+
     }
 
     @GetMapping("/registered-users")
@@ -34,6 +38,21 @@ public class RegisteredUserController {
         List<RegisteredUser> registeredUsers = registeredUserService.findAll();
         return ResponseEntity.ok(registeredUsers);
     }
+
+    @GetMapping("/searchReg")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<RegisteredUser>> searchRegisteredUsers(
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) Integer minPosts,
+            @RequestParam(required = false) Integer maxPosts,
+            @RequestParam(required = false) Boolean sortByFollowers) {
+
+        List<RegisteredUser> users = registeredUserService1.searchRegisteredUsers(firstName, lastName, email, minPosts, maxPosts, sortByFollowers);
+        return ResponseEntity.ok(users);
+    }
+
 
 
 
@@ -58,6 +77,8 @@ public class RegisteredUserController {
         List<RegisteredUser> users = registeredUserService.findAll();
         return ResponseEntity.ok(users);
     }
+
+
 
     @GetMapping("/{id}")
     public ResponseEntity<RegisteredUser> getUserById(@PathVariable Long id) {

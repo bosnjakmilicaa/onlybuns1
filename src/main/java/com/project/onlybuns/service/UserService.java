@@ -23,13 +23,17 @@ import java.util.Optional;
 @Service
 public class UserService {
 
-    private final UserRepository userRepository;
 
+    private final UserRepository userRepository;
+    private final RegisteredUserRepository registeredUserRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, RegisteredUserRepository registeredUserRepository) {
         this.userRepository = userRepository;
+        this.registeredUserRepository = registeredUserRepository;
     }
+
+
 
     // Metoda za vraćanje svih korisnika
 
@@ -71,13 +75,6 @@ public class UserService {
     public List<User> findAllUsers() {
         return userRepository.findAll(); // Ova metoda bi trebala vraćati sve korisnike kao User
     }
-    /*public List<RegisteredUser> findAll() {
-        return userRepository.findAll();
-    }*/
-
-    /*public Optional<RegisteredUser> findById(Long id) {
-        return userRepository.findById(id);
-    }*/
 
     public RegisteredUser save(RegisteredUser user) {
         return userRepository.save(user);
@@ -102,20 +99,10 @@ public class UserService {
     public Optional<User> findByEmail(String username) {
         return  userRepository.findByEmail(username);
     }
-    public List<User> searchUsers(String firstName, String lastName, String email, Integer minPosts, Integer maxPosts) {
-        List<User> users = userRepository.findByFirstNameContainingOrLastNameContainingOrEmailContaining(firstName, lastName, email);
-        if (minPosts != null || maxPosts != null) {
-            // Filtriranje korisnika na osnovu broja objava
-            return users.stream()
-                    .filter(user -> (minPosts == null || user.getPostsCount() >= minPosts) &&
-                            (maxPosts == null || user.getPostsCount() <= maxPosts))
-                    .toList();
-        }
-        return users;
-    }
 
-    public List<User> searchUsers(String firstName, String lastName, String email, Integer minPosts, Integer maxPosts, Boolean sortByFollowers) {
-        List<User> users = userRepository.findByFirstNameContainingOrLastNameContainingOrEmailContaining(firstName, lastName, email);
+
+    public List<RegisteredUser> searchRegisteredUsers(String firstName, String lastName, String email, Integer minPosts, Integer maxPosts, Boolean sortByFollowers) {
+        List<RegisteredUser> users = registeredUserRepository.findByFirstNameContainingOrLastNameContainingOrEmailContaining(firstName, lastName, email);
 
         // Filtriranje korisnika na osnovu broja objava
         if (minPosts != null || maxPosts != null) {
@@ -127,13 +114,24 @@ public class UserService {
 
         // Sortiranje
         if (sortByFollowers != null) {
-            users = sortByFollowersAndEmail(sortByFollowers);
+            users = sortByFollowersAndEmail(users, sortByFollowers);
         }
 
         return users;
     }
-    
-    
+
+    public List<RegisteredUser> sortByFollowersAndEmail(List<RegisteredUser> users, boolean sortByFollowers) {
+        if (sortByFollowers) {
+            return users.stream()
+                    .sorted((u1, u2) -> Integer.compare(u2.getFollowersCount(), u1.getFollowersCount())) // Pretpostavljajući da imate metodu getFollowersCount()
+                    .toList();
+        } else {
+            return users.stream()
+                    .sorted((u1, u2) -> u1.getEmail().compareTo(u2.getEmail()))
+                    .toList();
+        }
+    }
+
 
 
 

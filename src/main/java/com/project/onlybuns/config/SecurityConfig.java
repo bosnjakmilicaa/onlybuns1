@@ -69,7 +69,7 @@ public class SecurityConfig {
                 .and()
                 .csrf(csrf -> csrf.disable())
                 .authorizeRequests()
-                .requestMatchers("/registered-users").hasRole("ADMIN") // Omogućava pristup samo adminima
+                .requestMatchers("/registered-users","/searchReg").hasRole("ADMIN") // Omogućava pristup samo adminima
                 .anyRequest().permitAll()
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
