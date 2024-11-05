@@ -1,5 +1,5 @@
 package com.project.onlybuns.controller;
-
+import org.springframework.security.core.Authentication;
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.service.RegisteredUserService;
 import jakarta.servlet.http.HttpSession;
@@ -7,13 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
 
-@RestController
-@RequestMapping("/registered-users") // Base path for registered user-related endpoints
+@RestController// Base path for registered user-related endpoints
 @PreAuthorize("hasRole('ADMIN')")
 public class RegisteredUserController {
 
@@ -24,7 +24,20 @@ public class RegisteredUserController {
         this.registeredUserService = registeredUserService;
     }
 
-    @GetMapping
+    @GetMapping("/registered-users")
+    @PreAuthorize("hasRole('ADMIN')") // Ovaj deo osigurava da samo administratori imaju pristup
+    public ResponseEntity<List<RegisteredUser>> getRegisteredUsers() {
+        // Logovanje za debugging
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("User: " + authentication.getName() + " with roles: " + authentication.getAuthorities());
+
+        // Dobijanje registrovanih korisnika
+        List<RegisteredUser> registeredUsers = registeredUserService.findAll();
+        return ResponseEntity.ok(registeredUsers);
+    }
+
+
+    /*@GetMapping
     public ResponseEntity<?> getAllRegisteredUsers(HttpSession session) {
         // Proveri da li je ulogovani korisnik administrator
         Object userType = session.getAttribute("userType");
@@ -35,7 +48,10 @@ public class RegisteredUserController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Collections.singletonMap("message", "Error: You do not have permission to access this resource."));
         }
-    }
+    }*/
+
+
+
 
     @GetMapping("/all")
     public ResponseEntity<List<RegisteredUser>> getAllUsers() {

@@ -229,9 +229,10 @@ public class AuthController {
         // Generišite sigurni ključ
         SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
-        // Možete sačuvati secretKey na bezbednom mestu ili ga proslediti kao parametar
+        // Kreiranje JWT tokena
         return Jwts.builder()
-                .setSubject(user.getEmail())
+                .setSubject(user.getUsername()) // Možete koristiti username ili neki drugi identifikator
+                .claim("role", user.getUserType()) // Dodavanje uloge korisnika u token
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 dan
                 .signWith(secretKey) // Koristite generisani ključ
