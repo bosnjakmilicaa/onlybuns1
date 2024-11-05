@@ -1,6 +1,7 @@
 package com.project.onlybuns.controller;
 
 import com.project.onlybuns.config.JwtAuthenticationFilter;
+import com.project.onlybuns.service.RegisteredUserService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -34,6 +35,9 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private RegisteredUserService registeredUserService;
 
     RegisteredUser registeredUser;
     @Autowired
@@ -192,6 +196,15 @@ public class AuthController {
     @PostMapping("/updatePasswords")
     public ResponseEntity<?> updatePasswords() {
         updateOldPasswords();
+
+        List<RegisteredUser> users = registeredUserService.findAll();
+
+        // Ažuriranje postsCount za svakog korisnika
+        for (RegisteredUser user : users) {
+            int postsCount = user.getPosts() != null ? user.getPosts().size() : 0;
+            user.setPostsCount(postsCount);
+            registeredUserService.save(user); // Sačuvaj korisnika sa ažuriranim postsCount
+        }
         return ResponseEntity.ok("Old passwords updated successfully!");
     }
 

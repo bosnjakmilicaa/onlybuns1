@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
@@ -27,6 +28,13 @@ public class RegisteredUser extends User {
     @ManyToOne // Dodaj ovu vezu
     @JoinColumn(name = "admin_user_id") // Ovo će biti naziv kolone u tabeli RegisteredUser
     private AdminUser adminUser; // Referenca ka AdminUser
+
+    public List<Post> getPosts() {
+        return posts;
+    }
+    public int getNumberOfPosts() {
+        return posts.size(); // Vraća broj postova
+    }
 
     // ... ostali metodi i getteri/setteri
 
