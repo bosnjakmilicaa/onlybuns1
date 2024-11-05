@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.List;
 
 @RestController// Base path for registered user-related endpoints
-@PreAuthorize("hasRole('ADMIN')")
 public class RegisteredUserController {
 
     private final RegisteredUserService registeredUserService;
@@ -25,7 +24,7 @@ public class RegisteredUserController {
     }
 
     @GetMapping("/registered-users")
-    @PreAuthorize("hasRole('ADMIN')") // Ovaj deo osigurava da samo administratori imaju pristup
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<RegisteredUser>> getRegisteredUsers() {
         // Logovanje za debugging
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -37,7 +36,8 @@ public class RegisteredUserController {
     }
 
 
-    /*@GetMapping
+
+    /*@GetMapping("/registered-users")
     public ResponseEntity<?> getAllRegisteredUsers(HttpSession session) {
         // Proveri da li je ulogovani korisnik administrator
         Object userType = session.getAttribute("userType");

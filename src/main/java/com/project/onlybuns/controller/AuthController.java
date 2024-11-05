@@ -1,5 +1,6 @@
 package com.project.onlybuns.controller;
 
+import com.project.onlybuns.config.JwtAuthenticationFilter;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -12,6 +13,7 @@ import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,91 +35,16 @@ public class AuthController {
     @Autowired
     private UserService userService;
 
-
-
     RegisteredUser registeredUser;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-
-    /*@PostMapping("/register") // POST "/auth/register"
-    public ResponseEntity<?> registerUser(@Validated @RequestBody UserDTO userDTO, HttpSession session) {
-        // Proveri da li korisničko ime već postoji
-        if (userService.existsByUsername(userDTO.getUsername())) {
-            return ResponseEntity.badRequest().body("Error: Username is already taken!");
-        }
-
-        // Proveri da li e-mail već postoji
-        if (userService.existsByEmail(userDTO.getEmail())) {
-            return ResponseEntity.badRequest().body("Error: Email is already in use!");
-        }
-
-        // Heširaj lozinku pre nego što je sačuvamo
-        String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
-
-        // Sačuvaj korisnika u bazi podataka
-        RegisteredUser registeredUser = new RegisteredUser();
-        registeredUser.setUsername(userDTO.getUsername());
-        registeredUser.setPassword(encodedPassword);
-        registeredUser.setEmail(userDTO.getEmail());
-        registeredUser.setFirstName(userDTO.getFirstName());
-        registeredUser.setLastName(userDTO.getLastName());
-        registeredUser.setAddress(userDTO.getAddress());
-        userService.save(registeredUser);
-
-        // Kreiraj sesiju za registrovanog korisnika
-        session.setAttribute("user", registeredUser);
-        session.setAttribute("userType", "REGISTERED");
-
-        return ResponseEntity.ok("User registered successfully and session started!");
-    }*/
-
-    /*@PostMapping("/register") // POST "/auth/register"
-    public ResponseEntity<?> registerUser(@Validated @RequestBody UserDTO userDTO, BindingResult bindingResult, HttpSession session) {
-        // Proveri da li postoje greške u validaciji
-        if (bindingResult.hasErrors()) {
-            // Kreiraj listu poruka grešaka
-            Map<String, String> errorMessages = new HashMap<>();
-            bindingResult.getFieldErrors().forEach(error ->
-                    errorMessages.put(error.getField(), error.getDefaultMessage())
-            );
-            return ResponseEntity.badRequest().body(errorMessages);
-        }
-
-        // Proveri da li korisničko ime već postoji
-        if (userService.existsByUsername(userDTO.getUsername())) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Username is already taken!"));
-        }
-
-        // Proveri da li e-mail već postoji
-        if (userService.existsByEmail(userDTO.getEmail())) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Email is already in use!"));
-        }
-
-        // Heširaj lozinku pre nego što je sačuvamo
-        String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
-
-        // Sačuvaj korisnika u bazi podataka
-        RegisteredUser registeredUser = new RegisteredUser();
-        registeredUser.setUsername(userDTO.getUsername());
-        registeredUser.setPassword(encodedPassword);
-        registeredUser.setEmail(userDTO.getEmail());
-        registeredUser.setFirstName(userDTO.getFirstName());
-        registeredUser.setLastName(userDTO.getLastName());
-        registeredUser.setAddress(userDTO.getAddress());
-        userService.save(registeredUser);
-
-        // Kreiraj sesiju za registrovanog korisnika
-        session.setAttribute("user", registeredUser);
-        session.setAttribute("userType", "REGISTERED");
-
-        // Pripremi odgovor
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "User registered successfully and session started!");
-
-        return ResponseEntity.ok(response); // Vraća JSON objekat
-    }*/
+    @Autowired
+    public AuthController(JwtAuthenticationFilter jwtAuthenticationFilter) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    }
 
     @PostMapping("/register") // POST "/auth/register"
     public ResponseEntity<?> registerUser(@Validated @RequestBody UserDTO userDTO, BindingResult bindingResult, HttpSession session) {
@@ -169,8 +96,6 @@ public class AuthController {
 
 
 
-
-
     @PostMapping("/login") // POST "/auth/login"
     public ResponseEntity<?> loginUser(@RequestBody Map<String, String> userInput, HttpSession session) {
         try {
@@ -202,7 +127,7 @@ public class AuthController {
                     session.setAttribute("user", existingUser);
                     session.setAttribute("userId", existingUser.getId());
                     session.setAttribute("userType", userType);
-                    String token = generateToken(existingUser); // Ova metoda treba da kreira token
+                    String token = jwtAuthenticationFilter.generateToken(existingUser);
 
                     // Pripremi odgovor
                     Map<String, String> response = new HashMap<>();
@@ -225,19 +150,42 @@ public class AuthController {
     }
 
 
-    public String generateToken(User user) {
-        // Generišite sigurni ključ
-        SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    /*public String generateToken(User user) {
+        // Koristite tajni ključ koji ste učitali iz application.properties
+        SecretKey secretKey = Keys.hmacShaKeyFor(secretKeyString.getBytes());
+
+        // Proverite tip korisnika i postavite odgovarajuću ulogu
+        String userType = user instanceof AdminUser ? "ROLE_ADMIN" : "ROLE_REGISTERED"; // Dodajte ROLE_ prefiks
 
         // Kreiranje JWT tokena
         return Jwts.builder()
                 .setSubject(user.getUsername()) // Možete koristiti username ili neki drugi identifikator
-                .claim("role", user.getUserType()) // Dodavanje uloge korisnika u token
+                .claim("authorities", Collections.singletonList(userType)) // Dodavanje uloge korisnika u token
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 dan
-                .signWith(secretKey) // Koristite generisani ključ
+                .signWith(secretKey) // Koristite učitani ključ
                 .compact();
-    }
+    }*/
+    /*public String generateToken(User user) {
+        SecretKey secretKey = Keys.hmacShaKeyFor(secretKeyString.getBytes());
+
+        String userType = user instanceof AdminUser ? "ROLE_ADMIN" : "ROLE_REGISTERED";
+
+        // Koristi System.out.println umesto loggera
+        System.out.println("Generating token for user: " + user.getUsername() + " with type: " + userType);
+
+        return Jwts.builder()
+                .setSubject(user.getUsername())
+                .claim("authorities", Collections.singletonList(userType))
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 day
+                .signWith(secretKey)
+                .compact();
+    }*/
+
+
+
+
 
 
 

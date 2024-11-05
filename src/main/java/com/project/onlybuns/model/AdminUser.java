@@ -13,26 +13,6 @@ import java.util.List;
 @DiscriminatorValue("admin")
 public class AdminUser extends User {
 
-    /*@Email // Validates that the email is in a proper format
-    @NotBlank(message = "Email is required")
-    private String email; // Email address for login
-
-    private boolean isActive; // Status of the admin's account
-
-    @OneToMany(mappedBy = "adminUser") // mappedBy should point to the correct field in RegisteredUser
-    private List<RegisteredUser> registeredUsers = new ArrayList<>(); // List of registered users managed by this admin
-
-    public AdminUser() {
-        super("", ""); // Call superclass constructor with default values
-        this.isActive = false; // By default, admin user is not active
-    }
-
-    public AdminUser(String username, String password, String email) {
-        super(username, password); // Call superclass constructor with parameters
-        this.email = email;
-        this.isActive = false; // New admin starts inactive
-    }*/
-
     private String email;
 
     private boolean isActive;
