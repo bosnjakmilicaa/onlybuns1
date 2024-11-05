@@ -11,6 +11,7 @@ import java.util.List;
 public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findAll();  // Pronalazak svih objava
     List<Post> findByIsDeletedFalse();
+    List<Post> findByUserUsername(String username);
 
     List<Post> findByUser(RegisteredUser user); // Preporučeno
 

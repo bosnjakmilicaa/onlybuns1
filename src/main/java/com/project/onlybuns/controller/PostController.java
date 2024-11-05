@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -54,7 +55,7 @@ public class PostController {
         return ResponseEntity.ok(userPosts);
     }*/
 
-    @GetMapping("/my-posts")
+    /*@GetMapping("/my-posts")
     @PreAuthorize("hasRole('REGISTERED')")
     public ResponseEntity<?> getPostsByUserId(HttpSession session) {
         User user = (User) session.getAttribute("user"); // Dobavi korisnika iz sesije
@@ -68,7 +69,49 @@ public class PostController {
 
         List<Post> userPosts = postService.findByUserId(userId);
         return ResponseEntity.ok(userPosts);
+    }*/
+
+    /*@GetMapping("/my-posts")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public ResponseEntity<?> getPostsByUserId(HttpServletRequest request) {
+        String authorizationHeader = request.getHeader("Authorization");
+
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String jwt = authorizationHeader.substring(7);
+            try {
+                Claims claims = Jwts.parser()
+                        .setSigningKey(secretKey) // Koristite tajni ključ
+                        .parseClaimsJws(jwt)
+                        .getBody();
+
+                String username = claims.getSubject();
+                Long userId = userService.findByEmail(username).map(User::getId).orElse(null);
+
+                if (userId == null) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                            .body(Collections.singletonMap("message", "Error: User not found!"));
+                }
+
+                List<Post> userPosts = postService.findByUserId(userId);
+                return ResponseEntity.ok(userPosts);
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Collections.singletonMap("message", "Error: Invalid token!"));
+            }
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Collections.singletonMap("message", "Error: Authorization header is missing!"));
+        }
+    }*/
+
+    @GetMapping("/my-posts")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public List<Post> getPostsForLoggedInUser() {
+        // Dobijanje trenutnog korisnika iz SecurityContext-a
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return postService.getPostsByUsername(username);
     }
+
 
 
     @GetMapping

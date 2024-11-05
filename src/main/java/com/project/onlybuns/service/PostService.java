@@ -80,6 +80,11 @@ public class PostService {
         return Collections.emptyList(); // Vratite praznu listu ako korisnik nije pronađen
     }
 
+    public List<Post> getPostsByUsername(String username) {
+        // Pretpostavljam da postoji metoda koja povlači postove na osnovu username-a
+        return postRepository.findByUserUsername(username);
+    }
+
 
 
     public void likePost(Long id, RegisteredUser user) {
