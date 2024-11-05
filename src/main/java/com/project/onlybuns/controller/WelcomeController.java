@@ -10,6 +10,6 @@ public class WelcomeController {
 
     @GetMapping("/")  // API ruta
     public String getWelcomeMessage() {
-        return "WELCOME TO ONLYBUNS";
+        return "Get Hoppin' With Your Friends";
     }
 }
