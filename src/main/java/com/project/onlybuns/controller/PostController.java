@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,12 +33,6 @@ public class PostController {
 
 
     /*@GetMapping("/my-posts")
-    public ResponseEntity<List<Post>> getPostsByUserId(@AuthenticationPrincipal RegisteredUser user) {
-        List<Post> userPosts = postService.findByUserId(user.getId());
-        return ResponseEntity.ok(userPosts);
-    }*/
-
-    @GetMapping("/my-posts")
     public ResponseEntity<?> getPostsByUserId(HttpSession session) {
         User user = (User) session.getAttribute("user"); // Dobavi korisnika iz sesije
 
@@ -51,6 +46,22 @@ public class PostController {
         if (!"REGISTERED".equals(userType)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(Collections.singletonMap("message", "Error: Access denied for non-registered users!"));
+        }
+
+        Long userId = user.getId(); // Uzmimo userId iz korisnika
+
+        List<Post> userPosts = postService.findByUserId(userId);
+        return ResponseEntity.ok(userPosts);
+    }*/
+
+    @GetMapping("/my-posts")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public ResponseEntity<?> getPostsByUserId(HttpSession session) {
+        User user = (User) session.getAttribute("user"); // Dobavi korisnika iz sesije
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Collections.singletonMap("message", "Error: User not logged in!"));
         }
 
         Long userId = user.getId(); // Uzmimo userId iz korisnika
