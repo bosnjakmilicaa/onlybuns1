@@ -103,7 +103,6 @@ public class AuthController {
     @PostMapping("/login") // POST "/auth/login"
     public ResponseEntity<?> loginUser(@RequestBody Map<String, String> userInput, HttpSession session) {
         try {
-            // Proveri da li je korisnik već ulogovan
             if (session.getAttribute("user") != null) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(Collections.singletonMap("message", "Error: User is already logged in!"));
