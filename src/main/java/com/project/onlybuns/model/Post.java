@@ -23,6 +23,7 @@ public class Post {
     @Column(nullable = true)
     private String description; // Opis slike
 
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference(value = "user-posts")
