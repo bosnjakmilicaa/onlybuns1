@@ -16,9 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/posts") // Base path for post-related endpoints
@@ -37,77 +35,6 @@ public class PostController {
     }
 
 
-    /*@GetMapping("/my-posts")
-    public ResponseEntity<?> getPostsByUserId(HttpSession session) {
-        User user = (User) session.getAttribute("user"); // Dobavi korisnika iz sesije
-
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Collections.singletonMap("message", "Error: User not logged in!"));
-        }
-
-        // Proveri tip korisnika
-        String userType = (String) session.getAttribute("userType");
-        if (!"REGISTERED".equals(userType)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Collections.singletonMap("message", "Error: Access denied for non-registered users!"));
-        }
-
-        Long userId = user.getId(); // Uzmimo userId iz korisnika
-
-        List<Post> userPosts = postService.findByUserId(userId);
-        return ResponseEntity.ok(userPosts);
-    }*/
-
-    /*@GetMapping("/my-posts")
-    @PreAuthorize("hasRole('REGISTERED')")
-    public ResponseEntity<?> getPostsByUserId(HttpSession session) {
-        User user = (User) session.getAttribute("user"); // Dobavi korisnika iz sesije
-
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Collections.singletonMap("message", "Error: User not logged in!"));
-        }
-
-        Long userId = user.getId(); // Uzmimo userId iz korisnika
-
-        List<Post> userPosts = postService.findByUserId(userId);
-        return ResponseEntity.ok(userPosts);
-    }*/
-
-    /*@GetMapping("/my-posts")
-    @PreAuthorize("hasRole('REGISTERED')")
-    public ResponseEntity<?> getPostsByUserId(HttpServletRequest request) {
-        String authorizationHeader = request.getHeader("Authorization");
-
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String jwt = authorizationHeader.substring(7);
-            try {
-                Claims claims = Jwts.parser()
-                        .setSigningKey(secretKey) // Koristite tajni ključ
-                        .parseClaimsJws(jwt)
-                        .getBody();
-
-                String username = claims.getSubject();
-                Long userId = userService.findByEmail(username).map(User::getId).orElse(null);
-
-                if (userId == null) {
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                            .body(Collections.singletonMap("message", "Error: User not found!"));
-                }
-
-                List<Post> userPosts = postService.findByUserId(userId);
-                return ResponseEntity.ok(userPosts);
-            } catch (Exception e) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(Collections.singletonMap("message", "Error: Invalid token!"));
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Collections.singletonMap("message", "Error: Authorization header is missing!"));
-        }
-    }*/
-
     @GetMapping("/my-posts")
     @PreAuthorize("hasRole('REGISTERED')")
     public List<Post> getPostsForLoggedInUser() {
@@ -118,11 +45,11 @@ public class PostController {
 
 
 
-    @GetMapping
+    /*@GetMapping("/allPosts")
     public ResponseEntity<List<Post>> getAllPosts() {
         List<Post> posts = postService.findAllActivePosts(); // Treba implementirati ovu metodu
         return ResponseEntity.ok(posts);
-    }
+    }*/
 
     @GetMapping("/{id}")
     public ResponseEntity<Post> getPostById(@PathVariable Long id) {
@@ -137,56 +64,6 @@ public class PostController {
         Post createdPost = postService.save(post);
         return ResponseEntity.ok(createdPost);
     }
-
-    /*@PutMapping("/update/{id}")
-    public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody Post updatedPost, HttpSession session) {
-        // Proveri da li je korisnik prijavljen i da li je registrovan
-        RegisteredUser loggedUser = (RegisteredUser) session.getAttribute("user");
-        String userType = (String) session.getAttribute("userType");
-
-        // Proveri da li je korisnik prijavljen
-        if (loggedUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); // Vraća 401 ako korisnik nije prijavljen
-        }
-
-        // Proveri da li je korisnik administrator
-        if ("ADMIN".equals(userType)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null); // Vraća 403 ako je korisnik administrator
-        }
-
-        // Proveri da li post postoji i da li je korisnik autor objave
-        return postService.findById(id)
-                .filter(post -> post.getUser().equals(loggedUser)) // Proveri da li korisnik može da menja objavu
-                .map(post -> {
-                    updatedPost.setId(id); // Postavi ID za ažuriranje
-                    Post savedPost = postService.update(updatedPost);
-                    return ResponseEntity.ok(savedPost);
-                })
-                .orElse(ResponseEntity.notFound().build()); // Vraća 404 ako post ne postoji ili korisnik nije autor
-    }*/
-
-    /*@PutMapping("/update/{id}")
-    @PreAuthorize("hasRole('REGISTERED')")  // Ovaj deo osigurava da korisnik mora imati ulogu 'REGISTERED'
-    public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody Post updatedPost) {
-        // Dobijanje trenutno prijavljenog korisnika
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        RegisteredUser loggedUser = userService.findByUsername1(username).orElse(null); // Možete koristiti servis za pronalaženje korisnika
-
-        // Proveri da li korisnik postoji
-        if (loggedUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); // Vraća 401 ako korisnik nije prijavljen
-        }
-
-        // Proveri da li post postoji i da li je korisnik autor objave
-        return postService.findById(id)
-                .filter(post -> post.getUser().equals(loggedUser)) // Proveri da li korisnik može da menja objavu
-                .map(post -> {
-                    updatedPost.setId(id); // Postavi ID za ažuriranje
-                    Post savedPost = postService.update(updatedPost);
-                    return ResponseEntity.ok(savedPost);
-                })
-                .orElse(ResponseEntity.notFound().build()); // Vraća 404 ako post ne postoji ili korisnik nije autor
-    }*/
 
     @PutMapping("/update/{id}")
     @PreAuthorize("hasRole('REGISTERED')")
@@ -223,6 +100,69 @@ public class PostController {
                 })
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build()); // 404 Not Found
     }
+
+    /*@GetMapping("/allPosts")
+    public List<Post> getAllPosts() {
+        return postService.findAllActivePosts();
+    }*/
+
+    /*@GetMapping("/allPosts")
+    public List<Map<String, Object>> getAllPosts() {
+        List<Post> posts = postService.findAllActivePosts();
+        List<Map<String, Object>> postsWithUsernames = new ArrayList<>();
+
+        for (Post post : posts) {
+            Map<String, Object> postData = new HashMap<>();
+            postData.put("id", post.getId());
+            postData.put("imageUrl", post.getImageUrl());
+            postData.put("description", post.getDescription());
+            postData.put("username", post.getUser() != null ? post.getUser().getUsername() : "Unknown"); // Dodajemo korisničko ime
+            postsWithUsernames.add(postData);
+        }
+
+        return postsWithUsernames;
+    }*/
+
+    @GetMapping("/allPosts")
+    public List<Map<String, Object>> getAllPosts() {
+        List<Post> posts = postService.findAllActivePosts();
+        List<Map<String, Object>> postsWithUsernamesAndComments = new ArrayList<>();
+
+        for (Post post : posts) {
+            Map<String, Object> postData = new HashMap<>();
+
+            // Dodajemo podatke o postu
+            postData.put("id", post.getId());
+            postData.put("imageUrl", post.getImageUrl());
+            postData.put("description", post.getDescription());
+            postData.put("username", post.getUser() != null ? post.getUser().getUsername() : "Unknown"); // Dodajemo korisničko ime
+
+            // Dodajemo listu komentara
+            List<Map<String, Object>> commentsData = new ArrayList<>();
+            for (Comment comment : post.getComments()) {
+                Map<String, Object> commentData = new HashMap<>();
+                commentData.put("id", comment.getId());
+                commentData.put("content", comment.getContent());
+                commentData.put("username", comment.getUser() != null ? comment.getUser().getUsername() : "Unknown"); // Dodajemo korisničko ime komentara
+                commentsData.add(commentData);
+            }
+            postData.put("comments", commentsData);
+
+            // Dodajemo post sa komentarima
+            postsWithUsernamesAndComments.add(postData);
+        }
+
+        return postsWithUsernamesAndComments;
+    }
+
+
+
+    // Like a post by a user
+    /*@PostMapping("/{postId}/like")
+    public void likePost(@PathVariable Long postId, @RequestBody Long userId) {
+        RegisteredUser user = userService.getUserById(userId);
+        postService.likePost(postId, user);
+    }*/
 
 
 

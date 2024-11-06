@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -43,6 +45,22 @@ public class Post {
 
     @Column(nullable = false)
     private boolean isDeleted = false;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;  // New field for creation date
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();  // Set the creation timestamp before persisting the post
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 
     // Default constructor
     public Post() {}
