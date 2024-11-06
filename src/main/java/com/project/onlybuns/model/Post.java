@@ -25,11 +25,11 @@ public class Post {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference(value = "user-posts")
     private RegisteredUser user; // Connection to RegisteredUser
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonManagedReference
+    @JsonManagedReference(value = "post-comments")
     private List<Comment> comments = new ArrayList<>(); // Comments associated with the post
 
     @ManyToMany // Koristite ManyToMany ili OneToMany zavisno od dizajna

@@ -6,6 +6,7 @@ import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.model.User;
 import com.project.onlybuns.service.PostService;
 import com.project.onlybuns.service.CommentService;
+import com.project.onlybuns.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,10 +27,13 @@ public class PostController {
     private final PostService postService;
     private final CommentService commentService;
 
+    private final UserService userService;
+
     @Autowired
-    public PostController(PostService postService, CommentService commentService) {
+    public PostController(PostService postService, CommentService commentService, UserService userService) {
         this.postService = postService;
         this.commentService = commentService;
+        this.userService = userService;
     }
 
 
@@ -134,7 +138,7 @@ public class PostController {
         return ResponseEntity.ok(createdPost);
     }
 
-    @PutMapping("/update/{id}")
+    /*@PutMapping("/update/{id}")
     public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody Post updatedPost, HttpSession session) {
         // Proveri da li je korisnik prijavljen i da li je registrovan
         RegisteredUser loggedUser = (RegisteredUser) session.getAttribute("user");
@@ -159,7 +163,70 @@ public class PostController {
                     return ResponseEntity.ok(savedPost);
                 })
                 .orElse(ResponseEntity.notFound().build()); // Vraća 404 ako post ne postoji ili korisnik nije autor
+    }*/
+
+    /*@PutMapping("/update/{id}")
+    @PreAuthorize("hasRole('REGISTERED')")  // Ovaj deo osigurava da korisnik mora imati ulogu 'REGISTERED'
+    public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody Post updatedPost) {
+        // Dobijanje trenutno prijavljenog korisnika
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        RegisteredUser loggedUser = userService.findByUsername1(username).orElse(null); // Možete koristiti servis za pronalaženje korisnika
+
+        // Proveri da li korisnik postoji
+        if (loggedUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); // Vraća 401 ako korisnik nije prijavljen
+        }
+
+        // Proveri da li post postoji i da li je korisnik autor objave
+        return postService.findById(id)
+                .filter(post -> post.getUser().equals(loggedUser)) // Proveri da li korisnik može da menja objavu
+                .map(post -> {
+                    updatedPost.setId(id); // Postavi ID za ažuriranje
+                    Post savedPost = postService.update(updatedPost);
+                    return ResponseEntity.ok(savedPost);
+                })
+                .orElse(ResponseEntity.notFound().build()); // Vraća 404 ako post ne postoji ili korisnik nije autor
+    }*/
+
+    @PutMapping("/update/{id}")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody Post updatedPost) {
+        // Dobijanje trenutno prijavljenog korisnika
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        RegisteredUser loggedUser = userService.findByUsername1(username).orElse(null);
+
+        // Proveri da li je korisnik prijavljen
+        if (loggedUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); // 401 Unauthorized
+        }
+
+        // Pronađi post po ID-ju i proveri da li je autor isti kao prijavljeni korisnik
+        return postService.findById(id)
+                .filter(post -> post.getUser().equals(loggedUser)) // Proveri da li je prijavljeni korisnik autor posta
+                .map(post -> {
+                    // Ažuriraj podatke posta
+                    post.setImageUrl(updatedPost.getImageUrl());
+                    post.setDescription(updatedPost.getDescription());
+                    post.setDeleted(updatedPost.isDeleted());
+
+                    // Ažuriraj listu komentara samo ako je to neophodno (opcionalno)
+                    if (updatedPost.getComments() != null) {
+                        post.setComments(updatedPost.getComments());
+                    }
+
+                    // Postavi korisnika ponovo kako bi se osiguralo da je pravilno povezan
+                    post.setUser(loggedUser);
+
+                    // Sačuvaj izmenjeni post
+                    Post savedPost = postService.update(post);
+                    return ResponseEntity.ok(savedPost);
+                })
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build()); // 404 Not Found
     }
+
+
+
+
 
 
     @DeleteMapping("/{id}")

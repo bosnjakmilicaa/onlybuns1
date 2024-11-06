@@ -100,7 +100,7 @@ public class AuthController {
 
 
 
-    @PostMapping("/login") // POST "/auth/login"
+    /*@PostMapping("/login") // POST "/auth/login"
     public ResponseEntity<?> loginUser(@RequestBody Map<String, String> userInput, HttpSession session) {
         try {
             if (session.getAttribute("user") != null) {
@@ -150,7 +150,55 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("message", "Error: An unexpected error occurred."));
         }
+    }*/
+
+
+    @PostMapping("/login") // POST "/auth/login"
+    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> userInput) {
+        try {
+            String email = userInput.get("email");
+            String password = userInput.get("password");
+
+            if (email == null || email.isEmpty()) {
+                return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Email must be provided!"));
+            }
+
+            if (password == null || password.isEmpty()) {
+                return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Password must be provided!"));
+            }
+
+            Optional<User> optionalUser = userService.findByEmail(email);
+
+            if (optionalUser.isPresent()) {
+                User existingUser = optionalUser.get();
+
+                if (passwordEncoder.matches(password, existingUser.getPassword())) {
+                    String userType = existingUser instanceof AdminUser ? "ADMIN" : "REGISTERED";
+                    String token = jwtAuthenticationFilter.generateToken(existingUser);
+
+                    // Pripremi odgovor
+                    Map<String, String> response = new HashMap<>();
+                    response.put("message", "User logged in successfully!");
+                    response.put("userType", userType);
+                    response.put("token", token);
+
+                    return ResponseEntity.ok(response);
+                } else {
+                    return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Invalid password!"));
+                }
+            } else {
+                return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: User not found!"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("message", "Error: An unexpected error occurred."));
+        }
     }
+
+
+
+
 
 
     /*public String generateToken(User user) {
