@@ -1,9 +1,13 @@
 package com.project.onlybuns.controller;
 
 import com.project.onlybuns.config.JwtAuthenticationFilter;
+import com.project.onlybuns.service.LoginAttemptService;
 import com.project.onlybuns.service.RegisteredUserService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import com.project.onlybuns.DTO.UserDTO;
 import com.project.onlybuns.model.AdminUser;
@@ -11,6 +15,7 @@ import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.model.User;
 import com.project.onlybuns.service.UserService;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +40,9 @@ public class AuthController {
 
     @Autowired
     private RegisteredUserService registeredUserService;
+
+    @Autowired
+    private LoginAttemptService loginAttemptService;
 
     RegisteredUser registeredUser;
     @Autowired
@@ -144,54 +152,7 @@ public class AuthController {
 
 
 
-
-
-
-
     /*@PostMapping("/login") // POST "/auth/login"
-    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> userInput) {
-        try {
-            String email = userInput.get("email");
-            String password = userInput.get("password");
-
-            if (email == null || email.isEmpty()) {
-                return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Email must be provided!"));
-            }
-
-            if (password == null || password.isEmpty()) {
-                return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Password must be provided!"));
-            }
-
-            Optional<User> optionalUser = userService.findByEmail(email);
-
-            if (optionalUser.isPresent()) {
-                User existingUser = optionalUser.get();
-
-                if (passwordEncoder.matches(password, existingUser.getPassword())) {
-                    String userType = existingUser instanceof AdminUser ? "ADMIN" : "REGISTERED";
-                    String token = jwtAuthenticationFilter.generateToken(existingUser);
-
-                    // Pripremi odgovor
-                    Map<String, String> response = new HashMap<>();
-                    response.put("message", "User logged in successfully!");
-                    response.put("userType", userType);
-                    response.put("token", token);
-
-                    return ResponseEntity.ok(response);
-                } else {
-                    return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Invalid password!"));
-                }
-            } else {
-                return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: User not found!"));
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Collections.singletonMap("message", "Error: An unexpected error occurred."));
-        }
-    }*/
-
-    @PostMapping("/login") // POST "/auth/login"
     public ResponseEntity<?> loginUser(@RequestBody Map<String, String> userInput, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         try {
             // Ako već postoji Authorization header (token), vrati poruku da je korisnik već ulogovan
@@ -238,7 +199,76 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Collections.singletonMap("message", "Error: An unexpected error occurred."));
         }
+    }*/
+
+
+    @PostMapping("/login") // POST "/auth/login"
+    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> userInput, @RequestHeader(value = "Authorization", required = false) String authHeader, HttpServletRequest request) {
+        try {
+            // Ako već postoji Authorization header (token), vrati poruku da je korisnik već ulogovan
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Collections.singletonMap("message", "Error: User is already logged in!"));
+            }
+
+            String email = userInput.get("email");
+            String password = userInput.get("password");
+
+            if (email == null || email.isEmpty()) {
+                return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Email must be provided!"));
+            }
+
+            if (password == null || password.isEmpty()) {
+                return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Password must be provided!"));
+            }
+
+            // Get client IP address
+            String ipAddress = request.getRemoteAddr();
+
+            // Check if this IP has exceeded the login attempt limit
+            if (loginAttemptService.isBlocked(ipAddress)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Collections.singletonMap("message", "Error: Too many login attempts. Please try again later."));
+            }
+
+            Optional<User> optionalUser = userService.findByEmail(email);
+
+            if (optionalUser.isPresent()) {
+                User existingUser = optionalUser.get();
+
+                if (passwordEncoder.matches(password, existingUser.getPassword())) {
+                    String userType = existingUser instanceof AdminUser ? "ADMIN" : "REGISTERED";
+                    String token = jwtAuthenticationFilter.generateToken(existingUser);
+
+                    // Reset login attempts upon successful login
+                    loginAttemptService.resetAttempts(ipAddress);
+
+                    // Prepare response
+                    Map<String, String> response = new HashMap<>();
+                    response.put("message", "User logged in successfully!");
+                    response.put("userType", userType);
+                    response.put("token", token);
+
+                    return ResponseEntity.ok(response);
+                } else {
+                    // Increment failed attempts
+                    loginAttemptService.incrementAttempts(ipAddress);
+
+                    return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Invalid password!"));
+                }
+            } else {
+                // Increment failed attempts
+                loginAttemptService.incrementAttempts(ipAddress);
+
+                return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: User not found!"));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Collections.singletonMap("message", "Error: An unexpected error occurred."));
+        }
     }
+
 
 
 
