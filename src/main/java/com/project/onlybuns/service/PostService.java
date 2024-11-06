@@ -43,6 +43,8 @@ public class PostService {
         return postRepository.findByIsDeletedFalse(); // Metoda koja vraća sve aktivne objave
     }
 
+
+
     @Transactional
     public Post update(Post updatedPost) {
         // Proveri da li post sa datim ID-om postoji

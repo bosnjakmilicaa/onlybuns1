@@ -35,21 +35,53 @@ public class PostController {
     }
 
 
-    @GetMapping("/my-posts")
+    /*@GetMapping("/my-posts")
     @PreAuthorize("hasRole('REGISTERED')")
     public List<Post> getPostsForLoggedInUser() {
         // Dobijanje trenutnog korisnika iz SecurityContext-a
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return postService.getPostsByUsername(username);
+    }*/
+
+    @GetMapping("/my-posts")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public List<Map<String, Object>> getPostsForLoggedInUser() {
+        // Dobijanje trenutnog korisnika iz SecurityContext-a
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        List<Post> posts = postService.getPostsByUsername(username);
+        List<Map<String, Object>> postsWithUsernamesAndComments = new ArrayList<>();
+
+        for (Post post : posts) {
+            Map<String, Object> postData = new HashMap<>();
+
+            // Dodajemo podatke o postu
+            postData.put("id", post.getId());
+            postData.put("imageUrl", post.getImageUrl());
+            postData.put("description", post.getDescription());
+            postData.put("username", post.getUser() != null ? post.getUser().getUsername() : "Unknown"); // Dodajemo korisničko ime
+
+            // Dodajemo listu komentara
+            List<Map<String, Object>> commentsData = new ArrayList<>();
+            for (Comment comment : post.getComments()) {
+                Map<String, Object> commentData = new HashMap<>();
+                commentData.put("id", comment.getId());
+                commentData.put("content", comment.getContent());
+                commentData.put("username", comment.getUser() != null ? comment.getUser().getUsername() : "Unknown"); // Dodajemo korisničko ime komentara
+                commentsData.add(commentData);
+            }
+            postData.put("comments", commentsData);
+
+            // Dodajemo post sa komentarima
+            postsWithUsernamesAndComments.add(postData);
+        }
+
+        return postsWithUsernamesAndComments;
     }
 
 
 
-    /*@GetMapping("/allPosts")
-    public ResponseEntity<List<Post>> getAllPosts() {
-        List<Post> posts = postService.findAllActivePosts(); // Treba implementirati ovu metodu
-        return ResponseEntity.ok(posts);
-    }*/
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Post> getPostById(@PathVariable Long id) {
