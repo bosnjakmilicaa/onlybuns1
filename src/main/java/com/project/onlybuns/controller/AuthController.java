@@ -22,10 +22,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.crypto.SecretKey;
 import java.util.*;
@@ -50,7 +47,7 @@ public class AuthController {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
-    @PostMapping("/register") // POST "/auth/register"
+    /*@PostMapping("/register") // POST "/auth/register"
     public ResponseEntity<?> registerUser(@Validated @RequestBody UserDTO userDTO, BindingResult bindingResult, HttpSession session) {
         // Proveri da li postoje greške u validaciji
         if (bindingResult.hasErrors()) {
@@ -94,20 +91,66 @@ public class AuthController {
         response.put("message", "User registered successfully and session started!");
 
         return ResponseEntity.ok(response); // Vraća JSON objekat
+    }*/
+
+
+    @PostMapping("/register") // POST "/auth/register"
+    public ResponseEntity<?> registerUser(@Validated @RequestBody UserDTO userDTO, BindingResult bindingResult) {
+        // Proveri da li postoje greške u validaciji
+        if (bindingResult.hasErrors()) {
+            // Kreiraj listu poruka grešaka
+            Map<String, String> errorMessages = new HashMap<>();
+            bindingResult.getFieldErrors().forEach(error ->
+                    errorMessages.put(error.getField(), error.getDefaultMessage())
+            );
+            return ResponseEntity.badRequest().body(errorMessages);
+        }
+
+        // Proveri da li korisničko ime već postoji
+        if (userService.existsByUsername(userDTO.getUsername())) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("username", "Error: Username is already taken!"));
+        }
+
+        // Proveri da li e-mail već postoji
+        if (userService.existsByEmail(userDTO.getEmail())) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("email", "Error: Email is already in use!"));
+        }
+
+        // Heširaj lozinku pre nego što je sačuvamo
+        String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
+
+        // Sačuvaj korisnika u bazi podataka
+        RegisteredUser registeredUser = new RegisteredUser();
+        registeredUser.setUsername(userDTO.getUsername());
+        registeredUser.setPassword(encodedPassword);
+        registeredUser.setEmail(userDTO.getEmail());
+        registeredUser.setFirstName(userDTO.getFirstName());
+        registeredUser.setLastName(userDTO.getLastName());
+        registeredUser.setAddress(userDTO.getAddress());
+        userService.save(registeredUser);
+
+        // Generiši token za novog korisnika
+        String token = jwtAuthenticationFilter.generateToken(registeredUser);
+
+        // Pripremi odgovor
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "User registered successfully!");
+        response.put("userType", "REGISTERED");
+        response.put("token", token); // Dodaj token u odgovor
+
+        return ResponseEntity.ok(response); // Vraća JSON objekat sa tokenom
     }
 
 
 
 
 
-    /*@PostMapping("/login") // POST "/auth/login"
-    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> userInput, HttpSession session) {
-        try {
-            if (session.getAttribute("user") != null) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(Collections.singletonMap("message", "Error: User is already logged in!"));
-            }
 
+
+
+    /*@PostMapping("/login") // POST "/auth/login"
+    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> userInput) {
+        try {
             String email = userInput.get("email");
             String password = userInput.get("password");
 
@@ -126,19 +169,15 @@ public class AuthController {
 
                 if (passwordEncoder.matches(password, existingUser.getPassword())) {
                     String userType = existingUser instanceof AdminUser ? "ADMIN" : "REGISTERED";
-                    // Kreiraj sesiju
-                    session.setAttribute("user", existingUser);
-                    session.setAttribute("userId", existingUser.getId());
-                    session.setAttribute("userType", userType);
                     String token = jwtAuthenticationFilter.generateToken(existingUser);
 
                     // Pripremi odgovor
                     Map<String, String> response = new HashMap<>();
                     response.put("message", "User logged in successfully!");
-                    response.put("userType", userType); // Dodaj tip korisnika
-                    response.put("token", token); // Dodajte token u odgovor
+                    response.put("userType", userType);
+                    response.put("token", token);
 
-                    return ResponseEntity.ok(response); // Vraća odgovor sa tipom korisnika
+                    return ResponseEntity.ok(response);
                 } else {
                     return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Invalid password!"));
                 }
@@ -152,10 +191,15 @@ public class AuthController {
         }
     }*/
 
-
     @PostMapping("/login") // POST "/auth/login"
-    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> userInput) {
+    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> userInput, @RequestHeader(value = "Authorization", required = false) String authHeader) {
         try {
+            // Ako već postoji Authorization header (token), vrati poruku da je korisnik već ulogovan
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Collections.singletonMap("message", "Error: User is already logged in!"));
+            }
+
             String email = userInput.get("email");
             String password = userInput.get("password");
 
@@ -201,42 +245,6 @@ public class AuthController {
 
 
 
-    /*public String generateToken(User user) {
-        // Koristite tajni ključ koji ste učitali iz application.properties
-        SecretKey secretKey = Keys.hmacShaKeyFor(secretKeyString.getBytes());
-
-        // Proverite tip korisnika i postavite odgovarajuću ulogu
-        String userType = user instanceof AdminUser ? "ROLE_ADMIN" : "ROLE_REGISTERED"; // Dodajte ROLE_ prefiks
-
-        // Kreiranje JWT tokena
-        return Jwts.builder()
-                .setSubject(user.getUsername()) // Možete koristiti username ili neki drugi identifikator
-                .claim("authorities", Collections.singletonList(userType)) // Dodavanje uloge korisnika u token
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 dan
-                .signWith(secretKey) // Koristite učitani ključ
-                .compact();
-    }*/
-    /*public String generateToken(User user) {
-        SecretKey secretKey = Keys.hmacShaKeyFor(secretKeyString.getBytes());
-
-        String userType = user instanceof AdminUser ? "ROLE_ADMIN" : "ROLE_REGISTERED";
-
-        // Koristi System.out.println umesto loggera
-        System.out.println("Generating token for user: " + user.getUsername() + " with type: " + userType);
-
-        return Jwts.builder()
-                .setSubject(user.getUsername())
-                .claim("authorities", Collections.singletonList(userType))
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 day
-                .signWith(secretKey)
-                .compact();
-    }*/
-
-
-
-
 
 
 
@@ -272,11 +280,17 @@ public class AuthController {
 
 
 
-    @PostMapping("/logout") // POST "/auth/logout"
+    /*@PostMapping("/logout") // POST "/auth/logout"
     public ResponseEntity<?> logoutUser(HttpSession session) {
         session.invalidate(); // Poništi sesiju
         return ResponseEntity.ok("User logged out successfully!");
+    }*/
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logoutUser() {
+        return ResponseEntity.ok(Collections.singletonMap("message", "User logged out successfully!"));
     }
+
 
 
 
