@@ -197,89 +197,6 @@ public class AuthController {
         return ResponseEntity.ok(Collections.singletonMap("message", "User registered successfully! Please check your email for activation link."));
     }
 
-    /*@GetMapping("/activateAccount")
-    public ResponseEntity<?> activateUser(@RequestParam("token") String token) {
-        // Validiraj token
-        Claims claims = jwtAuthenticationFilter.parseToken(token);
-        if (claims == null) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Invalid or expired token"));
-        }
-
-        // Pronađi korisnika sa tim tokenom (username je u subject-u tokena)
-        String username = claims.getSubject();
-        Optional<RegisteredUser> optionalUser = userService.findByUsername1(username);
-        if (!optionalUser.isPresent()) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "User not found"));
-        }
-
-        RegisteredUser user = optionalUser.get();  // Izvucite korisnika iz Optional
-
-        // Proverite da li je korisnik već aktiviran
-        if (user.isActive()) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Account is already activated"));
-        }
-
-        // Aktiviraj korisnika
-        user.setActive(true);
-        userService.save(user);  // Spasi promene u bazi
-
-        return ResponseEntity.ok(Collections.singletonMap("message", "Account successfully activated! You can now log in."));
-    }*/
-
-    /*@GetMapping("/activate")
-    public ResponseEntity<?> activateUser(@RequestParam("token") String token) {
-        Claims claims;
-        try {
-            claims = jwtAuthenticationFilter.parseToken(token);
-        } catch (ExpiredJwtException e) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Token has expired"));
-        } catch (JwtException e) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Invalid token"));
-        }
-
-        String username = claims.getSubject();
-        RegisteredUser user = userService.findByUsername1(username)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found"));
-
-        if (user.isActive()) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Account is already activated"));
-        }
-
-        user.setActive(true);
-        userService.save(user);
-
-        return ResponseEntity.ok(Collections.singletonMap("message", "Account successfully activated. You can now log in."));
-    }*/
-
-    /*@GetMapping("/activate")
-    public ResponseEntity<?> activateUser(@RequestParam("token") String token) {
-        Claims claims;
-        try {
-            claims = jwtAuthenticationFilter.parseToken(token);
-        } catch (ExpiredJwtException e) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Token has expired"));
-        } catch (JwtException e) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Invalid token"));
-        }
-
-        // Dobavljanje korisnika pomoću username-a koji je u subject-u tokena
-        String username = claims.getSubject();
-        RegisteredUser user = userService.findByUsername1(username)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found"));
-
-        // Proverite da li je korisnik već aktiviran
-        if (user.isActive()) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Account is already activated"));
-        }
-
-        // Aktivirajte korisnika
-        user.setActive(true);
-        userService.save(user);
-
-        // Vratite poruku o uspehu
-        return ResponseEntity.ok(Collections.singletonMap("message", "Account successfully activated. You can now log in."));
-    }*/
-
     @GetMapping("/activate")
     public ResponseEntity<?> activateUser(@RequestParam("token") String token) {
         Claims claims;
@@ -365,6 +282,12 @@ public class AuthController {
 
             if (optionalUser.isPresent()) {
                 User existingUser = optionalUser.get();
+
+                if (!existingUser.isActive()) {
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                            .body(Collections.singletonMap("message", "Error: Your account is not activated. Please activate your account."));
+                }
+
 
                 if (passwordEncoder.matches(password, existingUser.getPassword())) {
                     String userType = existingUser instanceof AdminUser ? "ADMIN" : "REGISTERED";
