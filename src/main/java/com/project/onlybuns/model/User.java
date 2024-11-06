@@ -25,8 +25,6 @@ public abstract class User {
     @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
 
-    @Transient
-    private String confirmPassword;
 
     @Email(message = "Email should be valid")
     @NotBlank(message = "Email cannot be blank")

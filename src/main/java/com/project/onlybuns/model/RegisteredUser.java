@@ -13,6 +13,7 @@ import java.util.List;
 @DiscriminatorValue("registered_user")
 public class RegisteredUser extends User {
 
+
     @ManyToMany
     @JoinTable(
             name = "user_likes_post",

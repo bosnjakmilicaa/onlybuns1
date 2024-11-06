@@ -1,10 +1,10 @@
 package com.project.onlybuns.controller;
 
 import com.project.onlybuns.config.JwtAuthenticationFilter;
+import com.project.onlybuns.service.EmailService;
 import com.project.onlybuns.service.LoginAttemptService;
 import com.project.onlybuns.service.RegisteredUserService;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -15,6 +15,7 @@ import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.model.User;
 import com.project.onlybuns.service.UserService;
 import io.jsonwebtoken.security.Keys;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -28,6 +29,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.crypto.SecretKey;
 import java.util.*;
@@ -40,6 +42,9 @@ public class AuthController {
 
     @Autowired
     private RegisteredUserService registeredUserService;
+
+    @Autowired
+    private EmailService emailService;
 
     @Autowired
     private LoginAttemptService loginAttemptService;
@@ -102,7 +107,7 @@ public class AuthController {
     }*/
 
 
-    @PostMapping("/register") // POST "/auth/register"
+    /*@PostMapping("/register") // POST "/auth/register"
     public ResponseEntity<?> registerUser(@Validated @RequestBody UserDTO userDTO, BindingResult bindingResult) {
         // Proveri da li postoje greške u validaciji
         if (bindingResult.hasErrors()) {
@@ -147,59 +152,149 @@ public class AuthController {
         response.put("token", token); // Dodaj token u odgovor
 
         return ResponseEntity.ok(response); // Vraća JSON objekat sa tokenom
+    }*/
+
+    @PostMapping("/register")
+    public ResponseEntity<?> registerUser(@Validated @RequestBody UserDTO userDTO, BindingResult bindingResult)throws MessagingException {
+        if (bindingResult.hasErrors()) {
+            Map<String, String> errorMessages = new HashMap<>();
+            bindingResult.getFieldErrors().forEach(error ->
+                    errorMessages.put(error.getField(), error.getDefaultMessage())
+            );
+            return ResponseEntity.badRequest().body(errorMessages);
+        }
+
+        if (userService.existsByUsername(userDTO.getUsername())) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("username", "Error: Username is already taken!"));
+        }
+
+        if (userService.existsByEmail(userDTO.getEmail())) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("email", "Error: Email is already in use!"));
+        }
+
+        String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
+
+        RegisteredUser registeredUser = new RegisteredUser();
+        registeredUser.setUsername(userDTO.getUsername());
+        registeredUser.setPassword(encodedPassword);
+        registeredUser.setEmail(userDTO.getEmail());
+        registeredUser.setFirstName(userDTO.getFirstName());
+        registeredUser.setLastName(userDTO.getLastName());
+        registeredUser.setAddress(userDTO.getAddress());
+
+        // Korisnik je inicijalno inaktiviran
+        registeredUser.setActive(false);
+        userService.save(registeredUser);
+
+        // Generiši token za aktivaciju
+        String token = jwtAuthenticationFilter.generateToken(registeredUser);
+
+        System.out.println("Generisani token: " + token);
+
+
+        emailService.sendActivationEmail(userDTO.getEmail(), token);
+
+        return ResponseEntity.ok(Collections.singletonMap("message", "User registered successfully! Please check your email for activation link."));
+    }
+
+    /*@GetMapping("/activateAccount")
+    public ResponseEntity<?> activateUser(@RequestParam("token") String token) {
+        // Validiraj token
+        Claims claims = jwtAuthenticationFilter.parseToken(token);
+        if (claims == null) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Invalid or expired token"));
+        }
+
+        // Pronađi korisnika sa tim tokenom (username je u subject-u tokena)
+        String username = claims.getSubject();
+        Optional<RegisteredUser> optionalUser = userService.findByUsername1(username);
+        if (!optionalUser.isPresent()) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "User not found"));
+        }
+
+        RegisteredUser user = optionalUser.get();  // Izvucite korisnika iz Optional
+
+        // Proverite da li je korisnik već aktiviran
+        if (user.isActive()) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Account is already activated"));
+        }
+
+        // Aktiviraj korisnika
+        user.setActive(true);
+        userService.save(user);  // Spasi promene u bazi
+
+        return ResponseEntity.ok(Collections.singletonMap("message", "Account successfully activated! You can now log in."));
+    }*/
+
+    /*@GetMapping("/activate")
+    public ResponseEntity<?> activateUser(@RequestParam("token") String token) {
+        Claims claims;
+        try {
+            claims = jwtAuthenticationFilter.parseToken(token);
+        } catch (ExpiredJwtException e) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Token has expired"));
+        } catch (JwtException e) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Invalid token"));
+        }
+
+        String username = claims.getSubject();
+        RegisteredUser user = userService.findByUsername1(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found"));
+
+        if (user.isActive()) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Account is already activated"));
+        }
+
+        user.setActive(true);
+        userService.save(user);
+
+        return ResponseEntity.ok(Collections.singletonMap("message", "Account successfully activated. You can now log in."));
+    }*/
+
+    @GetMapping("/activate")
+    public ResponseEntity<?> activateUser(@RequestParam("token") String token) {
+        Claims claims;
+        try {
+            claims = jwtAuthenticationFilter.parseToken(token);
+        } catch (ExpiredJwtException e) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Token has expired"));
+        } catch (JwtException e) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Invalid token"));
+        }
+
+        // Dobavljanje korisnika pomoću username-a koji je u subject-u tokena
+        String username = claims.getSubject();
+        RegisteredUser user = userService.findByUsername1(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found"));
+
+        // Proverite da li je korisnik već aktiviran
+        if (user.isActive()) {
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Account is already activated"));
+        }
+
+        // Aktivirajte korisnika
+        user.setActive(true);
+        userService.save(user);
+
+        // Vratite poruku o uspehu
+        return ResponseEntity.ok(Collections.singletonMap("message", "Account successfully activated. You can now log in."));
     }
 
 
 
 
-    /*@PostMapping("/login") // POST "/auth/login"
-    public ResponseEntity<?> loginUser(@RequestBody Map<String, String> userInput, @RequestHeader(value = "Authorization", required = false) String authHeader) {
+
+    @PostMapping("/send")
+    public String sendEmail(@RequestParam String to, @RequestParam String subject, @RequestParam String body) {
         try {
-            // Ako već postoji Authorization header (token), vrati poruku da je korisnik već ulogovan
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                        .body(Collections.singletonMap("message", "Error: User is already logged in!"));
-            }
-
-            String email = userInput.get("email");
-            String password = userInput.get("password");
-
-            if (email == null || email.isEmpty()) {
-                return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Email must be provided!"));
-            }
-
-            if (password == null || password.isEmpty()) {
-                return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Password must be provided!"));
-            }
-
-            Optional<User> optionalUser = userService.findByEmail(email);
-
-            if (optionalUser.isPresent()) {
-                User existingUser = optionalUser.get();
-
-                if (passwordEncoder.matches(password, existingUser.getPassword())) {
-                    String userType = existingUser instanceof AdminUser ? "ADMIN" : "REGISTERED";
-                    String token = jwtAuthenticationFilter.generateToken(existingUser);
-
-                    // Pripremi odgovor
-                    Map<String, String> response = new HashMap<>();
-                    response.put("message", "User logged in successfully!");
-                    response.put("userType", userType);
-                    response.put("token", token);
-
-                    return ResponseEntity.ok(response);
-                } else {
-                    return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: Invalid password!"));
-                }
-            } else {
-                return ResponseEntity.badRequest().body(Collections.singletonMap("message", "Error: User not found!"));
-            }
+            emailService.sendSimpleEmail(to, subject, body);
+            return "Email sent successfully";
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Collections.singletonMap("message", "Error: An unexpected error occurred."));
+            return "Failed to send email: " + e.getMessage();
         }
-    }*/
+    }
+
+
 
 
     @PostMapping("/login") // POST "/auth/login"
@@ -308,13 +403,6 @@ public class AuthController {
     }
 
 
-
-
-    /*@PostMapping("/logout") // POST "/auth/logout"
-    public ResponseEntity<?> logoutUser(HttpSession session) {
-        session.invalidate(); // Poništi sesiju
-        return ResponseEntity.ok("User logged out successfully!");
-    }*/
 
     @PostMapping("/logout")
     public ResponseEntity<?> logoutUser() {

@@ -17,10 +17,4 @@ public class ActivationController {
         this.unregisteredUserService = unregisteredUserService;
     }
 
-    @GetMapping("/activate")
-    public String activateAccount(@RequestParam("token") String token) {
-        // Ovdje treba dodati logiku za aktivaciju naloga koristeći token
-        // Na primer, pronaći korisnika i postaviti isActive na true
-        return "Korisnik je aktiviran!"; // Ovo je samo primer, možeš dodati odgovarajući odgovor
-    }
 }

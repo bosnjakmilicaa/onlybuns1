@@ -1,4 +1,5 @@
 package com.project.onlybuns.config;
+import io.jsonwebtoken.JwtException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 
@@ -141,6 +142,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }*/
+
+    public Claims parseToken(String token) {
+        try {
+            return Jwts.parser()
+                    .setSigningKey(secretKey)  // Use your signing key here
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (JwtException e) {
+            return null; // Return null if the token is invalid
+        }
+    }
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)

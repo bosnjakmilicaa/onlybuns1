@@ -105,6 +105,7 @@ public class UserService {
     }
 
 
+
     public List<RegisteredUser> searchRegisteredUsers(String firstName, String lastName, String email, Integer minPosts, Integer maxPosts, Boolean sortByFollowers) {
         List<RegisteredUser> users = registeredUserRepository.findByFirstNameContainingOrLastNameContainingOrEmailContaining(firstName, lastName, email);
 
