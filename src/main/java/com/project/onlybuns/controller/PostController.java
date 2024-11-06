@@ -16,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @RestController
@@ -155,7 +156,7 @@ public class PostController {
         return postsWithUsernames;
     }*/
 
-    @GetMapping("/allPosts")
+    /*@GetMapping("/allPosts")
     public List<Map<String, Object>> getAllPosts() {
         List<Post> posts = postService.findAllActivePosts();
         List<Map<String, Object>> postsWithUsernamesAndComments = new ArrayList<>();
@@ -176,6 +177,49 @@ public class PostController {
                 commentData.put("id", comment.getId());
                 commentData.put("content", comment.getContent());
                 commentData.put("username", comment.getUser() != null ? comment.getUser().getUsername() : "Unknown"); // Dodajemo korisničko ime komentara
+                commentsData.add(commentData);
+            }
+            postData.put("comments", commentsData);
+
+            // Dodajemo post sa komentarima
+            postsWithUsernamesAndComments.add(postData);
+        }
+
+        return postsWithUsernamesAndComments;
+    }*/
+
+    @GetMapping("/allPosts")
+    public List<Map<String, Object>> getAllPosts() {
+        List<Post> posts = postService.findAllActivePosts();
+        List<Map<String, Object>> postsWithUsernamesAndComments = new ArrayList<>();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"); // Format za datum i vreme
+
+        for (Post post : posts) {
+            Map<String, Object> postData = new HashMap<>();
+
+            // Dodajemo podatke o postu
+            postData.put("id", post.getId());
+            postData.put("imageUrl", post.getImageUrl());
+            postData.put("description", post.getDescription());
+            postData.put("username", post.getUser() != null ? post.getUser().getUsername() : "Unknown");
+
+            // Formatiramo datum i vreme za post
+            String formattedDate = post.getCreatedAt() != null ? post.getCreatedAt().format(formatter) : "Unknown date";
+            postData.put("createdAt", formattedDate); // Dodajemo datum i vreme
+
+            // Dodajemo listu komentara
+            List<Map<String, Object>> commentsData = new ArrayList<>();
+            for (Comment comment : post.getComments()) {
+                Map<String, Object> commentData = new HashMap<>();
+                commentData.put("id", comment.getId());
+                commentData.put("content", comment.getContent());
+                commentData.put("username", comment.getUser() != null ? comment.getUser().getUsername() : "Unknown");
+
+                // Formatiramo datum i vreme za komentar
+                String formattedCommentDate = comment.getCreatedAt() != null ? comment.getCreatedAt().format(formatter) : "Unknown date";
+                commentData.put("createdAt", formattedCommentDate); // Dodajemo datum i vreme za komentar
+
                 commentsData.add(commentData);
             }
             postData.put("comments", commentsData);

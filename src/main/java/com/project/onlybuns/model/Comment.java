@@ -2,6 +2,8 @@ package com.project.onlybuns.model;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "comments")
 public class Comment {
@@ -22,6 +24,22 @@ public class Comment {
     @JoinColumn(name = "post_id", nullable = false)
     @JsonBackReference
     private Post post; // Povezivanje sa Post
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;  // Datum i vreme kada je komentar napravljen
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();  // Postavljanje trenutnog vremena pre nego što komentar bude sačuvan
+    }
 
     public Long getId() {
         return id;
