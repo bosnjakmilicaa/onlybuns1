@@ -25,7 +25,6 @@ public class Post {
     @Column(nullable = true)
     private String description; // Opis slike
 
-
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference(value = "user-posts")
@@ -49,6 +48,10 @@ public class Post {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;  // New field for creation date
 
+    // New column to store like count
+    @Column(nullable = false)
+    private int countLikes = 0;  // Initialize with 0 likes
+
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();  // Set the creation timestamp before persisting the post
@@ -62,18 +65,17 @@ public class Post {
         this.createdAt = createdAt;
     }
 
-    // Default constructor
-    public Post() {}
-
-    // Constructor with parameters
-    public Post(String imageUrl, String description, RegisteredUser user) {
-        this.imageUrl = imageUrl;
-        this.description = description; // Inicijalizacija opisa
-        this.user = user;
-        this.isDeleted = false;
+    // Getter and setter for countLikes
+    public int getCountLikes() {
+        return countLikes;
     }
 
-    // Getters and Setters
+    public void setCountLikes(int countLikes) {
+        this.countLikes = countLikes;
+    }
+
+    // Other constructors and methods
+
     public Long getId() {
         return id;
     }
@@ -132,14 +134,17 @@ public class Post {
 
     public void addLikedUser(RegisteredUser user) {
         this.likedByUsers.add(user);
+        this.countLikes = this.likedByUsers.size(); // Update countLikes when a user likes the post
     }
 
     public void removeLikedUser(RegisteredUser user) {
         this.likedByUsers.remove(user);
+        this.countLikes = this.likedByUsers.size(); // Update countLikes when a user removes like
     }
 
     // Return user ID from the RegisteredUser object
     public Long getUserId() {
         return user != null ? user.getId() : null; // Return user ID or null if user is not set
     }
+
 }

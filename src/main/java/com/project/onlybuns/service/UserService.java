@@ -19,6 +19,7 @@ import java.awt.print.Pageable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -106,7 +107,7 @@ public class UserService {
 
 
 
-    public List<RegisteredUser> searchRegisteredUsers(String firstName, String lastName, String email, Integer minPosts, Integer maxPosts, Boolean sortByFollowers) {
+    /*public List<RegisteredUser> searchRegisteredUsers(String firstName, String lastName, String email, Integer minPosts, Integer maxPosts, Boolean sortByFollowers) {
         List<RegisteredUser> users = registeredUserRepository.findByFirstNameContainingOrLastNameContainingOrEmailContaining(firstName, lastName, email);
 
         // Filtriranje korisnika na osnovu broja objava
@@ -123,7 +124,31 @@ public class UserService {
         }
 
         return users;
+    }*/
+
+    public List<RegisteredUser> searchRegisteredUsers(String firstName, String lastName, String email, Integer minPosts, Integer maxPosts, Boolean sortByFollowers) {
+        // Prvo filtriramo korisnike prema imenu, prezimenu i emailu
+        List<RegisteredUser> users = registeredUserRepository.findByFirstNameContainingOrLastNameContainingOrEmailContaining(firstName, lastName, email);
+
+        // Filtriranje korisnika na osnovu broja objava
+        if (minPosts != null || maxPosts != null) {
+            users = users.stream()
+                    .filter(user -> {
+                        boolean minCondition = (minPosts == null || user.getPostsCount() >= minPosts);
+                        boolean maxCondition = (maxPosts == null || user.getPostsCount() <= maxPosts);
+                        return minCondition && maxCondition; // Oba uslova moraju biti zadovoljena
+                    })
+                    .collect(Collectors.toList());
+        }
+
+        // Sortiranje prema broju pratilaca, ako je potrebno
+        if (sortByFollowers != null) {
+            users = sortByFollowersAndEmail(users, sortByFollowers);
+        }
+
+        return users;
     }
+
 
     public List<RegisteredUser> sortByFollowersAndEmail(List<RegisteredUser> users, boolean sortByFollowers) {
         if (sortByFollowers) {
