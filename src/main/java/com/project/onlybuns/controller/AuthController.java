@@ -251,7 +251,7 @@ public class AuthController {
         return ResponseEntity.ok(Collections.singletonMap("message", "Account successfully activated. You can now log in."));
     }*/
 
-    @GetMapping("/activate")
+    /*@GetMapping("/activate")
     public ResponseEntity<?> activateUser(@RequestParam("token") String token) {
         Claims claims;
         try {
@@ -278,7 +278,42 @@ public class AuthController {
 
         // Vratite poruku o uspehu
         return ResponseEntity.ok(Collections.singletonMap("message", "Account successfully activated. You can now log in."));
+    }*/
+
+    @GetMapping("/activate")
+    public ResponseEntity<?> activateUser(@RequestParam("token") String token) {
+        Claims claims;
+        try {
+            claims = jwtAuthenticationFilter.parseToken(token);
+            System.out.println("Token parsed successfully: " + claims.getSubject()); // Dodajte log za praćenje
+        } catch (ExpiredJwtException e) {
+            System.out.println("Token expired");
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Token has expired"));
+        } catch (JwtException e) {
+            System.out.println("Invalid token");
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Invalid token"));
+        }
+
+        // Dobavljanje korisnika pomoću username-a koji je u subject-u tokena
+        String username = claims.getSubject();
+        RegisteredUser user = userService.findByUsername1(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found"));
+
+        // Proverite da li je korisnik već aktiviran
+        if (user.isActive()) {
+            System.out.println("Account already activated for user: " + username);
+            return ResponseEntity.badRequest().body(Collections.singletonMap("error", "Account is already activated"));
+        }
+
+        // Aktivirajte korisnika
+        user.setActive(true);
+        userService.save(user);
+
+        System.out.println("User account activated: " + username);
+
+        return ResponseEntity.ok(Collections.singletonMap("message", "Account successfully activated. You can now log in."));
     }
+
 
 
 
