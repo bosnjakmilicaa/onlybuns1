@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -42,6 +43,43 @@ public class PostController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return postService.getPostsByUsername(username);
     }*/
+
+    public String getUsernameFromToken() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            return authentication.getName(); // Dobijamo korisničko ime iz JWT tokena
+        }
+        return null;
+    }
+
+    @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasRole('REGISTERED')")  // Ova anotacija osigurava da samo REGISTERED korisnici mogu obrisati objavu
+    public ResponseEntity<String> deletePost(@PathVariable Long id) {
+        // Dobijanje korisničkog imena iz tokena
+        String username = getUsernameFromToken();
+
+        if (username == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated"); // 401 if user is not authenticated
+        }
+
+        // Pronađi post po ID-u
+        Optional<Post> optionalPost = postService.findById(id);
+
+        if (optionalPost.isPresent()) {
+            Post post = optionalPost.get();
+
+            // Proveri da li je korisnik autor objave
+            if (post.getUser().getUsername().equals(username)) {
+                postService.delete(id); // Obriši post
+                return ResponseEntity.noContent().build(); // 204 if post was deleted successfully
+            } else {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not the author of this post and cannot delete it"); // 403 if user is not the author
+            }
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Post not found"); // 404 if post doesn't exist
+        }
+    }
+
 
     @GetMapping("/my-posts")
     @PreAuthorize("hasRole('REGISTERED')")
@@ -133,60 +171,6 @@ public class PostController {
                 .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build()); // 404 Not Found
     }
 
-    /*@GetMapping("/allPosts")
-    public List<Post> getAllPosts() {
-        return postService.findAllActivePosts();
-    }*/
-
-    /*@GetMapping("/allPosts")
-    public List<Map<String, Object>> getAllPosts() {
-        List<Post> posts = postService.findAllActivePosts();
-        List<Map<String, Object>> postsWithUsernames = new ArrayList<>();
-
-        for (Post post : posts) {
-            Map<String, Object> postData = new HashMap<>();
-            postData.put("id", post.getId());
-            postData.put("imageUrl", post.getImageUrl());
-            postData.put("description", post.getDescription());
-            postData.put("username", post.getUser() != null ? post.getUser().getUsername() : "Unknown"); // Dodajemo korisničko ime
-            postsWithUsernames.add(postData);
-        }
-
-        return postsWithUsernames;
-    }*/
-
-    /*@GetMapping("/allPosts")
-    public List<Map<String, Object>> getAllPosts() {
-        List<Post> posts = postService.findAllActivePosts();
-        List<Map<String, Object>> postsWithUsernamesAndComments = new ArrayList<>();
-
-        for (Post post : posts) {
-            Map<String, Object> postData = new HashMap<>();
-
-            // Dodajemo podatke o postu
-            postData.put("id", post.getId());
-            postData.put("imageUrl", post.getImageUrl());
-            postData.put("description", post.getDescription());
-            postData.put("username", post.getUser() != null ? post.getUser().getUsername() : "Unknown"); // Dodajemo korisničko ime
-
-            // Dodajemo listu komentara
-            List<Map<String, Object>> commentsData = new ArrayList<>();
-            for (Comment comment : post.getComments()) {
-                Map<String, Object> commentData = new HashMap<>();
-                commentData.put("id", comment.getId());
-                commentData.put("content", comment.getContent());
-                commentData.put("username", comment.getUser() != null ? comment.getUser().getUsername() : "Unknown"); // Dodajemo korisničko ime komentara
-                commentsData.add(commentData);
-            }
-            postData.put("comments", commentsData);
-
-            // Dodajemo post sa komentarima
-            postsWithUsernamesAndComments.add(postData);
-        }
-
-        return postsWithUsernamesAndComments;
-    }*/
-
     @GetMapping("/allPosts")
     public List<Map<String, Object>> getAllPosts() {
         List<Post> posts = postService.findAllActivePosts();
@@ -230,61 +214,6 @@ public class PostController {
         return postsWithUsernamesAndComments;
     }
 
-    /*@PutMapping("/{id}/like")
-    @PreAuthorize("hasRole('REGISTERED')")
-    public ResponseEntity<String> likePost(@PathVariable Long id, @AuthenticationPrincipal RegisteredUser loggedInUser) {
-        Optional<Post> postOptional = postService.findById(id);
-
-        if (postOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Post not found");
-        }
-
-        Post post = postOptional.get();
-
-        // Proveri da li je korisnik već lajkovao objavu
-        if (!post.getLikedByUsers().contains(loggedInUser)) {
-            post.addLikedUser(loggedInUser); // Dodaje korisnika u listu onih koji su lajkovali i ažurira countLikes
-            postService.save(post); // Sačuvaj ažuriranu objavu
-            return ResponseEntity.ok("Post liked successfully");
-        }
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User has already liked this post");
-    }*/
-
-   /* @PutMapping("/{id}/like")
-    @PreAuthorize("hasRole('REGISTERED')")
-    public ResponseEntity<String> likeOrUnlikePost(@PathVariable Long id, @AuthenticationPrincipal RegisteredUser loggedInUser) {
-        Optional<Post> postOptional = postService.findById(id);
-
-        if (postOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Post not found");
-        }
-
-        Post post = postOptional.get();
-
-        // Proveri da li je korisnik već lajkovao objavu
-        Like existingLike = post.getLikes().stream()
-                .filter(like -> like.getUser().equals(loggedInUser))
-                .findFirst()
-                .orElse(null);
-
-        if (existingLike != null) {
-            // Ako je lajkovao, ukloni lajkovanje
-            post.removeLike(existingLike);  // Ukloni lajkovanje
-            postService.save(post);  // Sačuvaj ažuriranu objavu
-            return ResponseEntity.ok("Like removed successfully");
-        } else {
-            // Ako nije lajkovao, dodaj lajkovanje
-            Like like = new Like(post, loggedInUser);  // Kreiraj novi "Like"
-
-            // Postavi korisnički ID koristeći username iz ulogovanog korisnika
-            like.setUserId(loggedInUser.getId());  // Setuj userId prema loggedInUser
-
-            post.addLike(like);  // Dodaj novi "Like"
-            postService.save(post);  // Sačuvaj ažuriranu objavu
-            return ResponseEntity.ok("Post liked successfully");
-        }
-    }*/
 
     @PutMapping("/{id}/like")
     @PreAuthorize("hasRole('REGISTERED')")
