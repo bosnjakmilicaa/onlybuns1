@@ -274,11 +274,17 @@ public class PostController {
         } else {
             // Ako nije lajkovao, dodaj lajkovanje
             Like like = new Like(post, loggedInUser);  // Kreiraj novi "Like"
+
+            // Postavi korisnički ID koristeći username iz ulogovanog korisnika
+            like.setUserId(loggedInUser.getId());  // Setuj userId prema loggedInUser
+
             post.addLike(like);  // Dodaj novi "Like"
             postService.save(post);  // Sačuvaj ažuriranu objavu
             return ResponseEntity.ok("Post liked successfully");
         }
     }
+
+
 
 
 

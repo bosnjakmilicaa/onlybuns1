@@ -1,4 +1,5 @@
 package com.project.onlybuns.controller;
+import com.project.onlybuns.DTO.RegisteredUserDTO;
 import com.project.onlybuns.service.UserService;
 import org.springframework.security.core.Authentication;
 import com.project.onlybuns.model.RegisteredUser;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController// Base path for registered user-related endpoints
 public class RegisteredUserController {
@@ -27,7 +29,7 @@ public class RegisteredUserController {
 
     }
 
-    @GetMapping("/registered-users")
+    /*@GetMapping("/registered-users")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<RegisteredUser>> getRegisteredUsers() {
         // Logovanje za debugging
@@ -37,7 +39,28 @@ public class RegisteredUserController {
         // Dobijanje registrovanih korisnika
         List<RegisteredUser> registeredUsers = registeredUserService.findAll();
         return ResponseEntity.ok(registeredUsers);
+    }*/
+
+    @GetMapping("/registered-users")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<RegisteredUserDTO>> getRegisteredUsers() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("User: " + authentication.getName() + " with roles: " + authentication.getAuthorities());
+
+        // Mapiramo RegisteredUser na RegisteredUserDTO
+        List<RegisteredUserDTO> registeredUsers = registeredUserService.findAll()
+                .stream()
+                .map(user -> new RegisteredUserDTO(
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getEmail(),
+                        user.getPosts().size(),
+                        user.getFollowersCount()))
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(registeredUsers);
     }
+
 
     @GetMapping("/searchReg")
     @PreAuthorize("hasRole('ADMIN')")

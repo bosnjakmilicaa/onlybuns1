@@ -1,5 +1,6 @@
 package com.project.onlybuns.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -14,6 +15,7 @@ public class Like {
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
+    @JsonBackReference(value = "post-likes")
     private Post post;
 
     @ManyToOne
@@ -62,5 +64,10 @@ public class Like {
 
     public void setLikedAt(LocalDateTime likedAt) {
         this.likedAt = likedAt;
+    }
+
+    public void setUserId(Long userId) {
+        this.user = new RegisteredUser();
+        this.user.setId(userId); // Set the user ID using the provided userId
     }
 }
