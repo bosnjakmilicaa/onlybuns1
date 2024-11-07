@@ -6,6 +6,18 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
+import org.springframework.cglib.core.Local;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Formatter;
 
@@ -57,7 +69,9 @@ public class Post {
         return comments.size();
     }
 
-    // Getter i Setter metodi
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+
     public Long getId() {
         return id;
     }

@@ -1,6 +1,9 @@
 package com.project.onlybuns.controller;
 
 import com.project.onlybuns.config.JwtAuthenticationFilter;
+
+import com.project.onlybuns.DTO.PostDTO;
+
 import com.project.onlybuns.model.*;
 import com.project.onlybuns.service.PostService;
 import com.project.onlybuns.service.CommentService;
@@ -15,6 +18,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -127,13 +131,32 @@ public class PostController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+    
+    @PostMapping("/create")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public ResponseEntity<Post> createPost(@RequestBody PostDTO postDTO) {
+        // Dobijanje trenutnog korisnika iz SecurityContext-a
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        RegisteredUser loggedUser = userService.findByUsername1(username).orElse(null);
 
-    @PostMapping
-    public ResponseEntity<Post> createPost(@RequestBody Post post, @AuthenticationPrincipal RegisteredUser user) {
-        post.setUser(user); // Postavi korisnika koji pravi objavu
-        Post createdPost = postService.save(post);
-        return ResponseEntity.ok(createdPost);
+        if (loggedUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        // Kreiraj novi Post objekat i postavi polja iz DTO-a
+        Post post = new Post();
+        post.setDescription(postDTO.getDescription());
+        post.setImageUrl(postDTO.getImageUrl());
+        post.setUser(loggedUser);
+        post.setCreatedAt(LocalDateTime.now()); // Automatsko postavljanje trenutnog vremena
+
+        // Spasi post u bazu
+        Post savedPost = postService.save(post);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedPost);
     }
+
+
 
     @PutMapping("/update/{id}")
     @PreAuthorize("hasRole('REGISTERED')")

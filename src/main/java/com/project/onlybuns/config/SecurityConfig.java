@@ -32,6 +32,7 @@ public class SecurityConfig {
                 .authorizeRequests()
                 .requestMatchers("/registered-users","/searchReg").hasRole("ADMIN") // Omogućava pristup samo adminima
                 .requestMatchers("/posts/my-posts").hasRole("REGISTERED")
+                .requestMatchers("/posts/create").hasRole("REGISTERED")
                 .anyRequest().permitAll()
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
