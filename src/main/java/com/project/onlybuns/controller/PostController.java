@@ -1,9 +1,6 @@
 package com.project.onlybuns.controller;
 
-import com.project.onlybuns.model.Post;
-import com.project.onlybuns.model.Comment;
-import com.project.onlybuns.model.RegisteredUser;
-import com.project.onlybuns.model.User;
+import com.project.onlybuns.model.*;
 import com.project.onlybuns.service.PostService;
 import com.project.onlybuns.service.CommentService;
 import com.project.onlybuns.service.UserService;
@@ -61,7 +58,7 @@ public class PostController {
             postData.put("imageUrl", post.getImageUrl());
             postData.put("description", post.getDescription());
             postData.put("username", post.getUser() != null ? post.getUser().getUsername() : "Unknown"); // Dodajemo korisničko ime
-            postData.put("countLikes", post.getCountLikes());
+            postData.put("countLikes", post.getLikesCount());
             // Dodajemo listu komentara
             List<Map<String, Object>> commentsData = new ArrayList<>();
             for (Comment comment : post.getComments()) {
@@ -203,7 +200,7 @@ public class PostController {
             postData.put("imageUrl", post.getImageUrl());
             postData.put("description", post.getDescription());
             postData.put("username", post.getUser() != null ? post.getUser().getUsername() : "Unknown");
-            postData.put("countLikes", post.getCountLikes());
+            postData.put("countLikes", post.getLikesCount());
             // Formatiramo datum i vreme za post
             String formattedDate = post.getCreatedAt() != null ? post.getCreatedAt().format(formatter) : "Unknown date";
             postData.put("createdAt", formattedDate); // Dodajemo datum i vreme
@@ -230,6 +227,61 @@ public class PostController {
 
         return postsWithUsernamesAndComments;
     }
+
+    /*@PutMapping("/{id}/like")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public ResponseEntity<String> likePost(@PathVariable Long id, @AuthenticationPrincipal RegisteredUser loggedInUser) {
+        Optional<Post> postOptional = postService.findById(id);
+
+        if (postOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Post not found");
+        }
+
+        Post post = postOptional.get();
+
+        // Proveri da li je korisnik već lajkovao objavu
+        if (!post.getLikedByUsers().contains(loggedInUser)) {
+            post.addLikedUser(loggedInUser); // Dodaje korisnika u listu onih koji su lajkovali i ažurira countLikes
+            postService.save(post); // Sačuvaj ažuriranu objavu
+            return ResponseEntity.ok("Post liked successfully");
+        }
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User has already liked this post");
+    }*/
+
+    @PutMapping("/{id}/like")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public ResponseEntity<String> likeOrUnlikePost(@PathVariable Long id, @AuthenticationPrincipal RegisteredUser loggedInUser) {
+        Optional<Post> postOptional = postService.findById(id);
+
+        if (postOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Post not found");
+        }
+
+        Post post = postOptional.get();
+
+        // Proveri da li je korisnik već lajkovao objavu
+        Like existingLike = post.getLikes().stream()
+                .filter(like -> like.getUser().equals(loggedInUser))
+                .findFirst()
+                .orElse(null);
+
+        if (existingLike != null) {
+            // Ako je lajkovao, ukloni lajkovanje
+            post.removeLike(existingLike);  // Ukloni lajkovanje
+            postService.save(post);  // Sačuvaj ažuriranu objavu
+            return ResponseEntity.ok("Like removed successfully");
+        } else {
+            // Ako nije lajkovao, dodaj lajkovanje
+            Like like = new Like(post, loggedInUser);  // Kreiraj novi "Like"
+            post.addLike(like);  // Dodaj novi "Like"
+            postService.save(post);  // Sačuvaj ažuriranu objavu
+            return ResponseEntity.ok("Post liked successfully");
+        }
+    }
+
+
+
 
 
 
@@ -279,11 +331,11 @@ public class PostController {
 
 
 
-    @PostMapping("/{id}/like")
+   /* @PostMapping("/{id}/like")
     public ResponseEntity<Void> likePost(@PathVariable Long id, @AuthenticationPrincipal RegisteredUser user) {
         postService.likePost(id, user); // Implementiraj ovu metodu u servisu
         return ResponseEntity.ok().build();
-    }
+    }*/
 
     @PostMapping("/{id}/comments")
     public ResponseEntity<Comment> addComment(@PathVariable Long id, @RequestBody Comment comment, @AuthenticationPrincipal RegisteredUser user) {

@@ -89,7 +89,7 @@ public class PostService {
 
 
 
-    public void likePost(Long id, RegisteredUser user) {
+    /*public void likePost(Long id, RegisteredUser user) {
         // Prvo proveri da li post postoji
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
@@ -103,6 +103,6 @@ public class PostService {
         // Dodaj korisnika u listu lajkova objave
         post.getLikedByUsers().add(user);
         postRepository.save(post); // Sačuvaj promene u bazi
-    }
+    }*/
 
 }

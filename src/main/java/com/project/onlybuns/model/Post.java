@@ -11,6 +11,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "posts")
 public class Post {
@@ -20,61 +27,48 @@ public class Post {
     private Long id;
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    private String imageUrl;  // URL slike
+    private String imageUrl;
 
     @Column(nullable = true)
-    private String description; // Opis slike
+    private String description;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference(value = "user-posts")
-    private RegisteredUser user; // Connection to RegisteredUser
+    private RegisteredUser user;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference(value = "post-likes")
+    private List<Like> likes = new ArrayList<>();
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference(value = "post-comments")
-    private List<Comment> comments = new ArrayList<>(); // Comments associated with the post
-
-    @ManyToMany // Koristite ManyToMany ili OneToMany zavisno od dizajna
-    @JoinTable(
-            name = "post_likes", // Ime tabele koja će povezivati postove i korisnike
-            joinColumns = @JoinColumn(name = "post_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private Set<RegisteredUser> likedByUsers = new HashSet<>(); // Users who liked the post
+    private List<Comment> comments = new ArrayList<>(); // Lista za komentare
 
     @Column(nullable = false)
     private boolean isDeleted = false;
 
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;  // New field for creation date
-
-    // New column to store like count
-    @Column(nullable = false)
-    private int countLikes;  // Initialize with 0 likes
+    private LocalDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();  // Set the creation timestamp before persisting the post
+        this.createdAt = LocalDateTime.now();
+    }
+
+    // Broj lajkova
+    public int getLikesCount() {
+        return likes.size();
+    }
+
+    // Broj komentara
+    public int getCommentsCount() {
+        return comments.size();
     }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    // Getter and setter for countLikes
-    public int getCountLikes() {
-        return countLikes;
-    }
-
-    public void setCountLikes(int countLikes) {
-        this.countLikes = countLikes;
-    }
-
-    // Other constructors and methods
 
     public Long getId() {
         return id;
@@ -93,11 +87,11 @@ public class Post {
     }
 
     public String getDescription() {
-        return description; // Getter za opis
+        return description;
     }
 
     public void setDescription(String description) {
-        this.description = description; // Setter za opis
+        this.description = description;
     }
 
     public RegisteredUser getUser() {
@@ -108,20 +102,20 @@ public class Post {
         this.user = user;
     }
 
-    public List<Comment> getComments() {
-        return comments;
+    public List<Like> getLikes() {
+        return likes;
     }
 
-    public void setComments(List<Comment> comments) {
-        this.comments = comments;
+    public void setLikes(List<Like> likes) {
+        this.likes = likes;
     }
 
-    public Set<RegisteredUser> getLikedByUsers() {
-        return likedByUsers;
+    public void addLike(Like like) {
+        likes.add(like);
     }
 
-    public void setLikedByUsers(Set<RegisteredUser> likedByUsers) {
-        this.likedByUsers = likedByUsers;
+    public void removeLike(Like like) {
+        likes.remove(like);
     }
 
     public boolean isDeleted() {
@@ -132,19 +126,13 @@ public class Post {
         isDeleted = deleted;
     }
 
-    public void addLikedUser(RegisteredUser user) {
-        this.likedByUsers.add(user);
-        this.countLikes = this.likedByUsers.size(); // Update countLikes when a user likes the post
+    public List<Comment> getComments() {
+        return comments;
     }
 
-    public void removeLikedUser(RegisteredUser user) {
-        this.likedByUsers.remove(user);
-        this.countLikes = this.likedByUsers.size(); // Update countLikes when a user removes like
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
     }
-
-    // Return user ID from the RegisteredUser object
-    public Long getUserId() {
-        return user != null ? user.getId() : null; // Return user ID or null if user is not set
-    }
-
 }
+
+

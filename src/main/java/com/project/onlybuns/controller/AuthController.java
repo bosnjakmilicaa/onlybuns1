@@ -341,6 +341,10 @@ public class AuthController {
         for (RegisteredUser user : users) {
             int postsCount = user.getPosts() != null ? user.getPosts().size() : 0;
             user.setPostsCount(postsCount);
+
+            int likesCount = user.getLikes() != null ? user.getLikes().size() : 0; // Pretpostavljamo da postoji lista likes za korisnika
+            user.setLikesCount(likesCount);
+
             registeredUserService.save(user); // Sačuvaj korisnika sa ažuriranim postsCount
         }
         return ResponseEntity.ok("Old passwords updated successfully!");

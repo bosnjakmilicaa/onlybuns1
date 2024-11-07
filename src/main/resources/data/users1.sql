@@ -10,14 +10,14 @@ VALUES
     ('testuser7@example.com', 'password123', 'tester7', 'registered_user', 'Test', 'User7', '452 Test Avenue', TRUE);
 
 -- Insert posts
-INSERT INTO posts (is_deleted, user_id, description, image_url, created_at,count_likes)
+INSERT INTO posts (is_deleted, user_id, description, image_url, created_at)
 VALUES
-    (false, 4, 'content1', 'http://www.royalshop.rs/wp-content/uploads/2015/04/zeka.jpg', '2024-11-05 14:30:00',2),
-    (false, 5, 'content1', 'https://www.agrotv.net/wp-content/uploads/2018/12/Divlji-zec-4.jpg', '2024-11-04 10:00:00',3),
-    (false, 5, 'content2', 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Arctic_Hare_1.jpg/640px-Arctic_Hare_1.jpg', '2024-11-03 18:45:00',4),
-    (false, 5, 'content3', 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Feldhase_Schiermonnikoog.JPG/640px-Feldhase_Schiermonnikoog.JPG', '2024-11-02 09:20:00',0),
-    (false, 7, 'content1', 'https://www.musicar.rs/wp-content/uploads/2017/08/divlji-zec-pogled.jpg', '2024-11-04 13:00:00',1),
-    (false, 7, 'content2', 'https://svijetljubimaca.ba/wp-content/uploads/2017/03/943_1.jpg', '2024-11-03 11:30:00',0);
+    (false, 4, 'content1', 'http://www.royalshop.rs/wp-content/uploads/2015/04/zeka.jpg', '2024-11-05 14:30:00'),
+    (false, 5, 'content1', 'https://www.agrotv.net/wp-content/uploads/2018/12/Divlji-zec-4.jpg', '2024-11-04 10:00:00'),
+    (false, 5, 'content2', 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e3/Arctic_Hare_1.jpg/640px-Arctic_Hare_1.jpg', '2024-11-03 18:45:00'),
+    (false, 5, 'content3', 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Feldhase_Schiermonnikoog.JPG/640px-Feldhase_Schiermonnikoog.JPG', '2024-11-02 09:20:00'),
+    (false, 7, 'content1', 'https://www.musicar.rs/wp-content/uploads/2017/08/divlji-zec-pogled.jpg', '2024-11-04 13:00:00'),
+    (false, 7, 'content2', 'https://svijetljubimaca.ba/wp-content/uploads/2017/03/943_1.jpg', '2024-11-03 11:30:00');
 
 -- Insert comments
 INSERT INTO comments (post_id, user_id, content, created_at)
@@ -28,3 +28,18 @@ VALUES
     (1, 4, 'com3', '2024-11-06 08:00:00'),
     (6, 7, 'com1', '2024-11-05 12:00:00'),
     (5, 5, 'com1', '2024-11-05 12:10:00');
+
+
+-- Insert likes
+INSERT INTO likes (post_id, user_id, liked_at)
+VALUES
+    (1, 4, '2024-11-06 13:00:00'),
+    (1, 5, '2024-11-06 13:05:00'),
+    (2, 7, '2024-11-05 14:00:00'),
+    (2, 5, '2024-11-05 14:10:00'),
+    (2, 4, '2024-11-05 14:15:00'),
+    (3, 4, '2024-11-05 15:00:00'),
+    (3, 5, '2024-11-05 15:10:00'),
+    (3, 7, '2024-11-05 15:20:00'),
+    (5, 5, '2024-11-05 16:00:00');
+

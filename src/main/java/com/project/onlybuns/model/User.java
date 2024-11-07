@@ -47,6 +47,9 @@ public abstract class User {
     private Integer followersCount;
     //private int followersCount; // Broj pratilaca
 
+    @Column(name = "likes_count")
+    private Integer likesCount;
+
     // Getters and Setters
 
     public Integer getPostsCount() {
@@ -72,6 +75,7 @@ public abstract class User {
         this.isActive = false; // Podrazumevano nije aktiviran
         this.followersCount = 0;
         this.postsCount =0;
+        this.likesCount =0;
     }
 
     // Constructor with parameters
@@ -150,6 +154,14 @@ public abstract class User {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public Integer getLikesCount() {
+        return likesCount != null ? likesCount : 0; // Vraća 0 ako je null
+    }
+
+    public void setLikesCount(Integer likesCount) {
+        this.likesCount = likesCount;
     }
 
     public boolean isActive() {
