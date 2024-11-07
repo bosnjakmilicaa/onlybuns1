@@ -50,7 +50,7 @@ public class Post {
 
     // New column to store like count
     @Column(nullable = false)
-    private int countLikes = 0;  // Initialize with 0 likes
+    private int countLikes;  // Initialize with 0 likes
 
     @PrePersist
     protected void onCreate() {

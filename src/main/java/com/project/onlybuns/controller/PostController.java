@@ -61,7 +61,7 @@ public class PostController {
             postData.put("imageUrl", post.getImageUrl());
             postData.put("description", post.getDescription());
             postData.put("username", post.getUser() != null ? post.getUser().getUsername() : "Unknown"); // Dodajemo korisničko ime
-
+            postData.put("countLikes", post.getCountLikes());
             // Dodajemo listu komentara
             List<Map<String, Object>> commentsData = new ArrayList<>();
             for (Comment comment : post.getComments()) {
@@ -203,7 +203,7 @@ public class PostController {
             postData.put("imageUrl", post.getImageUrl());
             postData.put("description", post.getDescription());
             postData.put("username", post.getUser() != null ? post.getUser().getUsername() : "Unknown");
-
+            postData.put("countLikes", post.getCountLikes());
             // Formatiramo datum i vreme za post
             String formattedDate = post.getCreatedAt() != null ? post.getCreatedAt().format(formatter) : "Unknown date";
             postData.put("createdAt", formattedDate); // Dodajemo datum i vreme
