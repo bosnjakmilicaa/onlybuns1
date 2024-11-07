@@ -61,87 +61,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .compact();
     }
 
-    /*@Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
-        String authorizationHeader = request.getHeader("Authorization");
-
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String jwt = authorizationHeader.substring(7);
-            try {
-                // Proverite da li je secretKey inicijalizovan
-                if (secretKey == null) {
-                    System.out.println("Secret key is null!");
-                    throw new IllegalStateException("Nije inicijalizovan");
-                }
-
-                Claims claims = Jwts.parser()
-                        .setSigningKey(secretKey)
-                        .parseClaimsJws(jwt)
-                        .getBody();
-
-                String username = claims.getSubject();
-                List<String> roles = claims.get("authorities", List.class);
-
-                // Ostatak koda...
-            } catch (Exception e) {
-                // Ispis greške
-                System.out.println("Cannot set user authentication: " + e.getMessage());
-                e.printStackTrace(); // Ispis kompletne greške na konzolu
-            }
-        } else {
-            System.out.println("Authorization header is missing or does not start with Bearer");
-        }
-
-        filterChain.doFilter(request, response);
-    }*/
-
-    /*@Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
-        String authorizationHeader = request.getHeader("Authorization");
-
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String jwt = authorizationHeader.substring(7);
-            try {
-                // Proverite da li je secretKey inicijalizovan
-                if (secretKey == null) {
-                    System.out.println("Secret key is null!");
-                    throw new IllegalStateException("Nije inicijalizovan");
-                }
-
-                Claims claims = Jwts.parser()
-                        .setSigningKey(secretKey)
-                        .parseClaimsJws(jwt)
-                        .getBody();
-
-                String username = claims.getSubject();
-                List<String> roles = claims.get("authorities", List.class);
-
-                // Proverite da li je username validan
-                if (username != null) {
-                    List<SimpleGrantedAuthority> authorities = roles.stream()
-                            .map(SimpleGrantedAuthority::new)
-                            .toList();
-
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(username, null, authorities);
-
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
-
-            } catch (Exception e) {
-                // Ispis greške
-                System.out.println("Cannot set user authentication: " + e.getMessage());
-                e.printStackTrace(); // Ispis kompletne greške na konzolu
-            }
-        } else {
-            System.out.println("Authorization header is missing or does not start with Bearer");
-        }
-
-        filterChain.doFilter(request, response);
-    }*/
 
     public Claims parseToken(String token) {
         try {
@@ -189,7 +108,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
-
 
 
 }

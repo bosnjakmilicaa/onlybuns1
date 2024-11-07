@@ -1,5 +1,6 @@
 package com.project.onlybuns.controller;
 
+import com.project.onlybuns.config.JwtAuthenticationFilter;
 import com.project.onlybuns.model.*;
 import com.project.onlybuns.service.PostService;
 import com.project.onlybuns.service.CommentService;
@@ -22,6 +23,7 @@ public class PostController {
 
     private final PostService postService;
     private final CommentService commentService;
+
 
     private final UserService userService;
 
@@ -249,7 +251,7 @@ public class PostController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User has already liked this post");
     }*/
 
-    @PutMapping("/{id}/like")
+   /* @PutMapping("/{id}/like")
     @PreAuthorize("hasRole('REGISTERED')")
     public ResponseEntity<String> likeOrUnlikePost(@PathVariable Long id, @AuthenticationPrincipal RegisteredUser loggedInUser) {
         Optional<Post> postOptional = postService.findById(id);
@@ -282,7 +284,53 @@ public class PostController {
             postService.save(post);  // Sačuvaj ažuriranu objavu
             return ResponseEntity.ok("Post liked successfully");
         }
+    }*/
+
+    @PutMapping("/{id}/like")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public ResponseEntity<String> likeOrUnlikePost(@PathVariable Long id) {
+        // Pronađi post prema id
+        Optional<Post> postOptional = postService.findById(id);
+
+        if (postOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Post not found");
+        }
+
+        Post post = postOptional.get();
+
+        // Dohvati korisničko ime iz SecurityContext
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // Pronađi korisnika na osnovu korisničkog imena
+        Optional<RegisteredUser> loggedInUserOptional = userService.findByUsername1(username);
+
+        if (loggedInUserOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+        }
+
+        RegisteredUser loggedInUser = loggedInUserOptional.get();
+
+        // Proveri da li je korisnik već lajkovao objavu
+        Like existingLike = post.getLikes().stream()
+                .filter(like -> like.getUser().equals(loggedInUser))
+                .findFirst()
+                .orElse(null);
+
+        if (existingLike != null) {
+            // Ako je lajkovao, ukloni lajkovanje
+            post.removeLike(existingLike);  // Ukloni lajkovanje
+            postService.save(post);  // Sačuvaj ažuriranu objavu
+            return ResponseEntity.ok("Like removed successfully");
+        } else {
+            // Ako nije lajkovao, dodaj lajkovanje
+            Like like = new Like(post, loggedInUser);  // Kreiraj novi "Like"
+            post.addLike(like);  // Dodaj novi "Like"
+            postService.save(post);  // Sačuvaj ažuriranu objavu
+            return ResponseEntity.ok("Post liked successfully");
+        }
     }
+
+
 
 
 
