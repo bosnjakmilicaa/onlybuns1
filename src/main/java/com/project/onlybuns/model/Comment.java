@@ -1,4 +1,5 @@
 package com.project.onlybuns.model;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
@@ -17,12 +18,12 @@ public class Comment {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference(value = "user-comments")  // Sprečava serijalizaciju povezane RegisteredUser
     private RegisteredUser user; // Povezivanje sa RegisteredUser
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference(value = "post-comments")// Sprečava serijalizaciju povezane Post
     private Post post; // Povezivanje sa Post
 
     @Column(name = "created_at", nullable = false, updatable = false)

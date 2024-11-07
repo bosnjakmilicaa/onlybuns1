@@ -1,6 +1,7 @@
 package com.project.onlybuns.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -15,11 +16,12 @@ public class Like {
 
     @ManyToOne
     @JoinColumn(name = "post_id", nullable = false)
-    @JsonBackReference(value = "post-likes")
+    @JsonBackReference(value = "post-likes")  // Sprečava serijalizaciju povezane post objekta
     private Post post;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference(value = "user-likes") // Sprečava serijalizaciju povezane RegisteredUser objekta
     private RegisteredUser user;
 
     private LocalDateTime likedAt;

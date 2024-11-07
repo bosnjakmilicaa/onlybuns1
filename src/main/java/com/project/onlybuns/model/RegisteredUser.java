@@ -21,9 +21,9 @@ public class RegisteredUser extends User {
     )
     private List<Post> likedPosts = new ArrayList<>(); // List of posts liked by the user
 
-    @JsonManagedReference
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Post> posts = new ArrayList<>(); // List of posts created by the user
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference(value = "post-user") // Povezano sa `@JsonBackReference` u `Post` klasi
+    private List<Post> posts = new ArrayList<>();
 
     @ManyToOne // Dodaj ovu vezu
     @JoinColumn(name = "admin_user_id") // Ovo će biti naziv kolone u tabeli RegisteredUser

@@ -137,39 +137,39 @@ public class PostController {
 
     @PutMapping("/update/{id}")
     @PreAuthorize("hasRole('REGISTERED')")
-    public ResponseEntity<Post> updatePost(@PathVariable Long id, @RequestBody Post updatedPost) {
-        // Dobijanje trenutno prijavljenog korisnika
+    public ResponseEntity<String> updatePost(@PathVariable Long id, @RequestBody Post updatedPost) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         RegisteredUser loggedUser = userService.findByUsername1(username).orElse(null);
 
-        // Proveri da li je korisnik prijavljen
         if (loggedUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null); // 401 Unauthorized
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
         }
 
-        // Pronađi post po ID-ju i proveri da li je autor isti kao prijavljeni korisnik
-        return postService.findById(id)
-                .filter(post -> post.getUser().equals(loggedUser)) // Proveri da li je prijavljeni korisnik autor posta
-                .map(post -> {
-                    // Ažuriraj podatke posta
-                    post.setImageUrl(updatedPost.getImageUrl());
-                    post.setDescription(updatedPost.getDescription());
-                    post.setDeleted(updatedPost.isDeleted());
+        Optional<Post> optionalPost = postService.findById(id);
 
-                    // Ažuriraj listu komentara samo ako je to neophodno (opcionalno)
-                    if (updatedPost.getComments() != null) {
-                        post.setComments(updatedPost.getComments());
-                    }
+        if (optionalPost.isPresent()) {
+            Post post = optionalPost.get();
 
-                    // Postavi korisnika ponovo kako bi se osiguralo da je pravilno povezan
-                    post.setUser(loggedUser);
+            if (!post.getUser().equals(loggedUser)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not the author of this post and cannot update it");
+            }
 
-                    // Sačuvaj izmenjeni post
-                    Post savedPost = postService.update(post);
-                    return ResponseEntity.ok(savedPost);
-                })
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).build()); // 404 Not Found
+            if (updatedPost.getImageUrl() != null) {
+                post.setImageUrl(updatedPost.getImageUrl());
+            }
+            if (updatedPost.getDescription() != null) {
+                post.setDescription(updatedPost.getDescription());
+            }
+
+            postService.update(post);
+
+            return ResponseEntity.ok("Post updated successfully");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Post not found");
+        }
     }
+
+
 
     @GetMapping("/allPosts")
     public List<Map<String, Object>> getAllPosts() {
@@ -262,54 +262,6 @@ public class PostController {
 
 
 
-
-
-
-
-
-
-    // Like a post by a user
-    /*@PostMapping("/{postId}/like")
-    public void likePost(@PathVariable Long postId, @RequestBody Long userId) {
-        RegisteredUser user = userService.getUserById(userId);
-        postService.likePost(postId, user);
-    }*/
-
-
-
-
-
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id, HttpSession session) {
-        // Proveri da li je korisnik prijavljen
-        RegisteredUser loggedUser = (RegisteredUser) session.getAttribute("user");
-        String userType = (String) session.getAttribute("userType");
-
-        if (loggedUser == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // Vraća 401 ako korisnik nije prijavljen
-        }
-
-        // Proveri da li je korisnik administrator
-        if ("ADMIN".equals(userType)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Vraća 403 ako je korisnik administrator
-        }
-
-        // Proveri da li post postoji i da li je korisnik autor objave
-        Optional<Post> optionalPost = postService.findById(id);
-
-        if (optionalPost.isPresent()) {
-            Post post = optionalPost.get();
-            if (post.getUser().equals(loggedUser)) { // Proveri da li korisnik može da obriše objavu
-                postService.delete(id); // Ova metoda ne treba da vraća ništa
-                return ResponseEntity.noContent().build(); // Vraća 204 ako je obrisano
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Vraća 403 ako korisnik nije autor
-            }
-        } else {
-            return ResponseEntity.notFound().build(); // Vraća 404 ako post ne postoji
-        }
-    }
 
 
 

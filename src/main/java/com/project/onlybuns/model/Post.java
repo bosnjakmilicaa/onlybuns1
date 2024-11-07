@@ -1,22 +1,13 @@
 package com.project.onlybuns.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.logging.Formatter;
 
 @Entity
 @Table(name = "posts")
@@ -34,16 +25,16 @@ public class Post {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @JsonBackReference(value = "user-posts")
+    @JsonBackReference(value = "post-user")  // Sprečava cikličnu serijalizaciju
     private RegisteredUser user;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference(value = "post-likes")
+    @JsonManagedReference(value = "post-likes") // Za serijalizaciju Likes
     private List<Like> likes = new ArrayList<>();
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference(value = "post-comments")
-    private List<Comment> comments = new ArrayList<>(); // Lista za komentare
+    @JsonManagedReference(value = "post-comments") // Za serijalizaciju Comments
+    private List<Comment> comments = new ArrayList<>();
 
     @Column(nullable = false)
     private boolean isDeleted = false;
@@ -53,7 +44,7 @@ public class Post {
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = LocalDateTime.now(); // Postavljanje trenutnog vremena prilikom kreiranja
     }
 
     // Broj lajkova
@@ -66,10 +57,7 @@ public class Post {
         return comments.size();
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
+    // Getter i Setter metodi
     public Long getId() {
         return id;
     }
@@ -133,6 +121,8 @@ public class Post {
     public void setComments(List<Comment> comments) {
         this.comments = comments;
     }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 }
-
-
