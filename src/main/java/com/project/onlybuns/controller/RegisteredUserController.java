@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,7 +63,7 @@ public class RegisteredUserController {
     }
 
 
-    @GetMapping("/searchReg")
+    /*@GetMapping("/searchReg")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<RegisteredUser>> searchRegisteredUsers(
             @RequestParam(required = false) String firstName,
@@ -74,7 +75,76 @@ public class RegisteredUserController {
 
         List<RegisteredUser> users = registeredUserService1.searchRegisteredUsers(firstName, lastName, email, minPosts, maxPosts, sortByFollowers);
         return ResponseEntity.ok(users);
+    }*/
+
+    @GetMapping("/searchReg")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<RegisteredUserDTO> searchRegisteredUsers(
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) Integer minPosts,
+            @RequestParam(required = false) Integer maxPosts,
+            @RequestParam(required = false) Boolean sortByFollowers) {
+
+        // Dohvatanje svih korisnika
+        List<RegisteredUser> users = registeredUserService.findAll();
+
+        // Filtriranje po imenu ako je zadato
+        if (firstName != null && !firstName.isEmpty()) {
+            users = users.stream()
+                    .filter(user -> user.getFirstName().equalsIgnoreCase(firstName))
+                    .collect(Collectors.toList());
+        }
+
+        // Filtriranje po prezimenu ako je zadato
+        if (lastName != null && !lastName.isEmpty()) {
+            users = users.stream()
+                    .filter(user -> user.getLastName().equalsIgnoreCase(lastName))
+                    .collect(Collectors.toList());
+        }
+
+        // Filtriranje po email-u ako je zadato
+        if (email != null && !email.isEmpty()) {
+            users = users.stream()
+                    .filter(user -> user.getEmail().equalsIgnoreCase(email))
+                    .collect(Collectors.toList());
+        }
+
+        // Filtriranje po broju postova između minPosts i maxPosts, ako su oba parametra zadata
+        if (minPosts != null && maxPosts != null) {
+            users = users.stream()
+                    .filter(user -> user.getPosts().size() >= minPosts && user.getPosts().size() <= maxPosts)
+                    .collect(Collectors.toList());
+        } else if (minPosts != null) {
+            // Filtriranje po minimalnom broju postova ako je samo minPosts zadat
+            users = users.stream()
+                    .filter(user -> user.getPosts().size() >= minPosts)
+                    .collect(Collectors.toList());
+        } else if (maxPosts != null) {
+            // Filtriranje po maksimalnom broju postova ako je samo maxPosts zadat
+            users = users.stream()
+                    .filter(user -> user.getPosts().size() <= maxPosts)
+                    .collect(Collectors.toList());
+        }
+
+        // Sortiranje po broju pratilaca ako je zadato
+        if (Boolean.TRUE.equals(sortByFollowers)) {
+            users.sort(Comparator.comparingInt(RegisteredUser::getFollowersCount).reversed());
+        }
+
+        // Mapiranje korisnika na DTO
+        return users.stream()
+                .map(user -> new RegisteredUserDTO(
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getEmail(),
+                        user.getPosts().size(),
+                        user.getFollowersCount()))
+                .collect(Collectors.toList());
     }
+
+
 
 
 
