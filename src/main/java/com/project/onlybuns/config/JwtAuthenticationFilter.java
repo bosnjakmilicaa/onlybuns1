@@ -61,6 +61,23 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 .compact();
     }
 
+    // Dodaj novu metodu za generisanje tokena sa prilagodljivim vremenom isteka
+    public String generateTokenWithExpiration(User user, long expirationMillis) {
+        String userType = user instanceof AdminUser ? "ROLE_ADMIN" : "ROLE_REGISTERED";
+        return Jwts.builder()
+                .setSubject(user.getUsername())
+                .claim("authorities", Collections.singletonList(userType))
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMillis)) // Vreme isteka u milisekundama
+                .signWith(secretKey)
+                .compact();
+    }
+
+    // Postojeća metoda za generisanje tokena sa podrazumevanim vremenom isteka (1 dan)
+    /*public String generateToken(User user) {
+        return generateTokenWithExpiration(user, 86400000); // 1 dan u milisekundama
+    }*/
+
 
     public Claims parseToken(String token) {
         try {
