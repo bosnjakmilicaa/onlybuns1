@@ -17,11 +17,18 @@ public class PostDTO {
     private String description;
     private String imageUrl;
 
+    private Double latitude;
+    private Double longitude;
+    private String location;
+
     public PostDTO() {}
 
-    public PostDTO(String description, String imageUrl) {
+    public PostDTO(String description, String imageUrl, Double latitude, Double longitude, String location) {
         this.description = description;
         this.imageUrl = imageUrl;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.location = location;
     }
 
     public String getDescription() {
@@ -38,5 +45,29 @@ public class PostDTO {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 }

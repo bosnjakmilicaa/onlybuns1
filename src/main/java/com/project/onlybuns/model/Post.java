@@ -59,6 +59,39 @@ public class Post {
         this.createdAt = LocalDateTime.now(); // Postavljanje trenutnog vremena prilikom kreiranja
     }
 
+    @Column(nullable = true)
+    private Double latitude;
+
+    @Column(nullable = true)
+    private Double longitude;
+
+    @Column(nullable = true, columnDefinition = "TEXT")
+    private String location;
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
     // Broj lajkova
     public int getLikesCount() {
         return likes.size();

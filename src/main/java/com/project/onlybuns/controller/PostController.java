@@ -11,6 +11,7 @@ import com.project.onlybuns.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -143,20 +144,19 @@ public class PostController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
-        // Kreiraj novi Post objekat i postavi polja iz DTO-a
         Post post = new Post();
         post.setDescription(postDTO.getDescription());
         post.setImageUrl(postDTO.getImageUrl());
         post.setUser(loggedUser);
-        post.setCreatedAt(LocalDateTime.now()); // Automatsko postavljanje trenutnog vremena
+        post.setCreatedAt(LocalDateTime.now());
+        post.setLatitude(postDTO.getLatitude());
+        post.setLongitude(postDTO.getLongitude());
+        post.setLocation(postDTO.getLocation());
 
-        // Spasi post u bazu
         Post savedPost = postService.save(post);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(savedPost);
     }
-
-
 
     @PutMapping("/update/{id}")
     @PreAuthorize("hasRole('REGISTERED')")
