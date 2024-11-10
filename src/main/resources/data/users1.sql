@@ -12,12 +12,12 @@ VALUES
 -- Insert posts
 INSERT INTO posts (is_deleted, user_id, description, image_url, created_at)
 VALUES
-    (false, 4, 'content1', 'http://www.royalshop.rs/wp-content/uploads/2015/04/zeka.jpg', '2024-11-05 14:30:00'),
-    (false, 5, 'content1', 'https://www.agrotv.net/wp-content/uploads/2018/12/Divlji-zec-4.jpg', '2024-11-04 10:00:00'),
-    (false, 5, 'content2', '/images/unnamed.jpg', '2024-11-03 18:45:00'),
-    (false, 5, 'content3', 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Feldhase_Schiermonnikoog.JPG/640px-Feldhase_Schiermonnikoog.JPG', '2024-11-02 09:20:00'),
-    (false, 7, 'content1', 'https://www.musicar.rs/wp-content/uploads/2017/08/divlji-zec-pogled.jpg', '2024-11-04 13:00:00'),
-    (false, 7, 'content2', 'https://svijetljubimaca.ba/wp-content/uploads/2017/03/943_1.jpg', '2024-11-03 11:30:00');
+    (false, 4, 'content1', '/images/4.jpeg', '2024-11-05 14:30:00'),
+    (false, 5, 'content1', '/images/5.jpeg', '2024-11-04 10:00:00'),
+    (false, 5, 'content2', '/images/7.jpeg', '2024-11-03 18:45:00'),
+    (false, 5, 'content3', '/images/3.jpeg', '2024-11-02 09:20:00'),
+    (false, 7, 'content1', '/images/6.jpeg', '2024-11-04 13:00:00'),
+    (false, 7, 'content2', '/images/2.jpeg', '2024-11-03 11:30:00');
 
 -- Insert comments
 INSERT INTO comments (post_id, user_id, content, created_at)
