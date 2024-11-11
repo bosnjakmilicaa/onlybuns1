@@ -43,3 +43,14 @@ VALUES
     (3, 7, '2024-11-05 15:20:00'),
     (5, 5, '2024-11-05 16:00:00');
 
+
+-- Insert follows
+INSERT INTO follows (follower_id, followed_id)
+VALUES
+    (4, 5),  -- User4 prati User5
+    (5, 4),  -- User5 prati User4
+    (7, 5),  -- User7 prati User5
+    (5, 7),  -- User5 prati User7
+    (4, 7)  -- User4 prati User7
+
+

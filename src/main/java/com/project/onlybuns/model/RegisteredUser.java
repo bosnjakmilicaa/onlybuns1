@@ -13,6 +13,8 @@ import java.util.List;
 @DiscriminatorValue("registered_user")
 public class RegisteredUser extends User {
 
+
+
     @ManyToMany
     @JoinTable(
             name = "user_likes_post",
@@ -31,6 +33,34 @@ public class RegisteredUser extends User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Like> likes = new ArrayList<>(); // List of likes given by the user
+
+
+
+
+    @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Follow> following = new ArrayList<>(); // Korisnici koje ovaj korisnik prati
+
+    @OneToMany(mappedBy = "followed", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Follow> followers = new ArrayList<>(); // Korisnici koji prate ovog korisnika
+
+
+    // Getteri i setteri za `following` i `followers`
+    public List<Follow> getFollowing() {
+        return following;
+    }
+
+    public void setFollowing(List<Follow> following) {
+        this.following = following;
+    }
+
+    public List<Follow> getFollowers() {
+        return followers;
+    }
+
+    public void setFollowers(List<Follow> followers) {
+        this.followers = followers;
+    }
+
 
     // Getters and Setters for posts
     public List<Post> getPosts() {
@@ -90,5 +120,10 @@ public class RegisteredUser extends User {
 
     public void setAdminUser(AdminUser adminUser) {
         this.adminUser = adminUser;
+    }
+
+
+    public int getFollowingCount() {
+        return following.size();
     }
 }

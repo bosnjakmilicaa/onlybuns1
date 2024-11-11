@@ -380,6 +380,12 @@ public class AuthController {
             int likesCount = user.getLikes() != null ? user.getLikes().size() : 0; // Pretpostavljamo da postoji lista likes za korisnika
             user.setLikesCount(likesCount);
 
+            int followersCount = user.getFollowers() != null ? user.getFollowers().size() : 0; // Pretpostavljamo da postoji lista likes za korisnika
+            user.setFollowersCount(followersCount);
+
+            int followingCount = user.getFollowing() != null ? user.getFollowing().size() : 0; // Pretpostavljamo da postoji lista likes za korisnika
+            user.setFollowingCount(followingCount);
+
             registeredUserService.save(user); // Sačuvaj korisnika sa ažuriranim postsCount
         }
         return ResponseEntity.ok("Old passwords updated successfully!");

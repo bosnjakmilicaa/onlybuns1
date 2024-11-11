@@ -7,6 +7,18 @@ public class RegisteredUserDTO {
     private int postsCount;
     private int followersCount;
 
+    private int followingCount;
+
+    public RegisteredUserDTO(String firstName, String lastName, String email, int postsCount, int followersCount, int followingCount) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.postsCount = postsCount;
+        this.followersCount = followersCount;
+        this.followingCount = followingCount;
+
+    }
+
     public RegisteredUserDTO(String firstName, String lastName, String email, int postsCount, int followersCount) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -14,6 +26,7 @@ public class RegisteredUserDTO {
         this.postsCount = postsCount;
         this.followersCount = followersCount;
     }
+
 
     public String getFirstName() {
         return firstName;
@@ -55,6 +68,15 @@ public class RegisteredUserDTO {
     public void setFollowersCount(int followersCount) {
         this.followersCount = followersCount;
     }
+
+    public int getFollowingCount() {
+        return followingCount;
+    }
+
+    public void setFollowingCount(int followingCount) {
+        this.followingCount = followingCount;
+    }
+
 
     // Getteri i setteri
 }

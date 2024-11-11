@@ -45,6 +45,9 @@ public abstract class User {
 
     @Column(name = "followers_count")
     private Integer followersCount;
+
+    @Column(name = "following_count")
+    private Integer followingCount;
     //private int followersCount; // Broj pratilaca
 
     @Column(name = "likes_count")
@@ -69,6 +72,11 @@ public abstract class User {
         this.followersCount = followersCount;
     }
 
+    public void setFollowingCount(Integer followersCount) {
+        this.followingCount = followersCount;
+    }
+
+
 
     // No-argument constructor
     public User() {
@@ -77,6 +85,7 @@ public abstract class User {
         this.postsCount =0;
         this.likesCount =0;
     }
+
 
     // Constructor with parameters
     public User(String username, String password, String email, String firstName, String lastName, String address) {
@@ -163,6 +172,8 @@ public abstract class User {
     public void setLikesCount(Integer likesCount) {
         this.likesCount = likesCount;
     }
+
+
 
     public boolean isActive() {
         return isActive;

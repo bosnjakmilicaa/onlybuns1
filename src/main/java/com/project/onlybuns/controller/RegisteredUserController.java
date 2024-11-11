@@ -56,8 +56,10 @@ public class RegisteredUserController {
                         user.getLastName(),
                         user.getEmail(),
                         user.getPosts().size(),
-                        user.getFollowersCount()))
+                        user.getFollowing().size(),
+                        user.getFollowersCount()))  // Dodajte ovde šesti parametar
                 .collect(Collectors.toList());
+
 
         return ResponseEntity.ok(registeredUsers);
     }
