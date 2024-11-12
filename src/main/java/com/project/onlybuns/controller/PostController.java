@@ -5,11 +5,15 @@ import com.project.onlybuns.config.JwtAuthenticationFilter;
 import com.project.onlybuns.DTO.PostDTO;
 
 import com.project.onlybuns.model.*;
+import com.project.onlybuns.service.ImageUploadService;
 import com.project.onlybuns.service.PostService;
 import com.project.onlybuns.service.CommentService;
 import com.project.onlybuns.service.UserService;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +22,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -33,11 +42,14 @@ public class PostController {
 
     private final UserService userService;
 
+    private final ImageUploadService imageUploadService;
+
     @Autowired
-    public PostController(PostService postService, CommentService commentService, UserService userService) {
+    public PostController(PostService postService, CommentService commentService, UserService userService,ImageUploadService imageUploadService) {
         this.postService = postService;
         this.commentService = commentService;
         this.userService = userService;
+        this.imageUploadService = imageUploadService;
     }
 
 
@@ -132,11 +144,34 @@ public class PostController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-    
+
+    @GetMapping("/images/{imageName}")
+    public ResponseEntity<Resource> getImage(@PathVariable String imageName) {
+        try {
+            Path imagePath = Paths.get("src/main/resources/static.images/" + imageName);
+            Resource resource = new UrlResource(imagePath.toUri());
+
+            if (resource.exists() || resource.isReadable()) {
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_JPEG)
+                        .body(resource);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+        } catch (MalformedURLException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     @PostMapping("/create")
     @PreAuthorize("hasRole('REGISTERED')")
-    public ResponseEntity<Post> createPost(@RequestBody PostDTO postDTO) {
-        // Dobijanje trenutnog korisnika iz SecurityContext-a
+    public ResponseEntity<Post> createPost(
+            @RequestParam("description") String description,
+            @RequestParam("latitude") Double latitude,
+            @RequestParam("longitude") Double longitude,
+            @RequestParam("location") String location,
+            @RequestPart("imageFile") MultipartFile imageFile) {
+
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         RegisteredUser loggedUser = userService.findByUsername1(username).orElse(null);
 
@@ -144,14 +179,21 @@ public class PostController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
+        String imageUrl;
+        try {
+            imageUrl = imageUploadService.uploadImage(imageFile);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+
         Post post = new Post();
-        post.setDescription(postDTO.getDescription());
-        post.setImageUrl(postDTO.getImageUrl());
+        post.setDescription(description);
+        post.setImageUrl(imageUrl);
         post.setUser(loggedUser);
         post.setCreatedAt(LocalDateTime.now());
-        post.setLatitude(postDTO.getLatitude());
-        post.setLongitude(postDTO.getLongitude());
-        post.setLocation(postDTO.getLocation());
+        post.setLatitude(latitude);
+        post.setLongitude(longitude);
+        post.setLocation(location);
 
         Post savedPost = postService.save(post);
 

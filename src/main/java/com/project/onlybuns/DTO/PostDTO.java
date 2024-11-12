@@ -7,6 +7,7 @@ import com.project.onlybuns.model.RegisteredUser;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -21,14 +22,25 @@ public class PostDTO {
     private Double longitude;
     private String location;
 
+    private MultipartFile imageFile;
+
     public PostDTO() {}
 
-    public PostDTO(String description, String imageUrl, Double latitude, Double longitude, String location) {
+    public PostDTO(String description, String imageUrl, Double latitude, Double longitude, String location,MultipartFile imageFile) {
         this.description = description;
         this.imageUrl = imageUrl;
         this.latitude = latitude;
         this.longitude = longitude;
         this.location = location;
+        this.imageFile = imageFile;
+    }
+
+    public MultipartFile getImageFile() {
+        return imageFile;
+    }
+
+    public void setImageFile(MultipartFile imageFile) {
+        this.imageFile = imageFile;
     }
 
     public String getDescription() {
