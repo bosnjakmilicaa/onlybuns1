@@ -142,7 +142,7 @@ public class RegisteredUserController {
                         user.getLastName(),
                         user.getEmail(),
                         user.getPosts().size(),
-                        user.getFollowersCount()))
+                        user.getFollowingCount()))
                 .collect(Collectors.toList());
     }
 

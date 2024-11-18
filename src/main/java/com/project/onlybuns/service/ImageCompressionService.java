@@ -51,21 +51,21 @@ public class ImageCompressionService {
         }
     }
 
-    private boolean isOlderThanOneMonth(File file) {
+    /*private boolean isOlderThanOneMonth(File file) {
         long currentTime = new Date().getTime();
         long fileTime = file.lastModified();
         long oneMonthInMillis = 30L * 24 * 60 * 60 * 1000; // 30 dana u milisekundama
         return (currentTime - fileTime) > oneMonthInMillis;
+    }*/
+
+    private boolean isOlderThanOneMonth(File file) {
+        return true;  // kompresujeće se sve slike
     }
 
-    /*private boolean isOlderThanOneMonth(File file) {
-        return true;  // kompresujeće se sve slike
-    } */
-
-     /* @PostConstruct
+     @PostConstruct
     public void init() {
         compressOldImages();
-    } */
+    }
 
     private boolean isCompressed(File file) {
         return file.getName().contains("_compressed");

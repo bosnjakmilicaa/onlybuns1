@@ -28,8 +28,12 @@ public class EmailService {
     public void sendActivationEmail(String to, String token) throws MessagingException {
         String subject = "Activate your account";
         String confirmationUrl = "http://localhost:8080/activate?token=" + token;
-        String body = "<html><body><p>Please click the following link to activate your account: <a href=\""
-                + confirmationUrl + "\">Activate</a></p></body></html>";
+        String body = "<html><body>" +
+                "<p>Please click the following link to activate your account: " +
+                "<a href=\"" + confirmationUrl + "\">Activate</a></p>" +
+                "<p>If you have any questions, please contact Milica or Tanja or Nadja.</p>" +
+                "</body></html>";
+
 
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true); // true za HTML
