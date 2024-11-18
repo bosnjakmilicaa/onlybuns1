@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "users")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -53,6 +55,19 @@ public abstract class User {
     @Column(name = "likes_count")
     private Integer likesCount;
 
+    @Column(name = "registration_date")
+    private LocalDateTime registrationDate; // Datum kada je pokušao da se registruje
+
+    // Getters and Setters
+
+    public LocalDateTime getRegistrationDate() {
+        return registrationDate;
+    }
+
+    public void setRegistrationDate(LocalDateTime registrationDate) {
+        this.registrationDate = registrationDate;
+    }
+
     // Getters and Setters
 
     public Integer getPostsCount() {
@@ -90,6 +105,7 @@ public abstract class User {
         this.followingCount =0;
         this.postsCount =0;
         this.likesCount =0;
+        this.registrationDate = LocalDateTime.now();
     }
 
 

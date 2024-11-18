@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.awt.print.Pageable;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +20,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByFirstNameContainingOrLastNameContainingOrEmailContaining(
             String firstName, String lastName, String email);
     List<User> findByPostsCountBetween(int min, int max);
+
+    void deleteByIsActiveFalse();
+    void deleteByIsActiveFalseAndRegistrationDateBefore(LocalDateTime dateTime);
     Optional<User> findByUsername(String username);
     Optional<User> findByEmail(String email);
     //RegisteredUser findByUsername(String username);
