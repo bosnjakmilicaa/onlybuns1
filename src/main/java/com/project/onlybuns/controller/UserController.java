@@ -32,39 +32,6 @@ public class UserController {
         return session.getAttribute("userType") != null && session.getAttribute("userType").equals("ADMIN");
     }
 
-    /*@GetMapping("/search")
-    public ResponseEntity<List<User>> searchUsers(
-            @RequestParam(required = false) String firstName,
-            @RequestParam(required = false) String lastName,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) Integer minPosts,
-            @RequestParam(required = false) Integer maxPosts,
-            HttpSession session) {
-        if (isAdmin(session)) {
-            List<User> users = userService.searchUsers(firstName, lastName, email, minPosts, maxPosts);
-            return ResponseEntity.ok(users);
-        } else {
-            return ResponseEntity.status(403).build(); // Forbidden
-        }
-    }*/
-
-
-
-
-
-    /*@GetMapping
-    public ResponseEntity<List<RegisteredUser>> getAllUsers() {
-        List<RegisteredUser> users = userService.findAll();
-        return ResponseEntity.ok(users);
-    }*/
-
-
-    /*@GetMapping("/{id}")
-    public ResponseEntity<RegisteredUser> getUserById(@PathVariable Long id) {
-        return userService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }*/
 
     @PostMapping
     public ResponseEntity<RegisteredUser> createUser(@RequestBody RegisteredUser user) {

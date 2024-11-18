@@ -52,15 +52,6 @@ public class PostController {
         this.imageUploadService = imageUploadService;
     }
 
-
-    /*@GetMapping("/my-posts")
-    @PreAuthorize("hasRole('REGISTERED')")
-    public List<Post> getPostsForLoggedInUser() {
-        // Dobijanje trenutnog korisnika iz SecurityContext-a
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return postService.getPostsByUsername(username);
-    }*/
-
     public String getUsernameFromToken() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {

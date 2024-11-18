@@ -30,17 +30,6 @@ public class RegisteredUserController {
 
     }
 
-    /*@GetMapping("/registered-users")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<RegisteredUser>> getRegisteredUsers() {
-        // Logovanje za debugging
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println("User: " + authentication.getName() + " with roles: " + authentication.getAuthorities());
-
-        // Dobijanje registrovanih korisnika
-        List<RegisteredUser> registeredUsers = registeredUserService.findAll();
-        return ResponseEntity.ok(registeredUsers);
-    }*/
 
     @GetMapping("/registered-users")
     @PreAuthorize("hasRole('ADMIN')")
@@ -64,20 +53,6 @@ public class RegisteredUserController {
         return ResponseEntity.ok(registeredUsers);
     }
 
-
-    /*@GetMapping("/searchReg")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<RegisteredUser>> searchRegisteredUsers(
-            @RequestParam(required = false) String firstName,
-            @RequestParam(required = false) String lastName,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) Integer minPosts,
-            @RequestParam(required = false) Integer maxPosts,
-            @RequestParam(required = false) Boolean sortByFollowers) {
-
-        List<RegisteredUser> users = registeredUserService1.searchRegisteredUsers(firstName, lastName, email, minPosts, maxPosts, sortByFollowers);
-        return ResponseEntity.ok(users);
-    }*/
 
     @GetMapping("/searchReg")
     @PreAuthorize("hasRole('ADMIN')")
@@ -145,26 +120,6 @@ public class RegisteredUserController {
                         user.getFollowingCount()))
                 .collect(Collectors.toList());
     }
-
-
-
-
-
-
-    /*@GetMapping("/registered-users")
-    public ResponseEntity<?> getAllRegisteredUsers(HttpSession session) {
-        // Proveri da li je ulogovani korisnik administrator
-        Object userType = session.getAttribute("userType");
-        if (userType != null && userType.equals("ADMIN")) {
-            List<RegisteredUser> registeredUsers = registeredUserService.findAll();
-            return ResponseEntity.ok(registeredUsers);
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Collections.singletonMap("message", "Error: You do not have permission to access this resource."));
-        }
-    }*/
-
-
 
 
     @GetMapping("/all")
