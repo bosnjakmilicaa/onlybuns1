@@ -3,6 +3,8 @@ package com.project.onlybuns.service;
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.repository.RegisteredUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +18,15 @@ public class RegisteredUserService {
     @Autowired
     public RegisteredUserService(RegisteredUserRepository registeredUserRepository) {
         this.registeredUserRepository = registeredUserRepository;
+    }
+
+    public Page<RegisteredUser> searchUsers(String firstName, String lastName, String email, Pageable pageable) {
+        return registeredUserRepository.findByFirstNameContainingOrLastNameContainingOrEmailContaining(
+                firstName, lastName, email, pageable);
+    }
+
+    public Page<RegisteredUser> findAll(Pageable pageable) {
+        return registeredUserRepository.findAll(pageable);
     }
 
     public List<RegisteredUser> findAll() {
