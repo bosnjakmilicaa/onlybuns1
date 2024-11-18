@@ -62,6 +62,7 @@ public class RegisteredUserDTO {
     }
 
     public void setPostsCount(int postsCount) {
+
         this.postsCount = postsCount;
     }
 

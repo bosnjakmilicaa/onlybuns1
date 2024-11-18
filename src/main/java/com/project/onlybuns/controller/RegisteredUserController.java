@@ -4,9 +4,7 @@ import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.service.RegisteredUserService;
 import com.project.onlybuns.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -73,145 +71,14 @@ public class RegisteredUserController {
                 user.getEmail(),
                 user.getPosts().size(),
                 user.getFollowing().size(),
-                user.getFollowersCount()
+                user.getFollowers().size()
         ));
 
         return ResponseEntity.ok(dtoPage);
     }
 
 
-
     /*@GetMapping("/searchReg")
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<RegisteredUserDTO> searchRegisteredUsers(
-            @RequestParam(required = false) String firstName,
-            @RequestParam(required = false) String lastName,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) Integer minPosts,
-            @RequestParam(required = false) Integer maxPosts,
-            @RequestParam(required = false) Boolean sortByFollowers) {
-
-        // Dohvatanje svih korisnika
-        List<RegisteredUser> users = registeredUserService.findAll();
-
-        // Filtriranje po imenu ako je zadato
-        if (firstName != null && !firstName.isEmpty()) {
-            users = users.stream()
-                    .filter(user -> user.getFirstName().equalsIgnoreCase(firstName))
-                    .collect(Collectors.toList());
-        }
-
-        // Filtriranje po prezimenu ako je zadato
-        if (lastName != null && !lastName.isEmpty()) {
-            users = users.stream()
-                    .filter(user -> user.getLastName().equalsIgnoreCase(lastName))
-                    .collect(Collectors.toList());
-        }
-
-        // Filtriranje po email-u ako je zadato
-        if (email != null && !email.isEmpty()) {
-            users = users.stream()
-                    .filter(user -> user.getEmail().equalsIgnoreCase(email))
-                    .collect(Collectors.toList());
-        }
-
-        // Filtriranje po broju postova između minPosts i maxPosts, ako su oba parametra zadata
-        if (minPosts != null && maxPosts != null) {
-            users = users.stream()
-                    .filter(user -> user.getPosts().size() >= minPosts && user.getPosts().size() <= maxPosts)
-                    .collect(Collectors.toList());
-        } else if (minPosts != null) {
-            // Filtriranje po minimalnom broju postova ako je samo minPosts zadat
-            users = users.stream()
-                    .filter(user -> user.getPosts().size() >= minPosts)
-                    .collect(Collectors.toList());
-        } else if (maxPosts != null) {
-            // Filtriranje po maksimalnom broju postova ako je samo maxPosts zadat
-            users = users.stream()
-                    .filter(user -> user.getPosts().size() <= maxPosts)
-                    .collect(Collectors.toList());
-        }
-
-        // Sortiranje po broju pratilaca ako je zadato
-        if (Boolean.TRUE.equals(sortByFollowers)) {
-            users.sort(Comparator.comparingInt(RegisteredUser::getFollowersCount).reversed());
-        }
-
-        // Mapiranje korisnika na DTO
-        return users.stream()
-                .map(user -> new RegisteredUserDTO(
-                        user.getFirstName(),
-                        user.getLastName(),
-                        user.getEmail(),
-                        user.getPosts().size(),
-                        user.getFollowingCount()))
-                .collect(Collectors.toList());
-    }*/
-
-    /*@GetMapping("/searchReg")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<RegisteredUserDTO>> searchRegisteredUsers(
-            @RequestParam(required = false) String firstName,
-            @RequestParam(required = false) String lastName,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) Integer minPosts,
-            @RequestParam(required = false) Integer maxPosts,
-            @RequestParam(required = false) Boolean sortByFollowers,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
-
-        // Dohvatanje svih korisnika
-        List<RegisteredUser> users = registeredUserService.findAll();
-
-        // Filtriranje i sortiranje (isto kao ranije)
-        if (firstName != null && !firstName.isEmpty()) {
-            users = users.stream()
-                    .filter(user -> user.getFirstName().equalsIgnoreCase(firstName))
-                    .collect(Collectors.toList());
-        }
-        if (lastName != null && !lastName.isEmpty()) {
-            users = users.stream()
-                    .filter(user -> user.getLastName().equalsIgnoreCase(lastName))
-                    .collect(Collectors.toList());
-        }
-        if (email != null && !email.isEmpty()) {
-            users = users.stream()
-                    .filter(user -> user.getEmail().equalsIgnoreCase(email))
-                    .collect(Collectors.toList());
-        }
-        if (minPosts != null && maxPosts != null) {
-            users = users.stream()
-                    .filter(user -> user.getPosts().size() >= minPosts && user.getPosts().size() <= maxPosts)
-                    .collect(Collectors.toList());
-        } else if (minPosts != null) {
-            users = users.stream()
-                    .filter(user -> user.getPosts().size() >= minPosts)
-                    .collect(Collectors.toList());
-        } else if (maxPosts != null) {
-            users = users.stream()
-                    .filter(user -> user.getPosts().size() <= maxPosts)
-                    .collect(Collectors.toList());
-        }
-        if (Boolean.TRUE.equals(sortByFollowers)) {
-            users.sort(Comparator.comparingInt(RegisteredUser::getFollowersCount).reversed());
-        }
-
-        // Implementacija paginacije
-        int start = Math.min(page * size, users.size());
-        int end = Math.min((page + 1) * size, users.size());
-        List<RegisteredUserDTO> pagedUsers = users.subList(start, end).stream()
-                .map(user -> new RegisteredUserDTO(
-                        user.getFirstName(),
-                        user.getLastName(),
-                        user.getEmail(),
-                        user.getPosts().size(),
-                        user.getFollowingCount()))
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(new PageImpl<>(pagedUsers, PageRequest.of(page, size), users.size()));
-    }*/
-
-    @GetMapping("/searchReg")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<RegisteredUserDTO>> searchRegisteredUsers(
             @RequestParam(required = false) String firstName,
@@ -258,23 +125,13 @@ public class RegisteredUserController {
         }
 
         // Sortiranje na osnovu izabranog atributa i redosleda
-        if (sortBy != null) {
-            if (sortBy.equals("email")) {
-                if ("desc".equals(sortOrder)) {
-                    users.sort(Comparator.comparing(RegisteredUser::getEmail).reversed());
-                } else {
-                    users.sort(Comparator.comparing(RegisteredUser::getEmail));
-                }
-            } else if (sortBy.equals("followingCount")) {
-                if ("desc".equals(sortOrder)) {
-                    users.sort(Comparator.comparingInt(RegisteredUser::getFollowingCount).reversed());
-                } else {
-                    users.sort(Comparator.comparingInt(RegisteredUser::getFollowingCount));
-                }
-            }
-        }
+        Sort sort = Sort.unsorted(); // Početni sortirani objekt
 
-        // Implementacija paginacije
+
+        // Implementacija paginacije sa sortiranjem
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        // Pretvaranje korisnika u Page objekat sa paginacijom i sortiranjem
         int start = Math.min(page * size, users.size());
         int end = Math.min((page + 1) * size, users.size());
         List<RegisteredUserDTO> pagedUsers = users.subList(start, end).stream()
@@ -283,10 +140,93 @@ public class RegisteredUserController {
                         user.getLastName(),
                         user.getEmail(),
                         user.getPosts().size(),
-                        user.getFollowingCount()))
+                        user.getFollowers().size(),
+                        user.getFollowing().size()))
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(new PageImpl<>(pagedUsers, PageRequest.of(page, size), users.size()));
+        // Kreiranje PageImpl sa paginacijom
+        Page<RegisteredUserDTO> pageResult = new PageImpl<>(pagedUsers, pageable, users.size());
+
+        return ResponseEntity.ok(pageResult);
+    }*/
+
+    @GetMapping("/searchReg")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<RegisteredUserDTO>> searchRegisteredUsers(
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) Integer minPosts,
+            @RequestParam(required = false) Integer maxPosts,
+            @RequestParam(defaultValue = "email") String sortBy, // Default sortiranje
+            @RequestParam(defaultValue = "asc") String sortOrder, // Default redosled
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        // Dohvatanje svih korisnika (ovo možeš povezati sa repozitorijumom)
+        List<RegisteredUser> users = registeredUserService.findAll();
+
+        // Filtriranje
+        if (firstName != null && !firstName.isEmpty()) {
+            users = users.stream()
+                    .filter(user -> user.getFirstName().equalsIgnoreCase(firstName))
+                    .collect(Collectors.toList());
+        }
+        if (lastName != null && !lastName.isEmpty()) {
+            users = users.stream()
+                    .filter(user -> user.getLastName().equalsIgnoreCase(lastName))
+                    .collect(Collectors.toList());
+        }
+        if (email != null && !email.isEmpty()) {
+            users = users.stream()
+                    .filter(user -> user.getEmail().equalsIgnoreCase(email))
+                    .collect(Collectors.toList());
+        }
+        if (minPosts != null) {
+            users = users.stream()
+                    .filter(user -> user.getPosts().size() >= minPosts)
+                    .collect(Collectors.toList());
+        }
+        if (maxPosts != null) {
+            users = users.stream()
+                    .filter(user -> user.getPosts().size() <= maxPosts)
+                    .collect(Collectors.toList());
+        }
+
+        // Sortiranje
+        Comparator<RegisteredUser> comparator;
+        if (sortBy.equals("email")) {
+            comparator = Comparator.comparing(RegisteredUser::getEmail, String.CASE_INSENSITIVE_ORDER);
+        } else if (sortBy.equals("followingCount")) {
+            comparator = Comparator.comparingInt(user -> user.getFollowing().size());
+        } else {
+            // Default sortiranje po email-u ako je sortBy nevalidan
+            comparator = Comparator.comparing(RegisteredUser::getEmail, String.CASE_INSENSITIVE_ORDER);
+        }
+
+        if (sortOrder.equalsIgnoreCase("desc")) {
+            comparator = comparator.reversed();
+        }
+
+        users.sort(comparator);
+
+        // Paginacija
+        int start = Math.min(page * size, users.size());
+        int end = Math.min((page + 1) * size, users.size());
+        List<RegisteredUserDTO> pagedUsers = users.subList(start, end).stream()
+                .map(user -> new RegisteredUserDTO(
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getEmail(),
+                        user.getPosts().size(),
+                        user.getFollowers().size(),
+                        user.getFollowing().size()))
+                .collect(Collectors.toList());
+
+        // Kreiranje PageImpl objekta
+        Page<RegisteredUserDTO> pageResult = new PageImpl<>(pagedUsers, PageRequest.of(page, size), users.size());
+
+        return ResponseEntity.ok(pageResult);
     }
 
 

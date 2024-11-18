@@ -123,7 +123,7 @@ public class RegisteredUser extends User {
     }
 
 
-    public int getFollowingCount() {
+    /*public int getFollowingCount() {
         return following.size();
-    }
+    }*/
 }

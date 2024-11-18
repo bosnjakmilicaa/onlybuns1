@@ -126,70 +126,9 @@ public class UserService {
         return users;
     }*/
 
-    public List<RegisteredUser> searchRegisteredUsers(String firstName, String lastName, String email, Integer minPosts, Integer maxPosts, Boolean sortByFollowers) {
-        // Prvo filtriramo korisnike prema imenu, prezimenu i emailu
-        List<RegisteredUser> users = registeredUserRepository.findByFirstNameContainingOrLastNameContainingOrEmailContaining(firstName, lastName, email);
-
-        // Filtriranje korisnika na osnovu broja objava
-        if (minPosts != null || maxPosts != null) {
-            users = users.stream()
-                    .filter(user -> {
-                        boolean minCondition = (minPosts == null || user.getPostsCount() >= minPosts);
-                        boolean maxCondition = (maxPosts == null || user.getPostsCount() <= maxPosts);
-                        return minCondition && maxCondition; // Oba uslova moraju biti zadovoljena
-                    })
-                    .collect(Collectors.toList());
-        }
-
-        // Sortiranje prema broju pratilaca, ako je potrebno
-        if (sortByFollowers != null) {
-            users = sortByFollowersAndEmail(users, sortByFollowers);
-        }
-
-        return users;
-    }
-
-
-    public List<RegisteredUser> sortByFollowersAndEmail(List<RegisteredUser> users, boolean sortByFollowers) {
-        if (sortByFollowers) {
-            return users.stream()
-                    .sorted((u1, u2) -> Integer.compare(u2.getFollowersCount(), u1.getFollowersCount())) // Pretpostavljajući da imate metodu getFollowersCount()
-                    .toList();
-        } else {
-            return users.stream()
-                    .sorted((u1, u2) -> u1.getEmail().compareTo(u2.getEmail()))
-                    .toList();
-        }
-    }
 
 
 
-
-    public List<User> sortByFollowersAndEmail(boolean sortByFollowers) {
-        List<User> users = userRepository.findAll();
-        if (sortByFollowers) {
-            return users.stream()
-                    .sorted((u1, u2) -> Integer.compare(u2.getFollowersCount(), u1.getFollowersCount())) // Pretpostavljajući da imate metodu getFollowersCount()
-                    .toList();
-        } else {
-            return users.stream()
-                    .sorted((u1, u2) -> u1.getEmail().compareTo(u2.getEmail()))
-                    .toList();
-        }
-    }
-
-    public List<User> sortByFollowersAndEmail() {
-        List<User> users = userRepository.findAll(); // Uzimamo sve korisnike
-        users.sort((user1, user2) -> {
-            int comparison = Integer.compare(user1.getFollowersCount(), user2.getFollowersCount());
-            if (comparison == 0) {
-                // Ako su brojevi pratilaca isti, poredi po email adresi
-                return user1.getEmail().compareTo(user2.getEmail());
-            }
-            return comparison;
-        });
-        return users; // Vraćamo sortiranu listu
-    }
     public void save(User user) {
         userRepository.save(user); // Čuvanje korisnika u bazi
     }

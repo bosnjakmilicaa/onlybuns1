@@ -68,11 +68,16 @@ public abstract class User {
         return followersCount!=null ? followersCount:0;
     }
 
+    public Integer getFollowingCount() {
+        return followingCount!=null ? followingCount:0;
+    }
+
     public void setFollowersCount(Integer followersCount) {
         this.followersCount = followersCount;
     }
 
     public void setFollowingCount(Integer followersCount) {
+
         this.followingCount = followersCount;
     }
 
@@ -82,6 +87,7 @@ public abstract class User {
     public User() {
         this.isActive = false; // Podrazumevano nije aktiviran
         this.followersCount = 0;
+        this.followingCount =0;
         this.postsCount =0;
         this.likesCount =0;
     }
