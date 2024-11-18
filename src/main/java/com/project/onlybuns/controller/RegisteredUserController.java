@@ -150,7 +150,7 @@ public class RegisteredUserController {
         return ResponseEntity.ok(pageResult);
     }*/
 
-    @GetMapping("/searchReg")
+    /*@GetMapping("/searchReg")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<RegisteredUserDTO>> searchRegisteredUsers(
             @RequestParam(required = false) String firstName,
@@ -227,7 +227,87 @@ public class RegisteredUserController {
         Page<RegisteredUserDTO> pageResult = new PageImpl<>(pagedUsers, PageRequest.of(page, size), users.size());
 
         return ResponseEntity.ok(pageResult);
+    }*/
+
+    @GetMapping("/searchReg")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Page<RegisteredUserDTO>> searchRegisteredUsers(
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) Integer minPosts,
+            @RequestParam(required = false) Integer maxPosts,
+            @RequestParam(defaultValue = "email") String sortBy, // Default sortiranje
+            @RequestParam(defaultValue = "asc") String sortOrder, // Default redosled
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        // Dohvatanje svih korisnika (ovo možeš povezati sa repozitorijumom)
+        List<RegisteredUser> users = registeredUserService.findAll();
+
+        // Filtriranje sa contains pretragom
+        if (firstName != null && !firstName.isEmpty()) {
+            users = users.stream()
+                    .filter(user -> user.getFirstName().toLowerCase().contains(firstName.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+        if (lastName != null && !lastName.isEmpty()) {
+            users = users.stream()
+                    .filter(user -> user.getLastName().toLowerCase().contains(lastName.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+        if (email != null && !email.isEmpty()) {
+            users = users.stream()
+                    .filter(user -> user.getEmail().toLowerCase().contains(email.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+        if (minPosts != null) {
+            users = users.stream()
+                    .filter(user -> user.getPosts().size() >= minPosts)
+                    .collect(Collectors.toList());
+        }
+        if (maxPosts != null) {
+            users = users.stream()
+                    .filter(user -> user.getPosts().size() <= maxPosts)
+                    .collect(Collectors.toList());
+        }
+
+        // Sortiranje
+        Comparator<RegisteredUser> comparator;
+        if (sortBy.equals("email")) {
+            comparator = Comparator.comparing(RegisteredUser::getEmail, String.CASE_INSENSITIVE_ORDER);
+        } else if (sortBy.equals("followingCount")) {
+            comparator = Comparator.comparingInt(user -> user.getFollowing().size());
+        } else {
+            // Default sortiranje po email-u ako je sortBy nevalidan
+            comparator = Comparator.comparing(RegisteredUser::getEmail, String.CASE_INSENSITIVE_ORDER);
+        }
+
+        if (sortOrder.equalsIgnoreCase("desc")) {
+            comparator = comparator.reversed();
+        }
+
+        users.sort(comparator);
+
+        // Paginacija
+        int start = Math.min(page * size, users.size());
+        int end = Math.min((page + 1) * size, users.size());
+        List<RegisteredUserDTO> pagedUsers = users.subList(start, end).stream()
+                .map(user -> new RegisteredUserDTO(
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getEmail(),
+                        user.getPosts().size(),
+                        user.getFollowers().size(),
+                        user.getFollowing().size()))
+                .collect(Collectors.toList());
+
+        // Kreiranje PageImpl objekta
+        Page<RegisteredUserDTO> pageResult = new PageImpl<>(pagedUsers, PageRequest.of(page, size), users.size());
+
+        return ResponseEntity.ok(pageResult);
     }
+
 
 
 
