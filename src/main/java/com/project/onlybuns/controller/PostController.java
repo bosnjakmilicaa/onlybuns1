@@ -5,6 +5,7 @@ import com.project.onlybuns.config.JwtAuthenticationFilter;
 import com.project.onlybuns.DTO.PostDTO;
 
 import com.project.onlybuns.model.*;
+import com.project.onlybuns.repository.RegisteredUserRepository;
 import com.project.onlybuns.service.ImageUploadService;
 import com.project.onlybuns.service.PostService;
 import com.project.onlybuns.service.CommentService;
@@ -31,6 +32,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/posts") // Base path for post-related endpoints
@@ -39,17 +41,20 @@ public class PostController {
     private final PostService postService;
     private final CommentService commentService;
 
+    private  final RegisteredUserRepository registeredUserRepository;
+
 
     private final UserService userService;
 
     private final ImageUploadService imageUploadService;
 
     @Autowired
-    public PostController(PostService postService, CommentService commentService, UserService userService,ImageUploadService imageUploadService) {
+    public PostController(PostService postService, CommentService commentService, UserService userService,ImageUploadService imageUploadService, RegisteredUserRepository registeredUserRepository) {
         this.postService = postService;
         this.commentService = commentService;
         this.userService = userService;
         this.imageUploadService = imageUploadService;
+        this.registeredUserRepository = registeredUserRepository;
     }
 
     public String getUsernameFromToken() {
@@ -227,7 +232,7 @@ public class PostController {
 
 
 
-    @GetMapping("/allPosts")
+    /*@GetMapping("/allPosts")
     public List<Map<String, Object>> getAllPosts() {
         List<Post> posts = postService.findAllActivePosts();
         List<Map<String, Object>> postsWithUsernamesAndComments = new ArrayList<>();
@@ -268,7 +273,79 @@ public class PostController {
         }
 
         return postsWithUsernamesAndComments;
+    }*/
+    @GetMapping("/allPosts")
+    public List<Map<String, Object>> getAllPosts(@AuthenticationPrincipal UserProfile userDetails) {
+        // Dobavljanje svih objava
+        List<Post> allPosts = postService.findAllActivePosts();
+
+        // Lista koja će sadržati sortirane objave
+        List<Post> sortedPosts;
+
+        // Provera da li je korisnik ulogovan
+        if (userDetails != null) {
+            // Ako je korisnik ulogovan, dobavljamo informacije o korisniku
+            String loggedInUsername = userDetails.getUsername();
+            RegisteredUser loggedInUser = registeredUserRepository.findByUsername(loggedInUsername)
+                    .orElseThrow(() -> new IllegalArgumentException("Logged-in user not found"));
+
+            // Dobavljanje ID-ova korisnika koje ulogovani korisnik prati
+            Set<Long> followedUserIds = loggedInUser.getFollowing().stream()
+                    .map(follow -> follow.getFollowed().getId()) // Pristup ID-u praćenog korisnika
+                    .collect(Collectors.toSet());
+
+            // Razdvajanje objava: prvo od korisnika koje korisnik prati, zatim ostale
+            List<Post> followedUserPosts = allPosts.stream()
+                    .filter(post -> post.getUser() != null && followedUserIds.contains(post.getUser().getId()))
+                    .collect(Collectors.toList());
+
+            List<Post> otherPosts = allPosts.stream()
+                    .filter(post -> post.getUser() == null || !followedUserIds.contains(post.getUser().getId()))
+                    .collect(Collectors.toList());
+
+            // Kombinovanje objava
+            sortedPosts = new ArrayList<>();
+            sortedPosts.addAll(followedUserPosts); // Postovi korisnika koje korisnik prati
+            sortedPosts.addAll(otherPosts);        // Postovi ostalih korisnika
+        } else {
+            // Ako korisnik nije ulogovan, postovi se ne sortiraju
+            sortedPosts = allPosts;
+        }
+
+        // Format za datum i vreme
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+
+        // Priprema rezultata za front-end
+        List<Map<String, Object>> postsWithUsernamesAndComments = new ArrayList<>();
+        for (Post post : sortedPosts) {
+            Map<String, Object> postData = new HashMap<>();
+            postData.put("id", post.getId());
+            postData.put("imageUrl", post.getImageUrl());
+            postData.put("description", post.getDescription());
+            postData.put("username", post.getUser() != null ? post.getUser().getUsername() : "Unknown");
+            postData.put("countLikes", post.getLikesCount());
+            String formattedDate = post.getCreatedAt() != null ? post.getCreatedAt().format(formatter) : "Unknown date";
+            postData.put("createdAt", formattedDate);
+
+            List<Map<String, Object>> commentsData = new ArrayList<>();
+            for (Comment comment : post.getComments()) {
+                Map<String, Object> commentData = new HashMap<>();
+                commentData.put("id", comment.getId());
+                commentData.put("content", comment.getContent());
+                commentData.put("username", comment.getUser() != null ? comment.getUser().getUsername() : "Unknown");
+                String formattedCommentDate = comment.getCreatedAt() != null ? comment.getCreatedAt().format(formatter) : "Unknown date";
+                commentData.put("createdAt", formattedCommentDate);
+                commentsData.add(commentData);
+            }
+            postData.put("comments", commentsData);
+
+            postsWithUsernamesAndComments.add(postData);
+        }
+
+        return postsWithUsernamesAndComments;
     }
+
+
 
 
     @PutMapping("/{id}/like")

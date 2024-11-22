@@ -137,6 +137,11 @@ public class RegisteredUserService {
 
     @Transactional
     public void followUser(Long followerId, Long followedId) {
+
+        if (followerId.equals(followedId)) {
+            throw new IllegalArgumentException("You cannot follow yourself.");
+        }
+
         RegisteredUser follower = registeredUserRepository.findById(followerId)
                 .orElseThrow(() -> new IllegalArgumentException("Follower not found."));
         RegisteredUser followed = registeredUserRepository.findById(followedId)
