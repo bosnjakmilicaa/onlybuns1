@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -94,7 +95,7 @@ public class RegisteredUserService {
         return count >= 50;  // Ograničenje na 50 praćenja po minuti
     }
 
-    public void followUser(Long followerId, Long followedId) {
+    /*public void followUser(Long followerId, Long followedId) {
         RegisteredUser follower = registeredUserRepository.findById(followerId)
                 .orElseThrow(() -> new IllegalArgumentException("Follower not found."));
         RegisteredUser followed = registeredUserRepository.findById(followedId)
@@ -132,7 +133,50 @@ public class RegisteredUserService {
         // Sačuvaj promene u korisnicima
         registeredUserRepository.save(follower);
         registeredUserRepository.save(followed);
+    }*/
+
+    @Transactional
+    public void followUser(Long followerId, Long followedId) {
+        RegisteredUser follower = registeredUserRepository.findById(followerId)
+                .orElseThrow(() -> new IllegalArgumentException("Follower not found."));
+        RegisteredUser followed = registeredUserRepository.findById(followedId)
+                .orElseThrow(() -> new IllegalArgumentException("Followed user not found."));
+
+        if (isFollowLimitExceeded(follower)) {
+            throw new IllegalArgumentException("Follow limit exceeded. You can only follow 50 users per minute.");
+        }
+
+        if (followRepository.existsByFollowerIdAndFollowedId(followerId, followedId)) {
+            throw new IllegalArgumentException("Already following this user.");
+        }
+
+        Follow follow = new Follow();
+        follow.setFollower(follower);
+        follow.setFollowed(followed);
+        followRepository.save(follow);
+
+        FollowLog followLog = new FollowLog();
+        followLog.setFollower(follower);
+        followLog.setFollowed(followed);
+        followLog.setTimestamp(LocalDateTime.now());
+        followLogRepository.save(followLog);
+
+        // Simulacija sporog izvršavanja
+        try {
+            Thread.sleep(2000); // Pauza od 2 sekunde
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        synchronized (this) {
+            followed.setFollowersCount(followed.getFollowersCount() + 1);
+            follower.setFollowingCount(follower.getFollowingCount() + 1);
+        }
+
+        registeredUserRepository.save(follower);
+        registeredUserRepository.save(followed);
     }
+
 
 
     public void unfollowUser(Long followerId, Long followedId) {
