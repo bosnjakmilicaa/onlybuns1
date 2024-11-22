@@ -152,21 +152,6 @@ public class RegisteredUserController {
         return ResponseEntity.ok("Successfully unfollowed the user.");
     }
 
-    /*@GetMapping("/me")
-    public ResponseEntity<RegisteredUser> getCurrentUser(@RequestHeader("Authorization") String token) {
-        // Dobijanje trenutnog korisnika sa SecurityContext-a
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        // Vaša logika da dobijete korisnika na osnovu username-a
-        RegisteredUser currentUser = registeredUserService.getCurrentUserByUsername(username);
-
-        if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
-
-        return ResponseEntity.ok(currentUser);
-    }*/
-
     @GetMapping("/me")
     public ResponseEntity<RegisteredUser> getCurrentUser(@RequestHeader("Authorization") String token) {
         // Get the username from the SecurityContext (after the token has been parsed by the filter)
@@ -185,12 +170,6 @@ public class RegisteredUserController {
 
         return ResponseEntity.ok(currentUser);
     }
-
-
-
-
-
-
 
     @GetMapping("/registered-users")
     @PreAuthorize("hasRole('ADMIN')")
