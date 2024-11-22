@@ -1,6 +1,8 @@
 package com.project.onlybuns.service;
 
+import com.project.onlybuns.model.Follow;
 import com.project.onlybuns.model.RegisteredUser;
+import com.project.onlybuns.repository.FollowRepository;
 import com.project.onlybuns.repository.RegisteredUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,11 +17,13 @@ public class RegisteredUserService {
 
     private final RegisteredUserRepository registeredUserRepository;
 
-    @Autowired
-    public RegisteredUserService(RegisteredUserRepository registeredUserRepository) {
-        this.registeredUserRepository = registeredUserRepository;
-    }
+    private final FollowRepository followRepository;
 
+    @Autowired
+    public RegisteredUserService(RegisteredUserRepository registeredUserRepository, FollowRepository followRepository) {
+        this.registeredUserRepository = registeredUserRepository;
+        this.followRepository = followRepository;
+    }
     public Page<RegisteredUser> searchUsers(String firstName, String lastName, String email, Pageable pageable) {
         return registeredUserRepository.findByFirstNameContainingOrLastNameContainingOrEmailContaining(
                 firstName, lastName, email, pageable);
@@ -46,4 +50,68 @@ public class RegisteredUserService {
     }
 
 
+    public boolean isAlreadyFollowing(Long followerId, Long followedId) {
+        return followRepository.existsByFollowerIdAndFollowedId(followerId, followedId);
+    }
+
+    public void followUser(Long followerId, Long followedId) {
+        RegisteredUser follower = registeredUserRepository.findById(followerId)
+                .orElseThrow(() -> new IllegalArgumentException("Follower not found."));
+        RegisteredUser followed = registeredUserRepository.findById(followedId)
+                .orElseThrow(() -> new IllegalArgumentException("Followed user not found."));
+
+        // Proveri da li već postoji veza
+        if (followRepository.existsByFollowerIdAndFollowedId(followerId, followedId)) {
+            throw new IllegalArgumentException("Already following this user.");
+        }
+
+        // Kreiraj novi Follow zapis
+        Follow follow = new Follow();
+        follow.setFollower(follower);
+        follow.setFollowed(followed);
+
+        // Sačuvaj u bazi
+        followRepository.save(follow);
+
+        // Ažuriraj brojače
+        follower.setFollowingCount(follower.getFollowingCount() + 1);
+        followed.setFollowersCount(followed.getFollowersCount() + 1);
+
+        // Sačuvaj promene u korisnicima
+        registeredUserRepository.save(follower);
+        registeredUserRepository.save(followed);
+    }
+
+
+    public void unfollowUser(Long followerId, Long followedId) {
+        Follow follow = followRepository.findByFollowerIdAndFollowedId(followerId, followedId)
+                .orElseThrow(() -> new IllegalArgumentException("Follow relationship not found."));
+
+        RegisteredUser follower = follow.getFollower();
+        RegisteredUser followed = follow.getFollowed();
+
+        // Obriši Follow zapis
+        followRepository.delete(follow);
+
+        // Ažuriraj brojače
+        follower.setFollowingCount(follower.getFollowingCount() - 1);
+        followed.setFollowersCount(followed.getFollowersCount() - 1);
+
+        // Sačuvaj promene u korisnicima
+        registeredUserRepository.save(follower);
+        registeredUserRepository.save(followed);
+    }
+
+    public Long findUserIdByUsername(String username) {
+        RegisteredUser user = registeredUserRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User with username " + username + " not found."));
+        return user.getId();
+    }
+
+    public RegisteredUser getCurrentUserByUsername(String username) {
+        Optional<RegisteredUser> optionalUser = registeredUserRepository.findByUsername(username);
+
+        // Provera da li korisnik postoji, inače vraća izuzetak
+        return optionalUser.orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
+    }
 }

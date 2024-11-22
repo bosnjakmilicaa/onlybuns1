@@ -14,7 +14,6 @@ public class UserCleanupService {
     // Metoda koja se poziva poslednjeg dana svakog meseca
     @Scheduled(cron = "0 0 0 28-31 * ?")  // Ovaj cron izraz omogućava pozivanje zadatka poslednjeg dana u mesecu
     public void deleteInactiveUsers() {
-        // Brisanje svih korisnika koji nisu aktivirani (isActive == false)
         userRepository.deleteByIsActiveFalse();
     }
 }

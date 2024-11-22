@@ -5,6 +5,7 @@ import com.project.onlybuns.service.RegisteredUserService;
 import com.project.onlybuns.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -28,29 +29,168 @@ public class RegisteredUserController {
         this.registeredUserService1 = registeredUserService1;
 
     }
+    /*@PostMapping("/{followerId}/follow/{followedId}")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public ResponseEntity<String> followUser(
+            @PathVariable Long followerId,
+            @PathVariable Long followedId) {
+        if (registeredUserService.isAlreadyFollowing(followerId, followedId)) {
+            return ResponseEntity.badRequest().body("Already following this user.");
+        }
+        registeredUserService.followUser(followerId, followedId);
+        return ResponseEntity.ok("Successfully followed the user.");
+    }
 
-
-    /*@GetMapping("/registered-users")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<RegisteredUserDTO>> getRegisteredUsers() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println("User: " + authentication.getName() + " with roles: " + authentication.getAuthorities());
-
-        // Mapiramo RegisteredUser na RegisteredUserDTO
-        List<RegisteredUserDTO> registeredUsers = registeredUserService.findAll()
-                .stream()
-                .map(user -> new RegisteredUserDTO(
-                        user.getFirstName(),
-                        user.getLastName(),
-                        user.getEmail(),
-                        user.getPosts().size(),
-                        user.getFollowing().size(),
-                        user.getFollowersCount()))  // Dodajte ovde šesti parametar
-                .collect(Collectors.toList());
-
-
-        return ResponseEntity.ok(registeredUsers);
+    @DeleteMapping("/{followerId}/unfollow/{followedId}")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public ResponseEntity<String> unfollowUser(
+            @PathVariable Long followerId,
+            @PathVariable Long followedId) {
+        if (!registeredUserService.isAlreadyFollowing(followerId, followedId)) {
+            return ResponseEntity.badRequest().body("Not following this user.");
+        }
+        registeredUserService.unfollowUser(followerId, followedId);
+        return ResponseEntity.ok("Successfully unfollowed the user.");
     }*/
+
+    /*@PostMapping("/{followerUsername}/follow/{followedUsername}")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public ResponseEntity<String> followUserByUsername(
+            @PathVariable String followerUsername,
+            @PathVariable String followedUsername) {
+
+        Long followerId = registeredUserService.findUserIdByUsername(followerUsername);
+        Long followedId = registeredUserService.findUserIdByUsername(followedUsername);
+
+        if (followerId == null || followedId == null) {
+            return ResponseEntity.badRequest().body("User not found.");
+        }
+
+        if (registeredUserService.isAlreadyFollowing(followerId, followedId)) {
+            return ResponseEntity.badRequest().body("Already following this user.");
+        }
+
+        registeredUserService.followUser(followerId, followedId);
+        return ResponseEntity.ok("Successfully followed the user.");
+    }
+
+
+    @GetMapping("/me")
+    public ResponseEntity<RegisteredUser> getCurrentUser(@RequestHeader("Authorization") String token) {
+        // Dobijanje trenutnog korisnika sa SecurityContext-a
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // Vaša logika da dobijete korisnika na osnovu username-a
+        RegisteredUser currentUser = registeredUserService.getCurrentUserByUsername(username);
+
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        return ResponseEntity.ok(currentUser);
+    }
+
+
+    @DeleteMapping("/{followerUsername}/unfollow/{followedUsername}")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public ResponseEntity<String> unfollowUserByUsername(
+            @PathVariable String followerUsername,
+            @PathVariable String followedUsername) {
+
+        Long followerId = registeredUserService.findUserIdByUsername(followerUsername);
+        Long followedId = registeredUserService.findUserIdByUsername(followedUsername);
+
+        if (followerId == null || followedId == null) {
+            return ResponseEntity.badRequest().body("User not found.");
+        }
+
+        if (!registeredUserService.isAlreadyFollowing(followerId, followedId)) {
+            return ResponseEntity.badRequest().body("Not following this user.");
+        }
+
+        registeredUserService.unfollowUser(followerId, followedId);
+        return ResponseEntity.ok("Successfully unfollowed the user.");
+    }*/
+
+    @PostMapping("/{followerId}/follow/{followedUsername}")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public ResponseEntity<String> followUserByUsername(
+            @PathVariable Long followerId,
+            @PathVariable String followedUsername) {
+
+        Long followedId = registeredUserService.findUserIdByUsername(followedUsername);
+
+        if (followerId == null || followedId == null) {
+            return ResponseEntity.badRequest().body("User not found.");
+        }
+
+        if (registeredUserService.isAlreadyFollowing(followerId, followedId)) {
+            return ResponseEntity.badRequest().body("Already following this user.");
+        }
+
+        registeredUserService.followUser(followerId, followedId);
+        return ResponseEntity.ok("Successfully followed the user.");
+    }
+
+    @DeleteMapping("/{followerId}/unfollow/{followedUsername}")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public ResponseEntity<String> unfollowUserByUsername(
+            @PathVariable Long followerId,
+            @PathVariable String followedUsername) {
+
+        Long followedId = registeredUserService.findUserIdByUsername(followedUsername);
+
+        if (followerId == null || followedId == null) {
+            return ResponseEntity.badRequest().body("User not found.");
+        }
+
+        if (!registeredUserService.isAlreadyFollowing(followerId, followedId)) {
+            return ResponseEntity.badRequest().body("Not following this user.");
+        }
+
+        registeredUserService.unfollowUser(followerId, followedId);
+        return ResponseEntity.ok("Successfully unfollowed the user.");
+    }
+
+    /*@GetMapping("/me")
+    public ResponseEntity<RegisteredUser> getCurrentUser(@RequestHeader("Authorization") String token) {
+        // Dobijanje trenutnog korisnika sa SecurityContext-a
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // Vaša logika da dobijete korisnika na osnovu username-a
+        RegisteredUser currentUser = registeredUserService.getCurrentUserByUsername(username);
+
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        return ResponseEntity.ok(currentUser);
+    }*/
+
+    @GetMapping("/me")
+    public ResponseEntity<RegisteredUser> getCurrentUser(@RequestHeader("Authorization") String token) {
+        // Get the username from the SecurityContext (after the token has been parsed by the filter)
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        if (username == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        // Get the current user based on the username
+        RegisteredUser currentUser = registeredUserService.getCurrentUserByUsername(username);
+
+        if (currentUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        return ResponseEntity.ok(currentUser);
+    }
+
+
+
+
+
+
 
     @GetMapping("/registered-users")
     @PreAuthorize("hasRole('ADMIN')")
@@ -77,157 +217,6 @@ public class RegisteredUserController {
         return ResponseEntity.ok(dtoPage);
     }
 
-
-    /*@GetMapping("/searchReg")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<RegisteredUserDTO>> searchRegisteredUsers(
-            @RequestParam(required = false) String firstName,
-            @RequestParam(required = false) String lastName,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) Integer minPosts,
-            @RequestParam(required = false) Integer maxPosts,
-            @RequestParam(required = false) String sortBy, // Koristimo String za sortiranje (email ili followingCount)
-            @RequestParam(required = false) String sortOrder, // Dodajemo parametar za redosled (asc ili desc)
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
-
-        // Dohvatanje svih korisnika
-        List<RegisteredUser> users = registeredUserService.findAll();
-
-        // Filtriranje korisnika po parametrima (isto kao ranije)
-        if (firstName != null && !firstName.isEmpty()) {
-            users = users.stream()
-                    .filter(user -> user.getFirstName().equalsIgnoreCase(firstName))
-                    .collect(Collectors.toList());
-        }
-        if (lastName != null && !lastName.isEmpty()) {
-            users = users.stream()
-                    .filter(user -> user.getLastName().equalsIgnoreCase(lastName))
-                    .collect(Collectors.toList());
-        }
-        if (email != null && !email.isEmpty()) {
-            users = users.stream()
-                    .filter(user -> user.getEmail().equalsIgnoreCase(email))
-                    .collect(Collectors.toList());
-        }
-        if (minPosts != null && maxPosts != null) {
-            users = users.stream()
-                    .filter(user -> user.getPosts().size() >= minPosts && user.getPosts().size() <= maxPosts)
-                    .collect(Collectors.toList());
-        } else if (minPosts != null) {
-            users = users.stream()
-                    .filter(user -> user.getPosts().size() >= minPosts)
-                    .collect(Collectors.toList());
-        } else if (maxPosts != null) {
-            users = users.stream()
-                    .filter(user -> user.getPosts().size() <= maxPosts)
-                    .collect(Collectors.toList());
-        }
-
-        // Sortiranje na osnovu izabranog atributa i redosleda
-        Sort sort = Sort.unsorted(); // Početni sortirani objekt
-
-
-        // Implementacija paginacije sa sortiranjem
-        Pageable pageable = PageRequest.of(page, size, sort);
-
-        // Pretvaranje korisnika u Page objekat sa paginacijom i sortiranjem
-        int start = Math.min(page * size, users.size());
-        int end = Math.min((page + 1) * size, users.size());
-        List<RegisteredUserDTO> pagedUsers = users.subList(start, end).stream()
-                .map(user -> new RegisteredUserDTO(
-                        user.getFirstName(),
-                        user.getLastName(),
-                        user.getEmail(),
-                        user.getPosts().size(),
-                        user.getFollowers().size(),
-                        user.getFollowing().size()))
-                .collect(Collectors.toList());
-
-        // Kreiranje PageImpl sa paginacijom
-        Page<RegisteredUserDTO> pageResult = new PageImpl<>(pagedUsers, pageable, users.size());
-
-        return ResponseEntity.ok(pageResult);
-    }*/
-
-    /*@GetMapping("/searchReg")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Page<RegisteredUserDTO>> searchRegisteredUsers(
-            @RequestParam(required = false) String firstName,
-            @RequestParam(required = false) String lastName,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) Integer minPosts,
-            @RequestParam(required = false) Integer maxPosts,
-            @RequestParam(defaultValue = "email") String sortBy, // Default sortiranje
-            @RequestParam(defaultValue = "asc") String sortOrder, // Default redosled
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size) {
-
-        // Dohvatanje svih korisnika (ovo možeš povezati sa repozitorijumom)
-        List<RegisteredUser> users = registeredUserService.findAll();
-
-        // Filtriranje
-        if (firstName != null && !firstName.isEmpty()) {
-            users = users.stream()
-                    .filter(user -> user.getFirstName().equalsIgnoreCase(firstName))
-                    .collect(Collectors.toList());
-        }
-        if (lastName != null && !lastName.isEmpty()) {
-            users = users.stream()
-                    .filter(user -> user.getLastName().equalsIgnoreCase(lastName))
-                    .collect(Collectors.toList());
-        }
-        if (email != null && !email.isEmpty()) {
-            users = users.stream()
-                    .filter(user -> user.getEmail().equalsIgnoreCase(email))
-                    .collect(Collectors.toList());
-        }
-        if (minPosts != null) {
-            users = users.stream()
-                    .filter(user -> user.getPosts().size() >= minPosts)
-                    .collect(Collectors.toList());
-        }
-        if (maxPosts != null) {
-            users = users.stream()
-                    .filter(user -> user.getPosts().size() <= maxPosts)
-                    .collect(Collectors.toList());
-        }
-
-        // Sortiranje
-        Comparator<RegisteredUser> comparator;
-        if (sortBy.equals("email")) {
-            comparator = Comparator.comparing(RegisteredUser::getEmail, String.CASE_INSENSITIVE_ORDER);
-        } else if (sortBy.equals("followingCount")) {
-            comparator = Comparator.comparingInt(user -> user.getFollowing().size());
-        } else {
-            // Default sortiranje po email-u ako je sortBy nevalidan
-            comparator = Comparator.comparing(RegisteredUser::getEmail, String.CASE_INSENSITIVE_ORDER);
-        }
-
-        if (sortOrder.equalsIgnoreCase("desc")) {
-            comparator = comparator.reversed();
-        }
-
-        users.sort(comparator);
-
-        // Paginacija
-        int start = Math.min(page * size, users.size());
-        int end = Math.min((page + 1) * size, users.size());
-        List<RegisteredUserDTO> pagedUsers = users.subList(start, end).stream()
-                .map(user -> new RegisteredUserDTO(
-                        user.getFirstName(),
-                        user.getLastName(),
-                        user.getEmail(),
-                        user.getPosts().size(),
-                        user.getFollowers().size(),
-                        user.getFollowing().size()))
-                .collect(Collectors.toList());
-
-        // Kreiranje PageImpl objekta
-        Page<RegisteredUserDTO> pageResult = new PageImpl<>(pagedUsers, PageRequest.of(page, size), users.size());
-
-        return ResponseEntity.ok(pageResult);
-    }*/
 
     @GetMapping("/searchReg")
     @PreAuthorize("hasRole('ADMIN')")
