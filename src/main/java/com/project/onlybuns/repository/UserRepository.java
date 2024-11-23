@@ -17,6 +17,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByUsername(String username); // Proverava da li korisničko ime već postoji
     boolean existsByEmail(String email);
 
+    List<User> findByIsActiveFalseAndRegistrationDateBetween(LocalDateTime startDate, LocalDateTime endDate);
+
     List<User> findByFirstNameContainingOrLastNameContainingOrEmailContaining(
             String firstName, String lastName, String email);
     List<User> findByPostsCountBetween(int min, int max);
@@ -28,4 +30,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     //RegisteredUser findByUsername(String username);
     Optional<RegisteredUser> findRegisteredUserByUsername(String username); // Vraća Optional<RegisteredUser>
 
+    List<User> findByIsActiveFalse();
 }
