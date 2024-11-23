@@ -14,8 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class RegisteredUserService {
@@ -209,10 +211,60 @@ public class RegisteredUserService {
         return user.getId();
     }
 
+    public boolean isAlreadyFollowing1(String followerUsername, String followedUsername) {
+        // Pronalazak korisnika na osnovu korisničkog imena
+        RegisteredUser follower = findByUsername(followerUsername);
+        RegisteredUser followed = findByUsername(followedUsername);
+
+        // Ako bilo koji korisnik nije pronađen, ne može biti praćenja
+        if (follower == null || followed == null) {
+            return false;
+        }
+
+        // Koristi postojeću metodu koja proverava praćenje na osnovu ID-jeva
+        return isAlreadyFollowing(follower.getId(), followed.getId());
+    }
+
     public RegisteredUser getCurrentUserByUsername(String username) {
         Optional<RegisteredUser> optionalUser = registeredUserRepository.findByUsername(username);
 
         // Provera da li korisnik postoji, inače vraća izuzetak
         return optionalUser.orElseThrow(() -> new UserNotFoundException("User not found with username: " + username));
     }
+
+
+    public RegisteredUser findByUsername(String username) {
+        return registeredUserRepository.findByUsername(username)
+                .orElse(null);
+    }
+
+    public Collection<RegisteredUser> getFollowers(String username) {
+        RegisteredUser user = findByUsername(username);
+
+        if (user == null) {
+            throw new IllegalArgumentException("User with username " + username + " not found.");
+        }
+
+        return user.getFollowers()
+                .stream()
+                .map(Follow::getFollower) // Pretpostavka da Follow ima metodu getFollower()
+                .collect(Collectors.toList());
+    }
+
+    public Collection<RegisteredUser> getFollowing(String username) {
+        // Pronađi korisnika po username
+        RegisteredUser user = findByUsername(username);
+
+        // Proveri da li korisnik postoji
+        if (user == null) {
+            throw new IllegalArgumentException("User with username " + username + " not found.");
+        }
+
+        // Dohvati korisnike koje trenutni korisnik prati
+        return user.getFollowing()
+                .stream()
+                .map(Follow::getFollowed) // Pretpostavka da Follow ima metodu getFollowed()
+                .collect(Collectors.toList());
+    }
+
 }

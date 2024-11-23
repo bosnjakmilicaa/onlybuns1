@@ -1,6 +1,7 @@
 package com.project.onlybuns.repository;
 
 import com.project.onlybuns.model.RegisteredUser;
+import com.project.onlybuns.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -23,4 +24,6 @@ public interface RegisteredUserRepository extends JpaRepository<RegisteredUser, 
             String firstName, String lastName, String email, Pageable pageable);
 
     Page<RegisteredUser> findByPostsCountBetween(int min, int max, Pageable pageable);
+
+
 }

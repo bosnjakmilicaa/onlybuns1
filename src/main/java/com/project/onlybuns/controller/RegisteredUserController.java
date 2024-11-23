@@ -1,5 +1,6 @@
 package com.project.onlybuns.controller;
 import com.project.onlybuns.DTO.RegisteredUserDTO;
+import com.project.onlybuns.DTO.UserConnectionsDTO;
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.service.RegisteredUserService;
 import com.project.onlybuns.service.UserService;
@@ -29,193 +30,49 @@ public class RegisteredUserController {
         this.registeredUserService1 = registeredUserService1;
 
     }
-    /*@PostMapping("/{followerId}/follow/{followedId}")
+
+    @GetMapping("/{username}/connections")
     @PreAuthorize("hasRole('REGISTERED')")
-    public ResponseEntity<String> followUser(
-            @PathVariable Long followerId,
-            @PathVariable Long followedId) {
-        if (registeredUserService.isAlreadyFollowing(followerId, followedId)) {
-            return ResponseEntity.badRequest().body("Already following this user.");
-        }
-        registeredUserService.followUser(followerId, followedId);
-        return ResponseEntity.ok("Successfully followed the user.");
-    }
+    public ResponseEntity<?> getUserConnections(@PathVariable String username) {
 
-    @DeleteMapping("/{followerId}/unfollow/{followedId}")
-    @PreAuthorize("hasRole('REGISTERED')")
-    public ResponseEntity<String> unfollowUser(
-            @PathVariable Long followerId,
-            @PathVariable Long followedId) {
-        if (!registeredUserService.isAlreadyFollowing(followerId, followedId)) {
-            return ResponseEntity.badRequest().body("Not following this user.");
-        }
-        registeredUserService.unfollowUser(followerId, followedId);
-        return ResponseEntity.ok("Successfully unfollowed the user.");
-    }*/
-
-    /*@PostMapping("/{followerUsername}/follow/{followedUsername}")
-    @PreAuthorize("hasRole('REGISTERED')")
-    public ResponseEntity<String> followUserByUsername(
-            @PathVariable String followerUsername,
-            @PathVariable String followedUsername) {
-
-        Long followerId = registeredUserService.findUserIdByUsername(followerUsername);
-        Long followedId = registeredUserService.findUserIdByUsername(followedUsername);
-
-        if (followerId == null || followedId == null) {
-            return ResponseEntity.badRequest().body("User not found.");
-        }
-
-        if (registeredUserService.isAlreadyFollowing(followerId, followedId)) {
-            return ResponseEntity.badRequest().body("Already following this user.");
-        }
-
-        registeredUserService.followUser(followerId, followedId);
-        return ResponseEntity.ok("Successfully followed the user.");
-    }
-
-
-    @GetMapping("/me")
-    public ResponseEntity<RegisteredUser> getCurrentUser(@RequestHeader("Authorization") String token) {
-        // Dobijanje trenutnog korisnika sa SecurityContext-a
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        // Vaša logika da dobijete korisnika na osnovu username-a
-        RegisteredUser currentUser = registeredUserService.getCurrentUserByUsername(username);
-
-        if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
-
-        return ResponseEntity.ok(currentUser);
-    }
-
-
-    @DeleteMapping("/{followerUsername}/unfollow/{followedUsername}")
-    @PreAuthorize("hasRole('REGISTERED')")
-    public ResponseEntity<String> unfollowUserByUsername(
-            @PathVariable String followerUsername,
-            @PathVariable String followedUsername) {
-
-        Long followerId = registeredUserService.findUserIdByUsername(followerUsername);
-        Long followedId = registeredUserService.findUserIdByUsername(followedUsername);
-
-        if (followerId == null || followedId == null) {
-            return ResponseEntity.badRequest().body("User not found.");
-        }
-
-        if (!registeredUserService.isAlreadyFollowing(followerId, followedId)) {
-            return ResponseEntity.badRequest().body("Not following this user.");
-        }
-
-        registeredUserService.unfollowUser(followerId, followedId);
-        return ResponseEntity.ok("Successfully unfollowed the user.");
-    }*/
-
-    /*@PostMapping("/{followerId}/follow/{followedUsername}")
-    @PreAuthorize("hasRole('REGISTERED')")
-    public ResponseEntity<String> followUserByUsername(
-            @PathVariable Long followerId,
-            @PathVariable String followedUsername) {
-
+        // Dobavljanje trenutnog korisnika iz SecurityContext-a
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println("User: " + authentication.getName() + " with roles: " + authentication.getAuthorities());
+        String loggedInUsername = authentication.getName();
 
-        // Provera da li je korisnik ulogovan i da li ima ulogu 'REGISTERED'
+        // Provera autentifikacije
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated.");
         }
 
-        Long followedId = registeredUserService.findUserIdByUsername(followedUsername);
-
-        if (followerId == null || followedId == null) {
-            return ResponseEntity.badRequest().body("User not found.");
+        // Provera da li ciljani korisnik postoji
+        RegisteredUser targetUser = registeredUserService.findByUsername(username);
+        if (targetUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Target user not found.");
         }
 
-        if (registeredUserService.isAlreadyFollowing(followerId, followedId)) {
-            return ResponseEntity.badRequest().body("Already following this user.");
+        // Provera da li ulogovani korisnik prati ciljanog korisnika
+        boolean isFollowing = registeredUserService.isAlreadyFollowing1(loggedInUsername, username);
+        if (!isFollowing) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can only view connections of users you follow.");
         }
 
-        registeredUserService.followUser(followerId, followedId);
-        return ResponseEntity.ok("Successfully followed the user.");
-    }*/
-    /*@PostMapping("/{followerId}/follow/{followedUsername}")
-    @PreAuthorize("hasRole('REGISTERED')")
-    public ResponseEntity<String> followUserByUsername(
-            @PathVariable Long followerId,
-            @PathVariable String followedUsername) {
+        // Dohvatanje pratilaca ciljanog korisnika
+        List<String> followers = registeredUserService.getFollowers(username)
+                .stream()
+                .map(RegisteredUser::getUsername) // Mapiraj na korisnička imena
+                .collect(Collectors.toList());
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName(); // Trenutni username
+        // Dohvatanje korisnika koje ciljani korisnik prati
+        List<String> following = registeredUserService.getFollowing(username)
+                .stream()
+                .map(RegisteredUser::getUsername) // Mapiraj na korisnička imena
+                .collect(Collectors.toList());
 
-        System.out.println("User: " + username + " with roles: " + authentication.getAuthorities());
-
-        // Provera da li je korisnik ulogovan i da li ima ulogu 'REGISTERED'
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated.");
-        }
-
-        // Dobijanje ID-a korisnika na osnovu username-a
-        Long loggedInUserId = registeredUserService.findUserIdByUsername(username);
-
-        // Ako ID-u ulogovanog korisnika ne odgovara followerId, vraćamo grešku
-        if (!followerId.equals(loggedInUserId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You cannot follow as another user.");
-        }
-
-        // Dobijanje ID-a korisnika kojeg želimo da pratimo
-        Long followedId = registeredUserService.findUserIdByUsername(followedUsername);
-
-        if (followedId == null) {
-            return ResponseEntity.badRequest().body("User to follow not found.");
-        }
-
-        if (registeredUserService.isAlreadyFollowing(followerId, followedId)) {
-            return ResponseEntity.badRequest().body("Already following this user.");
-        }
-
-        registeredUserService.followUser(followerId, followedId);
-        return ResponseEntity.ok("Successfully followed the user.");
+        // Formiranje odgovora
+        return ResponseEntity.ok(new UserConnectionsDTO(followers, following));
     }
 
 
-
-    @DeleteMapping("/{followerId}/unfollow/{followedUsername}")
-    @PreAuthorize("hasRole('REGISTERED')")
-    public ResponseEntity<String> unfollowUserByUsername(
-            @PathVariable Long followerId,
-            @PathVariable String followedUsername) {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName(); // Trenutni username
-
-        // Provera da li je korisnik ulogovan i da li ima ulogu 'REGISTERED'
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated.");
-        }
-
-        // Dobijanje ID-a korisnika na osnovu username-a
-        Long loggedInUserId = registeredUserService.findUserIdByUsername(username);
-
-        // Ako ID ulogovanog korisnika ne odgovara followerId, vraćamo grešku
-        if (!followerId.equals(loggedInUserId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You cannot unfollow as another user.");
-        }
-
-        // Dobijanje ID-a korisnika kojeg želimo da otpratimo
-        Long followedId = registeredUserService.findUserIdByUsername(followedUsername);
-
-        if (followedId == null) {
-            return ResponseEntity.badRequest().body("User to unfollow not found.");
-        }
-
-        if (!registeredUserService.isAlreadyFollowing(followerId, followedId)) {
-            return ResponseEntity.badRequest().body("Not following this user.");
-        }
-
-        registeredUserService.unfollowUser(followerId, followedId);
-        return ResponseEntity.ok("Successfully unfollowed the user.");
-    }*/
 
     @PostMapping("/{followerUsername}/follow/{followedUsername}")
     @PreAuthorize("hasRole('REGISTERED')")
