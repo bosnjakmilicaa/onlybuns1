@@ -137,7 +137,9 @@ public class RegisteredUserService {
         registeredUserRepository.save(followed);
     }*/
 
-    @Transactional
+
+    //readonly false  -> po defoltu je
+    @Transactional()
     public void followUser(Long followerId, Long followedId) {
 
         if (followerId.equals(followedId)) {
@@ -169,11 +171,12 @@ public class RegisteredUserService {
         followLogRepository.save(followLog);
 
         // Simulacija sporog izvršavanja
-        try {
+        /*try {
             Thread.sleep(2000); // Pauza od 2 sekunde
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-        }
+        }*/
+
 
         synchronized (this) {
             followed.setFollowersCount(followed.getFollowersCount() + 1);
@@ -183,7 +186,6 @@ public class RegisteredUserService {
         registeredUserRepository.save(follower);
         registeredUserRepository.save(followed);
     }
-
 
 
     public void unfollowUser(Long followerId, Long followedId) {

@@ -1,5 +1,5 @@
 package com.project.onlybuns.service;
-/*
+
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.repository.RegisteredUserRepository;
 import org.junit.jupiter.api.Assertions;
@@ -61,12 +61,12 @@ public class RegisteredUserServiceTest {
         RegisteredUser follower2 = registeredUserRepository.findById(followerId2).orElseThrow();
         RegisteredUser followed = registeredUserRepository.findById(followedId).orElseThrow();
 
-        System.out.println("Follower 1's following count: " + follower1.getFollowing().size());
-        System.out.println("Follower 2's following count: " + follower2.getFollowing().size());
+        System.out.println("Follower 4's following count: " + follower1.getFollowing().size());
+        System.out.println("Follower 5's following count: " + follower2.getFollowing().size());
         System.out.println("Followed's followers count: " + followed.getFollowers().size());
 
         Assertions.assertEquals(3, follower1.getFollowing().size());
         Assertions.assertEquals(3, follower2.getFollowing().size());
         Assertions.assertEquals(2, followed.getFollowers().size());
     }
-}*/
+}
