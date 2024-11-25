@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -274,6 +275,64 @@ public class PostController {
 
         return postsWithUsernamesAndComments;
     }*/
+
+    @GetMapping("/followedPosts")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public List<Map<String, Object>> getFollowedUsersPosts(Authentication authentication) {
+        // Izvlačenje korisničkog imena iz autentifikacije
+        String loggedInUsername = authentication.getName();
+
+        // Pronalaženje registrovanog korisnika
+        RegisteredUser loggedInUser = registeredUserRepository.findByUsername(loggedInUsername)
+                .orElseThrow(() -> new IllegalArgumentException("Logged-in user not found"));
+
+        // Izvlačenje ID-ova praćenih korisnika
+        Set<Long> followedUserIds = loggedInUser.getFollowing().stream()
+                .map(follow -> follow.getFollowed().getId())
+                .collect(Collectors.toSet());
+
+        // Filtriranje postova praćenih korisnika
+        List<Post> followedUserPosts = postService.findAllActivePosts().stream()
+                .filter(post -> post.getUser() != null && followedUserIds.contains(post.getUser().getId()))
+                .collect(Collectors.toList());
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
+
+        // Kreiranje liste postova sa detaljima
+        List<Map<String, Object>> postsWithUsernamesAndComments = new ArrayList<>();
+        for (Post post : followedUserPosts) {
+            Map<String, Object> postData = new HashMap<>();
+            postData.put("id", post.getId());
+            postData.put("imageUrl", post.getImageUrl());
+            postData.put("description", post.getDescription());
+            postData.put("username", post.getUser() != null ? post.getUser().getUsername() : "Unknown");
+            postData.put("countLikes", post.getLikesCount());
+            String formattedDate = post.getCreatedAt() != null ? post.getCreatedAt().format(formatter) : "Unknown date";
+            postData.put("createdAt", formattedDate);
+
+            List<Map<String, Object>> commentsData = new ArrayList<>();
+            for (Comment comment : post.getComments()) {
+                Map<String, Object> commentData = new HashMap<>();
+                commentData.put("id", comment.getId());
+                commentData.put("content", comment.getContent());
+                commentData.put("username", comment.getUser() != null ? comment.getUser().getUsername() : "Unknown");
+                String formattedCommentDate = comment.getCreatedAt() != null ? comment.getCreatedAt().format(formatter) : "Unknown date";
+                commentData.put("createdAt", formattedCommentDate);
+                commentsData.add(commentData);
+            }
+            postData.put("comments", commentsData);
+
+            postsWithUsernamesAndComments.add(postData);
+        }
+
+        return postsWithUsernamesAndComments;
+    }
+
+
+
+
+
+
     @GetMapping("/allPosts")
     public List<Map<String, Object>> getAllPosts(@AuthenticationPrincipal UserProfile userDetails) {
         // Dobavljanje svih objava

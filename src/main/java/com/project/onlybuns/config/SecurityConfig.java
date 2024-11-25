@@ -33,6 +33,7 @@ public class SecurityConfig {
                 .requestMatchers("/registered-users","/searchReg").hasRole("ADMIN") // Omogućava pristup samo adminima
                 .requestMatchers("/posts/my-posts").hasRole("REGISTERED")
                 .requestMatchers("/posts/create").hasRole("REGISTERED")
+                .requestMatchers("/posts/followedPosts").hasRole("REGISTERED")
                 .requestMatchers("/{followerUsername}/follow/{followedUsername}").hasRole("REGISTERED")
                 .requestMatchers("/{followerUsername}/unfollow/{followedUsername}").hasRole("REGISTERED")
                 .anyRequest().permitAll()
