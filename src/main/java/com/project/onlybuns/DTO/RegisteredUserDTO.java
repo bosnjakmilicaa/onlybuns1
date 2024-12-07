@@ -4,15 +4,29 @@ public class RegisteredUserDTO {
     private String firstName;
     private String lastName;
     private String email;
+
+    private  String username;
     private int postsCount;
     private int followersCount;
 
     private int followingCount;
+    private String confirmPassword;
 
     public RegisteredUserDTO(String firstName, String lastName, String email, int postsCount, int followersCount, int followingCount) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
+        this.postsCount = postsCount;
+        this.followersCount = followersCount;
+        this.followingCount = followingCount;
+
+    }
+
+    public RegisteredUserDTO(String firstName, String lastName, String email,String username, int postsCount, int followersCount, int followingCount) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.username = username;
         this.postsCount = postsCount;
         this.followersCount = followersCount;
         this.followingCount = followingCount;
@@ -40,6 +54,10 @@ public class RegisteredUserDTO {
         return email;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
     public int getPostsCount() {
         return postsCount;
     }
@@ -64,6 +82,9 @@ public class RegisteredUserDTO {
     public void setPostsCount(int postsCount) {
 
         this.postsCount = postsCount;
+    }
+    public void setConfirmPassword(String confirmPassword) {
+        this.confirmPassword = confirmPassword;
     }
 
     public void setFollowersCount(int followersCount) {

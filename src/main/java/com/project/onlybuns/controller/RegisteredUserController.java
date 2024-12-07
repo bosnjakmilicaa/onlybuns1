@@ -4,6 +4,8 @@ import com.project.onlybuns.DTO.UserConnectionsDTO;
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.service.RegisteredUserService;
 import com.project.onlybuns.service.UserService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
@@ -25,7 +27,7 @@ public class RegisteredUserController {
     private final UserService registeredUserService1;
 
     @Autowired
-    public RegisteredUserController(RegisteredUserService registeredUserService,UserService registeredUserService1) {
+    public RegisteredUserController(RegisteredUserService registeredUserService, UserService registeredUserService1) {
         this.registeredUserService = registeredUserService;
         this.registeredUserService1 = registeredUserService1;
 
@@ -73,7 +75,6 @@ public class RegisteredUserController {
     }
 
 
-
     @PostMapping("/{followerUsername}/follow/{followedUsername}")
     @PreAuthorize("hasRole('REGISTERED')")
     public ResponseEntity<String> followUserByUsername(
@@ -114,6 +115,7 @@ public class RegisteredUserController {
         registeredUserService.followUser(followerId, followedId);
         return ResponseEntity.ok("Successfully followed the user.");
     }
+
     @DeleteMapping("/{followerUsername}/unfollow/{followedUsername}")
     @PreAuthorize("hasRole('REGISTERED')")
     public ResponseEntity<String> unfollowUserByUsername(
@@ -155,6 +157,34 @@ public class RegisteredUserController {
         registeredUserService.unfollowUser(followerId, followedId);
         return ResponseEntity.ok("Successfully unfollowed the user.");
     }
+
+
+
+    @GetMapping("/allRegisteredUsers")
+    public ResponseEntity<Page<RegisteredUserDTO>> getRegisteredUsers1(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("User: " + authentication.getName() + " with roles: " + authentication.getAuthorities());
+
+        // Dohvati korisnike koristeći paginaciju
+        Page<RegisteredUser> usersPage = registeredUserService.findAll(PageRequest.of(page, size));
+
+        // Mapiranje na DTO
+        Page<RegisteredUserDTO> dtoPage = usersPage.map(user -> new RegisteredUserDTO(
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getUsername(),
+                user.getPosts().size(),
+                user.getFollowing().size(),
+                user.getFollowers().size()
+        ));
+
+        return ResponseEntity.ok(dtoPage);
+    }
+
 
 
 
@@ -265,15 +295,11 @@ public class RegisteredUserController {
     }
 
 
-
-
-
     @GetMapping("/all")
     public ResponseEntity<List<RegisteredUser>> getAllUsers() {
         List<RegisteredUser> users = registeredUserService.findAll();
         return ResponseEntity.ok(users);
     }
-
 
 
     @GetMapping("/{id}")
@@ -294,4 +320,33 @@ public class RegisteredUserController {
         registeredUserService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/username/{nadjiki}")
+    public ResponseEntity<RegisteredUserDTO> getUserProfile(
+            @PathVariable String nadjiki,
+            @RequestHeader("Authorization") String authorizationHeader){
+        // Debugging: print the received username
+        System.out.println("Fetching profile for username: " + nadjiki);
+
+        // Look up the user by username
+        RegisteredUser user = registeredUserService.findByUsername(nadjiki);
+        if (user == null) {
+            // User not found, return a 404
+            System.out.println("User not found: " + nadjiki);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        // Construct DTO and return response with user details
+        RegisteredUserDTO userDTO = new RegisteredUserDTO(
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+              // user.getAddress(), // Assuming this field exists
+                user.getFollowing().size(),  // Assuming 'following' is a collection
+                user.getFollowers().size()   // Assuming 'followers' is a collection
+        );
+
+        return ResponseEntity.ok(userDTO);
+    }
+
 }

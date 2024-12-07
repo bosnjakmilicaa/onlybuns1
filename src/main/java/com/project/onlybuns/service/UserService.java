@@ -141,4 +141,28 @@ public class UserService {
     /*public RegisteredUser findByUsername(String username) {
         return userRepository.findByUsername(username);
     }*/
+
+    public boolean verifyOldPassword(String username, String oldPassword) {
+        RegisteredUser user = registeredUserRepository.findByUsername2(username);
+        if (user != null) {
+            return passwordEncoder.matches(oldPassword, user.getPassword());
+        }
+        return false;
+    }
+
+    public boolean updatePassword(String username, String newPassword) {
+        RegisteredUser user = registeredUserRepository.findByUsername2(username);
+        if (user != null) {
+            user.setPassword(passwordEncoder.encode(newPassword));  // Encrypt new password
+            userRepository.save(user);
+            return true;
+        }
+        return false;
+    }
+
+    public void changeEmail(String username,String email){
+        RegisteredUser user = registeredUserRepository.findByUsername2(username);
+        user.setEmail(email);
+        userRepository.save(user);
+    }
 }

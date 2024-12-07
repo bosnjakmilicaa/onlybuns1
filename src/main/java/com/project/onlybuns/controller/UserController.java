@@ -51,6 +51,11 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("{username}/{email}")
+    public ResponseEntity<Void> changeEmail(@PathVariable String username, @PathVariable String email){
+        userService.changeEmail(username, email);
+        return ResponseEntity.noContent().build();
+    }
     /*@GetMapping("/username/{username}")
     public ResponseEntity<RegisteredUser> getUserByUsername(@PathVariable String username) {
         RegisteredUser user = userService.findByUsername(username);

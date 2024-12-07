@@ -63,6 +63,7 @@ public class RegisteredUserService {
         return followRepository.existsByFollowerIdAndFollowedId(followerId, followedId);
     }
 
+
     /*public void followUser(Long followerId, Long followedId) {
         RegisteredUser follower = registeredUserRepository.findById(followerId)
                 .orElseThrow(() -> new IllegalArgumentException("Follower not found."));
