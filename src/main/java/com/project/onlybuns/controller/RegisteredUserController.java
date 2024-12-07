@@ -159,6 +159,32 @@ public class RegisteredUserController {
     }
 
 
+    @GetMapping("/allRegisteredUsers")
+    public ResponseEntity<Page<RegisteredUserDTO>> getRegisteredUsers1(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("User: " + authentication.getName() + " with roles: " + authentication.getAuthorities());
+
+        // Dohvati korisnike koristeći paginaciju
+        Page<RegisteredUser> usersPage = registeredUserService.findAll(PageRequest.of(page, size));
+
+        // Mapiranje na DTO
+        Page<RegisteredUserDTO> dtoPage = usersPage.map(user -> new RegisteredUserDTO(
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getUsername(),
+                user.getPosts().size(),
+                user.getFollowing().size(),
+                user.getFollowers().size()
+        ));
+
+        return ResponseEntity.ok(dtoPage);
+    }
+
+
 
     @GetMapping("/allRegisteredUsers")
     public ResponseEntity<Page<RegisteredUserDTO>> getRegisteredUsers1(
