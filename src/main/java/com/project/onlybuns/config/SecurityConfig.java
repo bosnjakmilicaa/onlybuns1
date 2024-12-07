@@ -36,6 +36,8 @@ public class SecurityConfig {
                 .requestMatchers("/posts/followedPosts").hasRole("REGISTERED")
                 .requestMatchers("/{followerUsername}/follow/{followedUsername}").hasRole("REGISTERED")
                 .requestMatchers("/{followerUsername}/unfollow/{followedUsername}").hasRole("REGISTERED")
+                .requestMatchers("/{username}/followers").hasRole("REGISTERED")
+                .requestMatchers("/{username}/following").hasRole("REGISTERED")
                 .anyRequest().permitAll()
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

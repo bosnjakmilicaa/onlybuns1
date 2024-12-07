@@ -16,7 +16,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -33,7 +35,7 @@ public class RegisteredUserController {
 
     }
 
-    @GetMapping("/{username}/connections")
+   /* @GetMapping("/{username}/connections")
     @PreAuthorize("hasRole('REGISTERED')")
     public ResponseEntity<?> getUserConnections(@PathVariable String username) {
 
@@ -72,7 +74,87 @@ public class RegisteredUserController {
 
         // Formiranje odgovora
         return ResponseEntity.ok(new UserConnectionsDTO(followers, following));
+    }*/
+
+    @GetMapping("/{username}/followers")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public ResponseEntity<?> getUserFollowers(@PathVariable String username) {
+
+        // Dobavljanje trenutnog korisnika iz SecurityContext-a
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String loggedInUsername = authentication.getName();
+
+        // Provera autentifikacije
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated.");
+        }
+
+        // Provera da li ciljani korisnik postoji
+        RegisteredUser targetUser = registeredUserService.findByUsername(username);
+        if (targetUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Target user not found.");
+        }
+
+        // Provera da li ulogovani korisnik prati ciljanog korisnika
+        boolean isFollowing = registeredUserService.isAlreadyFollowing1(loggedInUsername, username);
+        if (!isFollowing) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can only view followers of users you follow.");
+        }
+
+        // Dohvatanje pratilaca ciljanog korisnika
+        List<String> followers = registeredUserService.getFollowers(username)
+                .stream()
+                .map(RegisteredUser::getUsername) // Mapiraj na korisnička imena
+                .collect(Collectors.toList());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("followers", followers);
+        response.put("followersCount", followers.size()); // Dodavanje broja pratilaca
+
+        // Formiranje odgovora
+        return ResponseEntity.ok(followers);
     }
+
+    @GetMapping("/{username}/following")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public ResponseEntity<?> getUserFollowing(@PathVariable String username) {
+
+        // Dobavljanje trenutnog korisnika iz SecurityContext-a
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String loggedInUsername = authentication.getName();
+
+        // Provera autentifikacije
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated.");
+        }
+
+        // Provera da li ciljani korisnik postoji
+        RegisteredUser targetUser = registeredUserService.findByUsername(username);
+        if (targetUser == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Target user not found.");
+        }
+
+        // Provera da li ulogovani korisnik prati ciljanog korisnika
+        boolean isFollowing = registeredUserService.isAlreadyFollowing1(loggedInUsername, username);
+        if (!isFollowing) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can only view the users followed by those you follow.");
+        }
+
+        // Dohvatanje korisnika koje ciljani korisnik prati
+        List<String> following = registeredUserService.getFollowing(username)
+                .stream()
+                .map(RegisteredUser::getUsername) // Mapiraj na korisnička imena
+                .collect(Collectors.toList());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("following", following);
+        response.put("followingCount", following.size()); // Dodavanje broja pratilaca
+
+        // Formiranje odgovora
+        return ResponseEntity.ok(following);
+    }
+
+
 
 
     @PostMapping("/{followerUsername}/follow/{followedUsername}")
