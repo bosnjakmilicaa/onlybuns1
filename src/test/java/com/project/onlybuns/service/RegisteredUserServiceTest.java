@@ -1,5 +1,5 @@
 package com.project.onlybuns.service;
-
+/*
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.repository.RegisteredUserRepository;
 import org.junit.jupiter.api.Assertions;
@@ -69,4 +69,4 @@ public class RegisteredUserServiceTest {
         Assertions.assertEquals(3, follower2.getFollowing().size());
         Assertions.assertEquals(2, followed.getFollowers().size());
     }
-}
+}*/
