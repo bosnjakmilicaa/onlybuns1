@@ -2,6 +2,7 @@ package com.project.onlybuns.controller;
 import com.project.onlybuns.DTO.RegisteredUserDTO;
 import com.project.onlybuns.DTO.UserConnectionsDTO;
 import com.project.onlybuns.model.RegisteredUser;
+import com.project.onlybuns.model.User;
 import com.project.onlybuns.service.RegisteredUserService;
 import com.project.onlybuns.service.UserService;
 import io.jsonwebtoken.Claims;
@@ -15,10 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -75,6 +73,30 @@ public class RegisteredUserController {
         // Formiranje odgovora
         return ResponseEntity.ok(new UserConnectionsDTO(followers, following));
     }*/
+
+    @GetMapping("/users/{username}")
+    public ResponseEntity<RegisteredUser> getUserProfile(@PathVariable String username) {
+        Optional<User> optionalUser = registeredUserService1.findByUsername(username);
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();  // dobija se User objekat
+            RegisteredUser registeredUser = convertToRegisteredUser(user);  // konvertovanje u RegisteredUser
+            return ResponseEntity.ok(registeredUser);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    private RegisteredUser convertToRegisteredUser(User user) {
+        // Pretpostavljamo da je RegisteredUser tip koji želite da vratite
+        RegisteredUser registeredUser = new RegisteredUser();
+        registeredUser.setUsername(user.getUsername());
+        registeredUser.setFirstName(user.getFirstName());
+        registeredUser.setLastName(user.getLastName());
+        registeredUser.setEmail(user.getEmail());
+        return registeredUser;
+    }
+
+
 
     @GetMapping("/{username}/followers")
     @PreAuthorize("hasRole('REGISTERED')")
