@@ -24,6 +24,7 @@ VALUES
 INSERT INTO comments (post_id, user_id, content, created_at)
 VALUES
     (1, 7, 'com1', '2024-11-06 12:00:00'),
+    (1, 1, 'comment', '2024-11-06 12:00:00'),
     (1, 5, 'com2', '2024-11-06 11:00:00'),
     (2, 7, 'com1', '2024-11-05 09:00:00'),
     (1, 4, 'com3', '2024-11-06 08:00:00'),
