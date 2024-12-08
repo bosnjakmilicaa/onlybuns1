@@ -1,6 +1,8 @@
 package com.project.onlybuns.controller;
 import com.project.onlybuns.DTO.RegisteredUserDTO;
 import com.project.onlybuns.DTO.UserConnectionsDTO;
+import com.project.onlybuns.model.Comment;
+import com.project.onlybuns.model.Post;
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.model.User;
 import com.project.onlybuns.service.RegisteredUserService;
@@ -16,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,23 +41,51 @@ public class RegisteredUserController {
     public ResponseEntity<RegisteredUser> getUserProfile(@PathVariable String username) {
         Optional<User> optionalUser = registeredUserService1.findByUsername(username);
         if (optionalUser.isPresent()) {
-            User user = optionalUser.get();  // dobija se User objekat
-            RegisteredUser registeredUser = convertToRegisteredUser(user);  // konvertovanje u RegisteredUser
-            return ResponseEntity.ok(registeredUser);
+            User user = optionalUser.get();  // Dobijamo User objekat
+
+            // Proveravamo da li je User zapravo instanca RegisteredUser
+            if (user instanceof RegisteredUser) {
+                RegisteredUser registeredUser = (RegisteredUser) user;  // Castujemo User u RegisteredUser
+                RegisteredUser convertedUser = convertToRegisteredUser(registeredUser);  // Konvertujemo
+                return ResponseEntity.ok(convertedUser);
+            } else {
+                // Ako korisnik nije tipa RegisteredUser, možete obraditi ovu situaciju
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            }
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
-    private RegisteredUser convertToRegisteredUser(User user) {
-        // Pretpostavljamo da je RegisteredUser tip koji želite da vratite
-        RegisteredUser registeredUser = new RegisteredUser();
-        registeredUser.setUsername(user.getUsername());
-        registeredUser.setFirstName(user.getFirstName());
-        registeredUser.setLastName(user.getLastName());
-        registeredUser.setEmail(user.getEmail());
-        return registeredUser;
+    private RegisteredUser convertToRegisteredUser(RegisteredUser registeredUser) {
+        RegisteredUser newUser = new RegisteredUser();
+        newUser.setUsername(registeredUser.getUsername());
+        newUser.setFirstName(registeredUser.getFirstName());
+        newUser.setLastName(registeredUser.getLastName());
+        newUser.setEmail(registeredUser.getEmail());
+
+        // Lista koja će sadržati stvarne Post objekte
+        List<Post> posts = new ArrayList<>();
+
+        // Pretvaranje podataka u stvarne Post objekte
+        for (Post post : registeredUser.getPosts()) {
+            Post newPost = new Post();
+            newPost.setId(post.getId());
+            newPost.setImageUrl(post.getImageUrl());
+            newPost.setDescription(post.getDescription());
+            newPost.setUser(post.getUser());
+            newPost.setLikes(post.getLikes());
+            newPost.setComments(post.getComments());
+            newPost.setCreatedAt(post.getCreatedAt());
+
+            posts.add(newPost);
+        }
+
+        newUser.setPosts(posts);  // Setovanje stvarnih postova
+        return newUser;
     }
+
+
 
 
 
