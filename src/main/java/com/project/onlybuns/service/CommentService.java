@@ -5,6 +5,8 @@ import com.project.onlybuns.repository.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,5 +34,22 @@ public class CommentService {
 
     public void delete(Long id) {
         commentRepository.deleteById(id);
+    }
+    public long countCommentsForWeek() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfWeek = now.minus(1, ChronoUnit.WEEKS);
+        return commentRepository.findCommentsByDateRange(startOfWeek, now).size();
+    }
+
+    public long countCommentsForMonth() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfMonth = now.minus(1, ChronoUnit.MONTHS);
+        return commentRepository.findCommentsByDateRange(startOfMonth, now).size();
+    }
+
+    public long countCommentsForYear() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfYear = now.minus(1, ChronoUnit.YEARS);
+        return commentRepository.findCommentsByDateRange(startOfYear, now).size();
     }
 }

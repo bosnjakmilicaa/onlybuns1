@@ -33,46 +33,6 @@ public class RegisteredUserController {
 
     }
 
-   /* @GetMapping("/{username}/connections")
-    @PreAuthorize("hasRole('REGISTERED')")
-    public ResponseEntity<?> getUserConnections(@PathVariable String username) {
-
-        // Dobavljanje trenutnog korisnika iz SecurityContext-a
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String loggedInUsername = authentication.getName();
-
-        // Provera autentifikacije
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated.");
-        }
-
-        // Provera da li ciljani korisnik postoji
-        RegisteredUser targetUser = registeredUserService.findByUsername(username);
-        if (targetUser == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Target user not found.");
-        }
-
-        // Provera da li ulogovani korisnik prati ciljanog korisnika
-        boolean isFollowing = registeredUserService.isAlreadyFollowing1(loggedInUsername, username);
-        if (!isFollowing) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You can only view connections of users you follow.");
-        }
-
-        // Dohvatanje pratilaca ciljanog korisnika
-        List<String> followers = registeredUserService.getFollowers(username)
-                .stream()
-                .map(RegisteredUser::getUsername) // Mapiraj na korisnička imena
-                .collect(Collectors.toList());
-
-        // Dohvatanje korisnika koje ciljani korisnik prati
-        List<String> following = registeredUserService.getFollowing(username)
-                .stream()
-                .map(RegisteredUser::getUsername) // Mapiraj na korisnička imena
-                .collect(Collectors.toList());
-
-        // Formiranje odgovora
-        return ResponseEntity.ok(new UserConnectionsDTO(followers, following));
-    }*/
 
     @GetMapping("/users/{username}")
     public ResponseEntity<RegisteredUser> getUserProfile(@PathVariable String username) {

@@ -13,7 +13,7 @@ VALUES
 -- Insert posts
 INSERT INTO posts (is_deleted, user_id, description, image_url, created_at)
 VALUES
-    (false, 4, 'content1', '/images/4.jpeg', '2024-11-05 14:30:00'),
+    (false, 4, 'content1', '/images/4.jpeg', '2024-11-11 14:30:00'),
     (false, 5, 'content1', '/images/5.jpeg', '2024-11-04 10:00:00'),
     (false, 5, 'content2', '/images/7.jpeg', '2024-11-03 18:45:00'),
     (false, 5, 'content3', '/images/3.jpeg', '2024-11-02 09:20:00'),

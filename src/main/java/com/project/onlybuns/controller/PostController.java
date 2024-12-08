@@ -328,6 +328,16 @@ public class PostController {
         return postsWithUsernamesAndComments;
     }
 
+    @GetMapping("/stats")
+    public Map<String, Long> getPostStats() {
+        Map<String, Long> stats = new HashMap<>();
+        stats.put("weekly", postService.countPostsForWeek());
+        stats.put("monthly", postService.countPostsForMonth());
+        stats.put("yearly", postService.countPostsForYear());
+        return stats;
+    }
+
+
 
 
 

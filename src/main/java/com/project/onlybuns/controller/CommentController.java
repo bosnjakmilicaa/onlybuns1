@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/comments") // Base path for comment-related endpoints
@@ -24,6 +26,7 @@ public class CommentController {
         List<Comment> comments = commentService.findAll();
         return ResponseEntity.ok(comments);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Comment> getCommentById(@PathVariable Long id) {
@@ -43,4 +46,14 @@ public class CommentController {
         commentService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/stats")
+    public Map<String, Long> getCommentStats() {
+        Map<String, Long> stats = new HashMap<>();
+        stats.put("weekly", commentService.countCommentsForWeek());
+        stats.put("monthly", commentService.countCommentsForMonth());
+        stats.put("yearly", commentService.countCommentsForYear());
+        return stats;
+    }
+
 }
