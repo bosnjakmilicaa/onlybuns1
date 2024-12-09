@@ -1,11 +1,19 @@
 package com.project.onlybuns.controller;
 
 import com.project.onlybuns.model.Comment;
+import com.project.onlybuns.model.Post;
+import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.service.CommentService;
+import com.project.onlybuns.service.PostService;
+import com.project.onlybuns.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,10 +23,14 @@ import java.util.Map;
 public class CommentController {
 
     private final CommentService commentService;
+    private final UserService userService;
+    private final PostService postService;
 
     @Autowired
-    public CommentController(CommentService commentService) {
+    public CommentController(CommentService commentService, UserService userService, PostService postService) {
         this.commentService = commentService;
+        this.userService = userService;
+        this.postService = postService;
     }
 
     @GetMapping
@@ -35,10 +47,44 @@ public class CommentController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
+   /* @PostMapping
     public ResponseEntity<Comment> createComment(@RequestBody Comment comment) {
         Comment createdComment = commentService.save(comment);
         return ResponseEntity.ok(createdComment);
+    } */
+
+    @PostMapping("/create")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public ResponseEntity<Map<String, Object>> createComment(
+            @RequestParam("postId") Long postId,
+            @RequestParam("content") String content) {
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        RegisteredUser loggedUser = userService.findByUsername1(username).orElse(null);
+
+        if (loggedUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        Post post = postService.findById(postId).orElse(null);
+        if (post == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        Comment comment = new Comment();
+        comment.setContent(content);
+        comment.setUser(loggedUser);
+        comment.setPost(post);
+        comment.setCreatedAt(LocalDateTime.now());
+
+        Comment savedComment = commentService.save(comment);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", savedComment.getId());
+        response.put("content", savedComment.getContent());
+        response.put("username", loggedUser.getUsername());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @DeleteMapping("/{id}")
