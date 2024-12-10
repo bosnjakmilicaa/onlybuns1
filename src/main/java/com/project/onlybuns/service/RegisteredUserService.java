@@ -14,9 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -187,6 +185,8 @@ public class RegisteredUserService {
         registeredUserRepository.save(follower);
         registeredUserRepository.save(followed);
     }
+
+
 
 
     public void unfollowUser(Long followerId, Long followedId) {

@@ -9,6 +9,8 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +43,24 @@ public class PostService {
 
     public List<Post> findAllActivePosts() {
         return postRepository.findByIsDeletedFalse(); // Metoda koja vraća sve aktivne objave
+    }
+
+    public long countPostsForWeek() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfWeek = now.minus(1, ChronoUnit.WEEKS);
+        return postRepository.findPostsByDateRange(startOfWeek, now).size();
+    }
+
+    public long countPostsForMonth() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfMonth = now.minus(1, ChronoUnit.MONTHS);
+        return postRepository.findPostsByDateRange(startOfMonth, now).size();
+    }
+
+    public long countPostsForYear() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfYear = now.minus(1, ChronoUnit.YEARS);
+        return postRepository.findPostsByDateRange(startOfYear, now).size();
     }
 
 

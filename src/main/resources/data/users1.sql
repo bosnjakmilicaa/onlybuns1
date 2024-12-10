@@ -13,7 +13,7 @@ VALUES
 -- Insert posts
 INSERT INTO posts (is_deleted, user_id, description, image_url, created_at)
 VALUES
-    (false, 4, 'content1', '/images/4.jpeg', '2024-11-05 14:30:00'),
+    (false, 4, 'content1', '/images/4.jpeg', '2024-11-11 14:30:00'),
     (false, 5, 'content1', '/images/5.jpeg', '2024-11-04 10:00:00'),
     (false, 5, 'content2', '/images/7.jpeg', '2024-11-03 18:45:00'),
     (false, 5, 'content3', '/images/3.jpeg', '2024-11-02 09:20:00'),
@@ -24,6 +24,7 @@ VALUES
 INSERT INTO comments (post_id, user_id, content, created_at)
 VALUES
     (1, 7, 'com1', '2024-11-06 12:00:00'),
+    (1, 3, 'comment', '2024-11-06 12:00:00'),
     (1, 5, 'com2', '2024-11-06 11:00:00'),
     (2, 7, 'com1', '2024-11-05 09:00:00'),
     (1, 4, 'com3', '2024-11-06 08:00:00'),
