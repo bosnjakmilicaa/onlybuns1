@@ -11,6 +11,7 @@ import com.project.onlybuns.repository.UnregisteredUserRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -150,19 +151,57 @@ public class UserService {
         return false;
     }
 
-    public boolean updatePassword(String username, String newPassword) {
+    public boolean updatePassword(String username, String oldPassword, String newPassword) {
         RegisteredUser user = registeredUserRepository.findByUsername2(username);
-        if (user != null) {
-            user.setPassword(passwordEncoder.encode(newPassword));  // Encrypt new password
-            userRepository.save(user);
+        if (user != null && passwordEncoder.matches(oldPassword, user.getPassword())) {
+            user.setPassword(passwordEncoder.encode(newPassword));  // Enkriptovanje nove šifre
+            registeredUserRepository.save(user);
             return true;
         }
-        return false;
+        return false; // Ako stara šifra nije tačna
     }
+
 
     public void changeEmail(String username,String email){
         RegisteredUser user = registeredUserRepository.findByUsername2(username);
         user.setEmail(email);
         userRepository.save(user);
     }
+    public void updateFirstName(String username, String newFirstName) {
+        // Find the user by username
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+
+        // Update the first name
+        user.setFirstName(newFirstName);
+
+        // Save the updated user
+        userRepository.save(user);
+    }
+
+    public void updateLastName(String username, String newFirstName) {
+        // Find the user by username
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+
+        // Update the first name
+        user.setLastName(newFirstName);
+
+        // Save the updated user
+        userRepository.save(user);
+    }
+
+    public void updateAdress(String username, String adress) {
+        // Find the user by username
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+
+        // Update the first name
+        user.setAddress(adress);
+
+        // Save the updated user
+        userRepository.save(user);
+    }
+
+
 }

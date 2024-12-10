@@ -1,5 +1,9 @@
 package com.project.onlybuns.DTO;
 
+import com.project.onlybuns.model.Follow;
+
+import java.util.List;
+
 public class RegisteredUserDTO {
     private String firstName;
     private String lastName;
@@ -11,6 +15,8 @@ public class RegisteredUserDTO {
 
     private int followingCount;
     private String confirmPassword;
+
+
 
     public RegisteredUserDTO(String firstName, String lastName, String email, int postsCount, int followersCount, int followingCount) {
         this.firstName = firstName;
@@ -30,6 +36,7 @@ public class RegisteredUserDTO {
         this.postsCount = postsCount;
         this.followersCount = followersCount;
         this.followingCount = followingCount;
+
 
     }
 
