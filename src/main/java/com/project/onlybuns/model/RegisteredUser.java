@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -12,9 +13,6 @@ import java.util.List;
 @Entity
 @DiscriminatorValue("registered_user")
 public class RegisteredUser extends User {
-
-
-
     @ManyToMany
     @JoinTable(
             name = "user_likes_post",
@@ -33,9 +31,6 @@ public class RegisteredUser extends User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Like> likes = new ArrayList<>(); // List of likes given by the user
-
-
-
 
     @OneToMany(mappedBy = "follower", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Follow> following = new ArrayList<>(); // Korisnici koje ovaj korisnik prati

@@ -290,14 +290,6 @@ public class RegisteredUserController {
         return ResponseEntity.ok(dtoPage);
     }
 
-
-
-   
-
-
-
-
-
     @GetMapping("/registered-users")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<RegisteredUserDTO>> getRegisteredUsers(

@@ -137,11 +137,6 @@ public class AuthController {
     }
 
 
-
-
-
-
-
     @PostMapping("/send")
     public String sendEmail(@RequestParam String to, @RequestParam String subject, @RequestParam String body) {
         try {
@@ -151,9 +146,6 @@ public class AuthController {
             return "Failed to send email: " + e.getMessage();
         }
     }
-
-
-
 
     @PostMapping("/login") // POST "/auth/login"
     public ResponseEntity<?> loginUser(@RequestBody Map<String, String> userInput, @RequestHeader(value = "Authorization", required = false) String authHeader, HttpServletRequest request) {
@@ -196,6 +188,8 @@ public class AuthController {
 
 
                 if (passwordEncoder.matches(password, existingUser.getPassword())) {
+                    existingUser.updateLastActiveDate();
+                    userService.save(existingUser);
                     String userType = existingUser instanceof AdminUser ? "ADMIN" : "REGISTERED";
                     String token = jwtAuthenticationFilter.generateToken(existingUser);
 
@@ -227,15 +221,6 @@ public class AuthController {
                     .body(Collections.singletonMap("message", "Error: An unexpected error occurred."));
         }
     }
-
-
-
-
-
-
-
-
-
 
     @PostMapping("/updatePasswords")
     public ResponseEntity<?> updatePasswords() {
@@ -282,9 +267,5 @@ public class AuthController {
     public ResponseEntity<?> logoutUser() {
         return ResponseEntity.ok(Collections.singletonMap("message", "User logged out successfully!"));
     }
-
-
-
-
 
 }

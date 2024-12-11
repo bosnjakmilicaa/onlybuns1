@@ -2,6 +2,7 @@ package com.project.onlybuns.repository;
 
 import com.project.onlybuns.model.Post;
 import com.project.onlybuns.model.RegisteredUser;
+import com.project.onlybuns.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -25,5 +26,7 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     Optional<String> findUsernameByUserId(Long userId);
 
     List<Post> findByUser(RegisteredUser user); // Preporučeno
+
+    long countByUserAndCreatedAtAfter(User user, LocalDateTime createdDate);
 
 }

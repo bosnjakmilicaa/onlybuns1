@@ -58,6 +58,21 @@ public abstract class User {
     @Column(name = "registration_date")
     private LocalDateTime registrationDate; // Datum kada je pokušao da se registruje
 
+    @Column(name = "last_active_date")
+    private LocalDateTime lastActiveDate;
+
+    public LocalDateTime getLastActiveDate() {
+        return this.lastActiveDate;
+    }
+
+    public void setLastActiveDate(LocalDateTime lastActiveDate) {
+        this.lastActiveDate = lastActiveDate;
+    }
+
+    public void updateLastActiveDate() {
+        this.lastActiveDate = LocalDateTime.now();
+    }
+
     // Getters and Setters
 
     public LocalDateTime getRegistrationDate() {
