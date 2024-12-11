@@ -137,8 +137,8 @@ public class RegisteredUserService {
     }*/
 
 
-    //readonly false  -> po defoltu je
-    @Transactional()
+    //readonly false  -> po difoltu je
+    @Transactional
     public void followUser(Long followerId, Long followedId) {
 
         if (followerId.equals(followedId)) {
@@ -176,11 +176,10 @@ public class RegisteredUserService {
             Thread.currentThread().interrupt();
         }*/
 
-
-        synchronized (this) {
+        /*synchronized (this) {
             followed.setFollowersCount(followed.getFollowersCount() + 1);
             follower.setFollowingCount(follower.getFollowingCount() + 1);
-        }
+        }*/
 
         registeredUserRepository.save(follower);
         registeredUserRepository.save(followed);

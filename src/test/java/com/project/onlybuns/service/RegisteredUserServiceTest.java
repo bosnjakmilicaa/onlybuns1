@@ -1,5 +1,5 @@
 package com.project.onlybuns.service;
-/*
+
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.repository.RegisteredUserRepository;
 import org.junit.jupiter.api.Assertions;
@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.CountDownLatch;
-
+/*
 @SpringBootTest
 public class RegisteredUserServiceTest {
 
@@ -69,4 +69,5 @@ public class RegisteredUserServiceTest {
         Assertions.assertEquals(3, follower2.getFollowing().size());
         Assertions.assertEquals(2, followed.getFollowers().size());
     }
-}*/
+}
+*/
