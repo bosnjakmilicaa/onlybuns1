@@ -16,4 +16,9 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     @Query("SELECT c FROM Comment c WHERE c.createdAt >= :startDate AND c.createdAt <= :endDate")
     List<Comment> findCommentsByDateRange(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
+    long countByUserIdAndCreatedAtAfter(Long userId, LocalDateTime timestamp);
+
+    List<Comment> findByPostIdOrderByCreatedAtDesc(Long postId);
+
+
 }

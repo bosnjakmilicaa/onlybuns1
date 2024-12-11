@@ -1,14 +1,20 @@
 package com.project.onlybuns.controller;
 import com.project.onlybuns.DTO.RegisteredUserDTO;
+import com.project.onlybuns.DTO.RegisteredUserDTONadja;
 import com.project.onlybuns.DTO.UserConnectionsDTO;
+
+import com.project.onlybuns.model.Follow;
+
 import com.project.onlybuns.model.Comment;
 import com.project.onlybuns.model.Post;
+
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.model.User;
 import com.project.onlybuns.service.RegisteredUserService;
 import com.project.onlybuns.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import org.apache.catalina.filters.ExpiresFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
@@ -21,6 +27,8 @@ import org.springframework.web.bind.annotation.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+
+
 
 
 @RestController// Base path for registered user-related endpoints
@@ -265,6 +273,8 @@ public class RegisteredUserController {
         // Dohvati korisnike koristeći paginaciju
         Page<RegisteredUser> usersPage = registeredUserService.findAll(PageRequest.of(page, size));
 
+
+
         // Mapiranje na DTO
         Page<RegisteredUserDTO> dtoPage = usersPage.map(user -> new RegisteredUserDTO(
                 user.getFirstName(),
@@ -274,6 +284,7 @@ public class RegisteredUserController {
                 user.getPosts().size(),
                 user.getFollowing().size(),
                 user.getFollowers().size()
+
         ));
 
         return ResponseEntity.ok(dtoPage);
@@ -420,9 +431,10 @@ public class RegisteredUserController {
     }
 
     @GetMapping("/username/{nadjiki}")
-    public ResponseEntity<RegisteredUserDTO> getUserProfile(
+    public ResponseEntity<RegisteredUserDTONadja> getUserProfile2(
             @PathVariable String nadjiki,
-            @RequestHeader("Authorization") String authorizationHeader){
+            @RequestHeader("Authorization") String authorizationHeader
+            ){
         // Debugging: print the received username
         System.out.println("Fetching profile for username: " + nadjiki);
 
@@ -433,18 +445,61 @@ public class RegisteredUserController {
             System.out.println("User not found: " + nadjiki);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
+        /*
+        // Pozivanje metoda za praćenje i pratioce
+        List<RegisteredUser> following = registeredUserService.getFollowingMicaKurva(nadjiki);
+        List<RegisteredUser> followers = registeredUserService.getFollowersMicaProstakusa(nadjiki);
+
+        // Ispisivanje rezultata u konzolu
+        System.out.println("Following for " + nadjiki + ":");
+        following.forEach(f -> System.out.println("- " + f.getUsername()));
+
+        System.out.println("Followers for " + nadjiki + ":");
+        followers.forEach(f -> System.out.println("- " + f.getUsername()));
+
+
+*/
 
         // Construct DTO and return response with user details
-        RegisteredUserDTO userDTO = new RegisteredUserDTO(
+        RegisteredUserDTONadja userDTO = new RegisteredUserDTONadja(
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),
-              // user.getAddress(), // Assuming this field exists
-                user.getFollowing().size(),  // Assuming 'following' is a collection
-                user.getFollowers().size()   // Assuming 'followers' is a collection
+                user.getAddress(),
+                user.getFollowersCount(),
+                user.getFollowingCount(),
+                user.getFollowing(),
+                user.getFollowers()
+
         );
+
+
 
         return ResponseEntity.ok(userDTO);
     }
+    @GetMapping("/totalPosts")
+    @PreAuthorize("hasRole('ADMIN')") // Možete ukloniti ovu liniju ako želite da svi korisnici vide podatke
+    public ResponseEntity<Map<String, Object>> getTotalPostsCount() {
+        // Dohvatanje svih registrovanih korisnika
+        List<RegisteredUser> users = registeredUserService.findAll();
+
+        // Izračunavanje ukupnog broja objava
+        int totalPosts = users.stream()
+                .mapToInt(user -> user.getPosts().size()) // Pretpostavlja se da korisnici imaju listu "posts"
+                .sum();
+
+        // Priprema odgovora
+        Map<String, Object> response = new HashMap<>();
+        response.put("totalPosts", totalPosts);
+
+        return ResponseEntity.ok(response);
+    }
+
+
+
+
+
+
+
 
 }

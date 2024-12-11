@@ -269,4 +269,34 @@ public class RegisteredUserService {
                 .collect(Collectors.toList());
     }
 
+    public List<RegisteredUser> getFollowingMicaKurva(String username) {
+        // Pronađi korisnika po username
+        RegisteredUser user = findByUsername(username);
+
+        // Proveri da li korisnik postoji
+        if (user == null) {
+            throw new IllegalArgumentException("User with username " + username + " not found.");
+        }
+
+        // Dohvati korisnike koje trenutni korisnik prati
+        return user.getFollowing()
+                .stream()
+                .map(Follow::getFollowed) // Pretpostavka da Follow ima metodu getFollowed()
+                .collect(Collectors.toList());
+    }
+
+    public List<RegisteredUser> getFollowersMicaProstakusa(String username) {
+        RegisteredUser user = findByUsername(username);
+
+        if (user == null) {
+            throw new IllegalArgumentException("User with username " + username + " not found.");
+        }
+
+        return user.getFollowers()
+                .stream()
+                .map(Follow::getFollower) // Pretpostavka da Follow ima metodu getFollower()
+                .collect(Collectors.toList());
+    }
+
+
 }
