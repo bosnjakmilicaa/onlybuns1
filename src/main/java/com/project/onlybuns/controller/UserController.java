@@ -68,8 +68,8 @@ public class UserController {
         if (requestBody.containsKey("lastName")) {
             userService.updateLastName(username, requestBody.get("lastName"));
         }
-        if (requestBody.containsKey("adress")) {
-            userService.updateLastName(username, requestBody.get("adress"));
+        if (requestBody.containsKey("address")) {
+            userService.updateAdress(username, requestBody.get("address"));
         }
         if (requestBody.containsKey("oldPassword") && requestBody.containsKey("newPassword")) {
             boolean isUpdated = userService.updatePassword(

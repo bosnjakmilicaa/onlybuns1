@@ -445,8 +445,8 @@ public class RegisteredUserController {
             System.out.println("User not found: " + nadjiki);
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-        /*
-        // Pozivanje metoda za praćenje i pratioce
+
+
         List<RegisteredUser> following = registeredUserService.getFollowingMicaKurva(nadjiki);
         List<RegisteredUser> followers = registeredUserService.getFollowersMicaProstakusa(nadjiki);
 
@@ -458,7 +458,7 @@ public class RegisteredUserController {
         followers.forEach(f -> System.out.println("- " + f.getUsername()));
 
 
-*/
+
 
         // Construct DTO and return response with user details
         RegisteredUserDTONadja userDTO = new RegisteredUserDTONadja(
@@ -468,8 +468,8 @@ public class RegisteredUserController {
                 user.getAddress(),
                 user.getFollowersCount(),
                 user.getFollowingCount(),
-                user.getFollowing(),
-                user.getFollowers()
+                followers,
+                following
 
         );
 

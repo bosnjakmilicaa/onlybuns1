@@ -1,6 +1,7 @@
 package com.project.onlybuns.DTO;
 
 import com.project.onlybuns.model.Follow;
+import com.project.onlybuns.model.RegisteredUser;
 
 import java.util.List;
 
@@ -17,10 +18,10 @@ public class RegisteredUserDTONadja {
     private int followingCount;
     private String confirmPassword;
 
-    List<Follow> followingList;
-    List<Follow> followersList;
+    List<RegisteredUser> followingList;
+    List<RegisteredUser> followersList;
 
-    public RegisteredUserDTONadja(String firstName, String lastName, String email, String address, int followersCount, int followingCount, List<Follow> followingList, List<Follow> followersList) {
+    public RegisteredUserDTONadja(String firstName, String lastName, String email, String address, int followersCount, int followingCount, List<RegisteredUser> followingList, List<RegisteredUser> followersList) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
@@ -104,19 +105,5 @@ public class RegisteredUserDTONadja {
         this.confirmPassword = confirmPassword;
     }
 
-    public List<Follow> getFollowingList() {
-        return followingList;
-    }
 
-    public void setFollowingList(List<Follow> followingList) {
-        this.followingList = followingList;
-    }
-
-    public List<Follow> getFollowersList() {
-        return followersList;
-    }
-
-    public void setFollowersList(List<Follow> followersList) {
-        this.followersList = followersList;
-    }
 }
