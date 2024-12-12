@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,6 +19,8 @@ public interface RegisteredUserRepository extends JpaRepository<RegisteredUser, 
 
     @Query("SELECT u FROM RegisteredUser u WHERE u.username = :username")
     RegisteredUser findByUsername2(@Param("username") String username);
+
+    List<RegisteredUser> findByLastActiveDateBefore(LocalDateTime date);
 
     List<RegisteredUser> findByFirstNameContainingOrLastNameContainingOrEmailContaining(
             String firstName, String lastName, String email);

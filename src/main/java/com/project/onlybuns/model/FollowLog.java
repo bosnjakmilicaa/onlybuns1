@@ -18,7 +18,17 @@ public class FollowLog {
     @ManyToOne
     private RegisteredUser followed;
 
+    @Column(nullable = false)
     private LocalDateTime timestamp;
+
+
+    public LocalDateTime getTimestrap(){
+        return this.timestamp;
+    }
+    @PrePersist
+    protected void onCreate() {
+        this.timestamp = LocalDateTime.now();
+    }
 
     // Getteri i setteri
     public Long getId() {

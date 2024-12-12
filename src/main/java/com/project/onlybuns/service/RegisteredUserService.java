@@ -137,8 +137,8 @@ public class RegisteredUserService {
     }*/
 
 
-    //readonly false  -> po defoltu je
-    @Transactional()
+    //readonly false  -> po difoltu je
+    /*@Transactional
     public void followUser(Long followerId, Long followedId) {
 
         if (followerId.equals(followedId)) {
@@ -158,6 +158,7 @@ public class RegisteredUserService {
             throw new IllegalArgumentException("Already following this user.");
         }
 
+        //zakljucavanje
         Follow follow = new Follow();
         follow.setFollower(follower);
         follow.setFollowed(followed);
@@ -169,19 +170,88 @@ public class RegisteredUserService {
         followLog.setTimestamp(LocalDateTime.now());
         followLogRepository.save(followLog);
 
-        // Simulacija sporog izvršavanja
-        /*try {
-            Thread.sleep(2000); // Pauza od 2 sekunde
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }*/
 
+        registeredUserRepository.save(follower);
+        registeredUserRepository.save(followed);
+    }*/
 
-        synchronized (this) {
-            followed.setFollowersCount(followed.getFollowersCount() + 1);
-            follower.setFollowingCount(follower.getFollowingCount() + 1);
+    /*@Transactional
+    public void followUser(Long followerId, Long followedId) {
+
+        if (followerId.equals(followedId)) {
+            throw new IllegalArgumentException("You cannot follow yourself.");
         }
 
+        RegisteredUser follower = registeredUserRepository.findById(followerId)
+                .orElseThrow(() -> new IllegalArgumentException("Follower not found."));
+        RegisteredUser followed = registeredUserRepository.findById(followedId)
+                .orElseThrow(() -> new IllegalArgumentException("Followed user not found."));
+
+        if (isFollowLimitExceeded(follower)) {
+            throw new IllegalArgumentException("Follow limit exceeded. You can only follow 50 users per minute.");
+        }
+
+        // Pessimističko zaključavanje pri proveri da li već prati korisnika
+        Optional<Follow> existingFollow = followRepository.findByFollowerIdAndFollowedId(followerId, followedId);
+        if (existingFollow.isPresent()) {
+            throw new IllegalArgumentException("Already following this user.");
+        }
+
+        // Zaključavanje i kreiranje nove relacije "follow"
+        Follow follow = new Follow();
+        follow.setFollower(follower);
+        follow.setFollowed(followed);
+        followRepository.save(follow);
+
+        // Logovanje praćenja u FollowLog
+        FollowLog followLog = new FollowLog();
+        followLog.setFollower(follower);
+        followLog.setFollowed(followed);
+        followLog.setTimestamp(LocalDateTime.now());
+        followLogRepository.save(followLog);
+
+        // Ažuriranje podataka o korisnicima
+        registeredUserRepository.save(follower);
+        registeredUserRepository.save(followed);
+    }*/
+
+    @Transactional
+    public void followUser(Long followerId, Long followedId) {
+
+        if (followerId.equals(followedId)) {
+            throw new IllegalArgumentException("You cannot follow yourself.");
+        }
+
+        RegisteredUser follower = registeredUserRepository.findById(followerId)
+                .orElseThrow(() -> new IllegalArgumentException("Follower not found."));
+        RegisteredUser followed = registeredUserRepository.findById(followedId)
+                .orElseThrow(() -> new IllegalArgumentException("Followed user not found."));
+
+        if (isFollowLimitExceeded(follower)) {
+            throw new IllegalArgumentException("Follow limit exceeded. You can only follow 50 users per minute.");
+        }
+
+        // Pessimističko zaključavanje pri proveri da li već prati korisnika
+        Optional<Follow> existingFollow = followRepository.findByFollowerIdAndFollowedId(followerId, followedId);
+        if (existingFollow.isPresent()) {
+            throw new IllegalArgumentException("Already following this user.");
+        }
+
+        // Zaključavanje i kreiranje nove relacije "follow"
+        Follow follow = new Follow();
+        follow.setFollower(follower);
+        follow.setFollowed(followed);
+        followRepository.save(follow);
+
+        // Logovanje praćenja u FollowLog
+        FollowLog followLog = new FollowLog();
+        followLog.setFollower(follower);
+        followLog.setFollowed(followed);
+        followLog.setTimestamp(LocalDateTime.now());
+        followLogRepository.save(followLog);
+
+
+        // Spasavanje ažuriranih korisnika
         registeredUserRepository.save(follower);
         registeredUserRepository.save(followed);
     }
@@ -189,6 +259,8 @@ public class RegisteredUserService {
 
 
 
+
+    @Transactional
     public void unfollowUser(Long followerId, Long followedId) {
         Follow follow = followRepository.findByFollowerIdAndFollowedId(followerId, followedId)
                 .orElseThrow(() -> new IllegalArgumentException("Follow relationship not found."));

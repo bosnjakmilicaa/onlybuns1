@@ -19,6 +19,16 @@ public class Follow {
     @JoinColumn(name = "followed_id")
     private RegisteredUser followed;
 
+    private LocalDateTime timestamp;
+
+    public LocalDateTime getTimestrap(){
+        return this.timestamp;
+    }
+    @PrePersist
+    protected void onCreate() {
+        this.timestamp = LocalDateTime.now();
+    }
+
     // Getteri i setteri
     public RegisteredUser getFollower() {
         return follower;

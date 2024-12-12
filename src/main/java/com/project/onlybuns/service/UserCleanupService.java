@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 @Service
 public class UserCleanupService {
@@ -14,21 +15,32 @@ public class UserCleanupService {
     @Autowired
     private UserRepository userRepository;
 
-    // Metoda koja se pokreće poslednjeg dana u mesecu u ponoć
     @Scheduled(cron = "0 0 0 L * ?") // Poslednji dan u mesecu u ponoć
     public void deleteInactiveUsers() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime tenMinutesBeforeMidnight = now.with(LocalTime.of(23, 50)); // 23:50 poslednji dan meseca
+
         // Pronađite sve neaktivne korisnike
         List<User> inactiveUsers = userRepository.findByIsActiveFalse();
 
-        // Briši sve neaktivne korisnike
-        if (!inactiveUsers.isEmpty()) {
-            userRepository.deleteAll(inactiveUsers);
-            System.out.println("Deleted " + inactiveUsers.size() + " inactive users.");
+        // Filtrirajte korisnike koji su registrovani u poslednjih 10 minuta pre ponoći
+        List<User> usersToDelete = inactiveUsers.stream()
+                .filter(user -> user.getRegistrationDate().isBefore(tenMinutesBeforeMidnight))
+                .toList();
+
+        // Briši samo korisnike koji ne potpadaju pod period zaštite
+        if (!usersToDelete.isEmpty()) {
+            userRepository.deleteAll(usersToDelete);
+            System.out.println("Deleted " + usersToDelete.size() + " inactive users.");
         } else {
-            System.out.println("No inactive users to delete.");
+            System.out.println("No inactive users to delete or protected by time rule.");
         }
     }
 }
+
+
+
+
 
 
 //TESTIRANJE

@@ -8,7 +8,8 @@ VALUES
     ('testuser5@example.com', 'password123', 'tester5', 'registered_user', 'Test', 'User5', '451 Test Avenue', TRUE),
     ('testuser6@example.com', 'password123', 'tester8', 'registered_user', 'Test', 'User6', '450 Test Avenue', TRUE),
     ('testuser7@example.com', 'password123', 'tester7', 'registered_user', 'Test', 'User7', '452 Test Avenue', TRUE),
-    ('testuser8@example.com', 'password123', 'tester9', 'registered_user', 'Test', 'User8', '452 Test Avenue', TRUE);
+    ('testuser8@example.com', 'password123', 'tester9', 'registered_user', 'Test', 'User8', '452 Test Avenue', TRUE),
+    ('tanja7bajunovic@gmail.com', 'password123', 'tanja123', 'registered_user', 'Tanja', 'Civic', '452 Test Avenue', TRUE);
 
 -- Insert posts
 INSERT INTO posts (is_deleted, user_id, description, image_url, created_at)
@@ -18,7 +19,8 @@ VALUES
     (false, 5, 'content2', '/images/7.jpeg', '2024-11-03 18:45:00'),
     (false, 5, 'content3', '/images/3.jpeg', '2024-11-02 09:20:00'),
     (false, 7, 'content1', '/images/6.jpeg', '2024-11-04 13:00:00'),
-    (false, 7, 'content2', '/images/2.jpeg', '2024-11-03 11:30:00');
+    (false, 7, 'content2', '/images/2.jpeg', '2024-11-03 11:30:00'),
+    (false, 9, 'content2', '/images/9.jpg', '2024-11-03 11:30:00');
 
 -- Insert comments
 INSERT INTO comments (post_id, user_id, content, created_at)
@@ -53,6 +55,8 @@ VALUES
     (5, 4),  -- User5 prati User4
     (7, 5),  -- User7 prati User5
     (5, 7),  -- User5 prati User7
-    (4, 7)  -- User4 prati User7
+    (4, 7),  -- User4 prati User7
+    (5, 9),
+    (9, 5);
 
 

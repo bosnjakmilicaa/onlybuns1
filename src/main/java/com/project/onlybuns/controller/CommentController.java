@@ -66,6 +66,12 @@ public class CommentController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
 
+        long commentCountLastHour = commentService.countCommentsByUserInLastHour(loggedUser.getId());
+        if (commentCountLastHour >= 60) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(Map.of("error", "You have exceeded the limit of 60 comments per hour."));
+        }
+
         Post post = postService.findById(postId).orElse(null);
         if (post == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
