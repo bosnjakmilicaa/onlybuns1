@@ -158,6 +158,7 @@ public class RegisteredUserService {
             throw new IllegalArgumentException("Already following this user.");
         }
 
+        //zakljucavanje
         Follow follow = new Follow();
         follow.setFollower(follower);
         follow.setFollowed(followed);
@@ -169,17 +170,6 @@ public class RegisteredUserService {
         followLog.setTimestamp(LocalDateTime.now());
         followLogRepository.save(followLog);
 
-        // Simulacija sporog izvršavanja
-        /*try {
-            Thread.sleep(2000); // Pauza od 2 sekunde
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }*/
-
-        /*synchronized (this) {
-            followed.setFollowersCount(followed.getFollowersCount() + 1);
-            follower.setFollowingCount(follower.getFollowingCount() + 1);
-        }*/
 
         registeredUserRepository.save(follower);
         registeredUserRepository.save(followed);

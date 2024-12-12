@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.CountDownLatch;
-/*
+
 @SpringBootTest
 public class RegisteredUserServiceTest {
 
@@ -70,4 +70,3 @@ public class RegisteredUserServiceTest {
         Assertions.assertEquals(2, followed.getFollowers().size());
     }
 }
-*/
