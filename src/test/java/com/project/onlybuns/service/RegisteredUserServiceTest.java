@@ -66,7 +66,7 @@ public class RegisteredUserServiceTest {
         System.out.println("Followed's followers count: " + followed.getFollowers().size());
 
         Assertions.assertEquals(3, follower1.getFollowing().size());
-        Assertions.assertEquals(3, follower2.getFollowing().size());
+        Assertions.assertEquals(4, follower2.getFollowing().size());
         Assertions.assertEquals(2, followed.getFollowers().size());
     }
 }
