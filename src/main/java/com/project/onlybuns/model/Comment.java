@@ -45,7 +45,7 @@ public class Comment {
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();  // Postavljanje trenutnog vremena pre nego što komentar bude sačuvan
+        this.createdAt = LocalDateTime.now();
     }
 
     public Long getId() {

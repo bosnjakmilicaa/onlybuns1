@@ -27,7 +27,7 @@ public class InactivityNotifier {
         //LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
        // List<RegisteredUser> inactiveUsers = userRepository.findByLastActiveDateBefore(oneWeekAgo);
 
-       LocalDateTime fiveMinutesAgo = LocalDateTime.now().minusMinutes(5); // Proveravamo korisnike koji nisu bili aktivni poslednjih 5 minuta
+       LocalDateTime fiveMinutesAgo = LocalDateTime.now().minusMinutes(5);
        List<RegisteredUser> inactiveUsers = userRepository.findByLastActiveDateBefore(fiveMinutesAgo);
 
         for (RegisteredUser user : inactiveUsers) {
