@@ -219,7 +219,7 @@ public class RegisteredUserController {
         return ResponseEntity.ok("Successfully followed the user.");
     }
 
-    @DeleteMapping("/{followerUsername}/unfollow/{followedUsername}")
+    /*@DeleteMapping("/{followerUsername}/unfollow/{followedUsername}")
     @PreAuthorize("hasRole('REGISTERED')")
     public ResponseEntity<String> unfollowUserByUsername(
             @PathVariable String followerUsername,
@@ -259,7 +259,51 @@ public class RegisteredUserController {
         // Otpraćivanje korisnika
         registeredUserService.unfollowUser(followerId, followedId);
         return ResponseEntity.ok("Successfully unfollowed the user.");
+    }*/
+
+    @DeleteMapping("/{followerUsername}/unfollow/{followedUsername}")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public ResponseEntity<String> unfollowUserByUsername(
+            @PathVariable String followerUsername,
+            @PathVariable String followedUsername) {
+
+        try {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String loggedInUsername = authentication.getName();
+
+            if (authentication == null || !authentication.isAuthenticated()) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User is not authenticated.");
+            }
+
+            if (!followerUsername.equals(loggedInUsername)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You cannot unfollow as another user.");
+            }
+
+            if (followerUsername.equals(followedUsername)) {
+                return ResponseEntity.badRequest().body("You cannot unfollow yourself.");
+            }
+
+            Long followerId = registeredUserService.findUserIdByUsername(followerUsername);
+            Long followedId = registeredUserService.findUserIdByUsername(followedUsername);
+
+            if (followedId == null) {
+                return ResponseEntity.badRequest().body("User to unfollow not found.");
+            }
+
+            if (!registeredUserService.isAlreadyFollowing(followerId, followedId)) {
+                return ResponseEntity.badRequest().body("Not following this user.");
+            }
+
+            registeredUserService.unfollowUser(followerId, followedId);
+            return ResponseEntity.ok("Successfully unfollowed the user.");
+
+        } catch (Exception e) {
+            // Log the exception
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
+        }
     }
+
 
 
     @GetMapping("/allRegisteredUsers")
