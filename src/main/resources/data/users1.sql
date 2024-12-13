@@ -20,7 +20,8 @@ VALUES
     (false, 5, 'content3', '/images/3.jpeg', '2024-11-02 09:20:00'),
     (false, 7, 'content1', '/images/6.jpeg', '2024-11-04 13:00:00'),
     (false, 7, 'content2', '/images/2.jpeg', '2024-11-03 11:30:00'),
-    (false, 9, 'content2', '/images/9.jpg', '2024-11-03 11:30:00');
+    (false, 9, 'content2', '/images/9.jpg', '2024-11-03 11:30:00'),
+    (false, 9, 'content2', '/images/9.jpg', '2024-12-12 11:30:00');
 
 -- Insert comments
 INSERT INTO comments (post_id, user_id, content, created_at)
@@ -45,7 +46,8 @@ VALUES
     (3, 4, '2024-11-05 15:00:00'),
     (3, 5, '2024-11-05 15:10:00'),
     (3, 7, '2024-11-05 15:20:00'),
-    (5, 5, '2024-11-05 16:00:00');
+    (5, 5, '2024-11-05 16:00:00'),
+    (8, 5, '2024-12-12 23:00:00');
 
 
 -- Insert follows

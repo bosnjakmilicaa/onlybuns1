@@ -27,6 +27,14 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findByUser(RegisteredUser user); // Preporučeno
 
+    @Query("SELECT p FROM Post p WHERE p.createdAt > :startDate")
+    List<Post> findPostsAfterDate(@Param("startDate") LocalDateTime startDate);
     long countByUserAndCreatedAtAfter(User user, LocalDateTime createdDate);
 
+    List<Post> findTop5ByCreatedAtAfterOrderByLikesDesc(LocalDateTime createdAt);
+    List<Post> findTop10ByOrderByLikesDesc();
 }
+
+
+
+

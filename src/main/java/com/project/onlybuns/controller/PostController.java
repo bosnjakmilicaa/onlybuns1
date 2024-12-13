@@ -481,4 +481,67 @@ public class PostController {
         Comment savedComment = commentService.save(comment); // Implementiraj ovu metodu u servisu
         return ResponseEntity.ok(savedComment);
     }
+
+    @GetMapping("/totalPosts")
+    public ResponseEntity<Map<String, Integer>> getTotalPostsCount() {
+        // Dohvatanje svih registrovanih korisnika
+
+        // Izračunavanje ukupnog broja objava
+        int totalPosts = postService.findAll().size();
+
+        // Priprema odgovora
+        Map<String, Integer> response = new HashMap<>();
+        response.put("totalPosts", totalPosts);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/postsLastMonth")
+    public ResponseEntity<Map<String, Integer>> getPostsLastMonthCount() {
+        System.out.println("Endpoint '/postsLastMonth' called."); // Provera poziva endpointa
+
+        // Dohvatanje svih objava iz servisa
+        List<Post> postsLastMonth = postService.findPostsFromLastMonth();
+        System.out.println("Number of posts retrieved from service: " + postsLastMonth.size());
+
+        // Debug: Ispisivanje datuma objava
+        postsLastMonth.forEach(post ->
+                System.out.println("Post ID: " + post.getId() + ", Created At: " + post.getCreatedAt())
+        );
+
+        // Izračunavanje broja objava u poslednjih mesec dana
+        int totalPostsLastMonth = postsLastMonth.size();
+        System.out.println("Total posts in the last month: " + totalPostsLastMonth);
+
+        // Priprema odgovora
+        Map<String, Integer> response = new HashMap<>();
+        response.put("totalPostsLastMonth", totalPostsLastMonth);
+
+        System.out.println("Response prepared: " + response);
+
+        return ResponseEntity.ok(response);
+    }
+
+
+
+    @GetMapping("/top5PostsLast7Days")
+    public ResponseEntity<Map<String, Object>> getTop5PostsLast7Days() {
+        try {
+            List<Post> posts = postService.findTop5MostLikedPostsFromLast7Days();
+            return ResponseEntity.ok(Map.of("top5PostsLast7Days", posts));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/top10MostLikedPosts")
+    public ResponseEntity<Map<String, Object>> getTop10MostLikedPosts() {
+        try {
+            List<Post> posts = postService.findTop10MostLikedPosts();
+            return ResponseEntity.ok(Map.of("top10MostLikedPosts", posts));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
+
 }

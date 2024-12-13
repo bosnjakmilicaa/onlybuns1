@@ -511,23 +511,7 @@ public class RegisteredUserController {
 
         return ResponseEntity.ok(userDTO);
     }
-    @GetMapping("/totalPosts")
-    @PreAuthorize("hasRole('ADMIN')") // Možete ukloniti ovu liniju ako želite da svi korisnici vide podatke
-    public ResponseEntity<Map<String, Object>> getTotalPostsCount() {
-        // Dohvatanje svih registrovanih korisnika
-        List<RegisteredUser> users = registeredUserService.findAll();
 
-        // Izračunavanje ukupnog broja objava
-        int totalPosts = users.stream()
-                .mapToInt(user -> user.getPosts().size()) // Pretpostavlja se da korisnici imaju listu "posts"
-                .sum();
-
-        // Priprema odgovora
-        Map<String, Object> response = new HashMap<>();
-        response.put("totalPosts", totalPosts);
-
-        return ResponseEntity.ok(response);
-    }
 
 
 

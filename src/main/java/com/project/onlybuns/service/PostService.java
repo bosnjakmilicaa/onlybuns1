@@ -106,7 +106,18 @@ public class PostService {
         // Pretpostavljam da postoji metoda koja povlači postove na osnovu username-a
         return postRepository.findByUserUsername(username);
     }
+    public List<Post> findPostsFromLastMonth() {
+        LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
+        return postRepository.findPostsAfterDate(thirtyDaysAgo);
+    }
 
+    public List<Post> findTop5MostLikedPostsFromLast7Days() {
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+        return postRepository.findTop5ByCreatedAtAfterOrderByLikesDesc(sevenDaysAgo);
+    }
+    public List<Post> findTop10MostLikedPosts() {
+        return postRepository.findTop10ByOrderByLikesDesc();
+    }
 
 
     /*public void likePost(Long id, RegisteredUser user) {
