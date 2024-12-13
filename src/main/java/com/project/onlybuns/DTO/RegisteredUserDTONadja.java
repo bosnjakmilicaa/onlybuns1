@@ -1,38 +1,35 @@
 package com.project.onlybuns.DTO;
 
-import com.project.onlybuns.model.Follow;
-import com.project.onlybuns.model.RegisteredUser;
-
 import java.util.List;
+
+
 
 public class RegisteredUserDTONadja {
     private String firstName;
     private String lastName;
     private String email;
-
-    private  String username;
+    private String username;
     private String address;
-    private int postsCount;
     private int followersCount;
-
     private int followingCount;
-    private String confirmPassword;
+    private List<SimpleUserDTO> followingList;
+    private List<SimpleUserDTO> followersList;
 
-    List<RegisteredUser> followingList;
-    List<RegisteredUser> followersList;
-
-    public RegisteredUserDTONadja(String firstName, String lastName, String email, String address, int followersCount, int followingCount, List<RegisteredUser> followingList, List<RegisteredUser> followersList) {
+    public RegisteredUserDTONadja(String firstName, String lastName, String username, String email, String address,
+                                  int followersCount, int followingCount,
+                                  List<SimpleUserDTO> followingList, List<SimpleUserDTO> followersList) {
         this.firstName = firstName;
         this.lastName = lastName;
+        this.username = username;
         this.email = email;
         this.address = address;
         this.followersCount = followersCount;
         this.followingCount = followingCount;
         this.followingList = followingList;
         this.followersList = followersList;
-
     }
 
+    // Getteri i setteri
     public String getFirstName() {
         return firstName;
     }
@@ -73,14 +70,6 @@ public class RegisteredUserDTONadja {
         this.address = address;
     }
 
-    public int getPostsCount() {
-        return postsCount;
-    }
-
-    public void setPostsCount(int postsCount) {
-        this.postsCount = postsCount;
-    }
-
     public int getFollowersCount() {
         return followersCount;
     }
@@ -97,13 +86,19 @@ public class RegisteredUserDTONadja {
         this.followingCount = followingCount;
     }
 
-    public String getConfirmPassword() {
-        return confirmPassword;
+    public List<SimpleUserDTO> getFollowingList() {
+        return followingList;
     }
 
-    public void setConfirmPassword(String confirmPassword) {
-        this.confirmPassword = confirmPassword;
+    public void setFollowingList(List<SimpleUserDTO> followingList) {
+        this.followingList = followingList;
     }
 
+    public List<SimpleUserDTO> getFollowersList() {
+        return followersList;
+    }
 
+    public void setFollowersList(List<SimpleUserDTO> followersList) {
+        this.followersList = followersList;
+    }
 }

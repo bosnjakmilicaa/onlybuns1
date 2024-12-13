@@ -1,20 +1,14 @@
 package com.project.onlybuns.controller;
 import com.project.onlybuns.DTO.RegisteredUserDTO;
 import com.project.onlybuns.DTO.RegisteredUserDTONadja;
-import com.project.onlybuns.DTO.UserConnectionsDTO;
 
-import com.project.onlybuns.model.Follow;
-
-import com.project.onlybuns.model.Comment;
+import com.project.onlybuns.DTO.SimpleUserDTO;
 import com.project.onlybuns.model.Post;
 
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.model.User;
 import com.project.onlybuns.service.RegisteredUserService;
 import com.project.onlybuns.service.UserService;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import org.apache.catalina.filters.ExpiresFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
@@ -24,7 +18,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -468,8 +461,9 @@ public class RegisteredUserController {
 
     @GetMapping("/username/{nadjiki}")
     public ResponseEntity<RegisteredUserDTONadja> getUserProfile2(
-            @PathVariable String nadjiki,
-            @RequestHeader("Authorization") String authorizationHeader
+            @PathVariable String nadjiki
+            //,
+           // @RequestHeader("Authorization") String authorizationHeader
             ){
         // Debugging: print the received username
         System.out.println("Fetching profile for username: " + nadjiki);
@@ -496,18 +490,22 @@ public class RegisteredUserController {
 
 
 
-        // Construct DTO and return response with user details
         RegisteredUserDTONadja userDTO = new RegisteredUserDTONadja(
                 user.getFirstName(),
                 user.getLastName(),
+                user.getUsername(),
                 user.getEmail(),
                 user.getAddress(),
                 user.getFollowersCount(),
                 user.getFollowingCount(),
-                followers,
-                following
-
+                following.stream()
+                        .map(f -> new SimpleUserDTO(f.getUsername()))
+                        .collect(Collectors.toList()),
+                followers.stream()
+                        .map(f -> new SimpleUserDTO(f.getUsername()))
+                        .collect(Collectors.toList())
         );
+
 
 
 
