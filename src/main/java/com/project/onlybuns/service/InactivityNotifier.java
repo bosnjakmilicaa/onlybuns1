@@ -21,14 +21,15 @@ public class InactivityNotifier {
     private UserActivityService userActivityService;
 
 
-   // @Scheduled(cron = "0 0 9 * * ?") // Svakog dana u 9:00
-   @Scheduled(cron = "0 0/5 * * * ?") // Svakih 5 minuta
-    public void notifyInactiveUsers() {
-        //LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
-       // List<RegisteredUser> inactiveUsers = userRepository.findByLastActiveDateBefore(oneWeekAgo);
 
-       LocalDateTime fiveMinutesAgo = LocalDateTime.now().minusMinutes(5);
-       List<RegisteredUser> inactiveUsers = userRepository.findByLastActiveDateBefore(fiveMinutesAgo);
+  // @Scheduled(cron = "0 0/5 * * * ?") // Svakih 5 minuta
+   @Scheduled(cron = "0 0 9 * * ?") // Svakog dana u 9:00
+    public void notifyInactiveUsers() {
+        LocalDateTime oneWeekAgo = LocalDateTime.now().minusDays(7);
+        List<RegisteredUser> inactiveUsers = userRepository.findByLastActiveDateBefore(oneWeekAgo);
+
+      //LocalDateTime fiveMinutesAgo = LocalDateTime.now().minusMinutes(5);
+       //List<RegisteredUser> inactiveUsers = userRepository.findByLastActiveDateBefore(fiveMinutesAgo);
 
         for (RegisteredUser user : inactiveUsers) {
             String summary = userActivityService.generateWeeklySummary(user);
