@@ -15,7 +15,8 @@ public class ChatGroup {
     private String name; // Naziv grupe
 
     @ManyToOne
-    private RegisteredUser admin; // Korisnik koji je admin grupe
+    @JoinColumn(name = "admin_id", nullable = false) // Korisnik koji je admin grupe
+    private RegisteredUser admin; // Admin korisnik
 
     @ManyToMany
     @JoinTable(

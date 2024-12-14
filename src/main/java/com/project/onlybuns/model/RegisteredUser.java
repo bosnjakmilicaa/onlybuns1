@@ -38,6 +38,23 @@ public class RegisteredUser extends User {
     @OneToMany(mappedBy = "followed", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Follow> followers = new ArrayList<>(); // Korisnici koji prate ovog korisnika
 
+    @ManyToMany
+    @JoinTable(
+            name = "user_chat_groups", // Ime tabele koja povezuje korisnike i grupe
+            joinColumns = @JoinColumn(name = "user_id"), // Kolona koja referencira korisnika
+            inverseJoinColumns = @JoinColumn(name = "chat_group_id") // Kolona koja referencira grupu
+    )
+    private List<ChatGroup> chatGroups = new ArrayList<>(); // Lista chat grupa kojima korisnik pripada
+
+    // Getteri i setteri za chatGroups
+    public List<ChatGroup> getChatGroups() {
+        return chatGroups;
+    }
+
+    public void setChatGroups(List<ChatGroup> chatGroups) {
+        this.chatGroups = chatGroups;
+    }
+
 
     // Getteri i setteri za `following` i `followers`
     public List<Follow> getFollowing() {

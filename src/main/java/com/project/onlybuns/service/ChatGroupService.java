@@ -4,6 +4,8 @@ import com.project.onlybuns.model.ChatGroup;
 import com.project.onlybuns.model.Message;
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.repository.ChatGroupRepository;
+import com.project.onlybuns.repository.RegisteredUserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,6 +18,9 @@ public class ChatGroupService {
     private final ChatGroupRepository chatGroupRepository;
     private final MessageService messageService; // Dodata zavisnost
 
+    @Autowired
+    private RegisteredUserRepository registeredUserRepository;
+
     public ChatGroupService(ChatGroupRepository chatGroupRepository, MessageService messageService) {
         this.chatGroupRepository = chatGroupRepository;
         this.messageService = messageService; // Inicijalizacija
@@ -27,6 +32,19 @@ public class ChatGroupService {
         chatGroup.setAdmin(admin);
         chatGroup.getMembers().add(admin); // Admin je uvek član grupe
         return chatGroupRepository.save(chatGroup);
+    }
+    public void addMemberToGroup(Long groupId, Long userId) {
+        // Pronađi grupu
+        ChatGroup chatGroup = chatGroupRepository.findById(groupId).orElseThrow(() -> new RuntimeException("Group not found"));
+
+        // Pronađi korisnika
+        RegisteredUser user = registeredUserRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Dodaj korisnika u grupu
+        chatGroup.addMember(user);
+
+        // Spasite promene
+        chatGroupRepository.save(chatGroup);
     }
 
     public void addMemberToGroup(Long groupId, RegisteredUser user) {
