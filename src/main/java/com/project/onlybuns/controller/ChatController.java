@@ -17,6 +17,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -53,7 +55,7 @@ public class ChatController {
     }
 
     // Endpoint za uklanjanje člana iz grupe
-    @PostMapping("/remove-member/{groupId}/{userId}")
+    /*@PostMapping("/remove-member/{groupId}/{userId}")
     public String removeMemberFromGroup(@PathVariable Long groupId, @PathVariable Long userId) {
         Optional<ChatGroup> chatGroup = chatGroupRepository.findById(groupId);
         Optional<RegisteredUser> user = registeredUserRepository.findById(userId);
@@ -63,6 +65,48 @@ public class ChatController {
             return "User removed from the group successfully";
         }
         return "Group or user not found";
+    }*/
+
+    @DeleteMapping("group/{groupName}/{username}")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public ResponseEntity<String> removeUserFromGroup(
+            @PathVariable String groupName,
+            @PathVariable String username,
+            Authentication authentication) {
+
+        // Izvlačenje korisničkog imena iz autentifikacije
+        String loggedInUsername = authentication.getName();
+
+        // Pronalaženje registrovanog korisnika na osnovu korisničkog imena
+        RegisteredUser loggedInUser = registeredUserRepository.findByUsername(loggedInUsername)
+                .orElseThrow(() -> new IllegalArgumentException("Logged-in user not found"));
+
+        // Pronalaženje grupe po imenu
+        ChatGroup group = chatGroupRepository.findByName(groupName)
+                .orElseThrow(() -> new IllegalArgumentException("Group not found"));
+
+        // Proveriti da li je ulogovani korisnik admin
+        if (!group.getAdmin().getUsername().equals(loggedInUsername)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not an admin of this group");
+        }
+
+        // Onemogućiti korisniku da ukloni sebe
+        if (loggedInUsername.equals(username)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You cannot remove yourself from the group");
+        }
+
+        // Uklanjanje korisnika iz grupe
+        RegisteredUser userToRemove = registeredUserRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        boolean removed = group.getMembers().remove(userToRemove);
+
+        if (removed) {
+            chatGroupRepository.save(group); // Spasite izmenjenu grupu
+            return ResponseEntity.ok("User removed from group successfully");
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found in the group");
+        }
     }
 
     // Metoda za slanje poruka
@@ -75,25 +119,6 @@ public class ChatController {
 
 
 
-    /*@GetMapping("/groups")
-    @PreAuthorize("hasRole('REGISTERED')")
-    public List<ChatGroup> getUserGroups(Authentication authentication) {
-        // Izvlačenje korisničkog imena iz autentifikacije
-        String loggedInUsername = authentication.getName();
-
-        // Pronalaženje registrovanog korisnika na osnovu korisničkog imena
-        RegisteredUser loggedInUser = registeredUserRepository.findByUsername(loggedInUsername)
-                .orElseThrow(() -> new IllegalArgumentException("Logged-in user not found"));
-
-        // Dobijanje lista grupa u koje korisnik pripada
-        List<ChatGroup> userGroups = chatGroupRepository.findByMembersId(loggedInUser.getId());
-
-        if (userGroups.isEmpty()) {
-            throw new IllegalArgumentException("No groups found for the user");
-        }
-
-        return userGroups;
-    }*/
 
     @GetMapping("/groups")
     @PreAuthorize("hasRole('REGISTERED')")
@@ -170,9 +195,6 @@ public class ChatController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", "Group not found"));
     }
-
-
-
 
 
     // Endpoint za poslednje poruke u grupi
