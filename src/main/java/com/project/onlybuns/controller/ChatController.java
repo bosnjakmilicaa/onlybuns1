@@ -10,16 +10,15 @@ import com.project.onlybuns.repository.MessageRepository;
 import com.project.onlybuns.repository.ChatGroupRepository;
 import com.project.onlybuns.repository.RegisteredUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -139,6 +138,39 @@ public class ChatController {
 
         return chatGroupDTOs;
     }
+    // Metoda koja proverava da li je trenutni ulogovani korisnik administrator grupe
+    @PreAuthorize("hasRole('REGISTERED')")
+    @GetMapping("/isAdminByGroupName/{groupName}")
+    public ResponseEntity<Map<String, Object>> isUserAdminByGroupName(@PathVariable String groupName, Authentication authentication) {
+        // Izvlačenje korisničkog imena iz autentifikacije
+        String loggedInUsername = authentication.getName();
+
+        // Pronalaženje registrovanog korisnika na osnovu korisničkog imena
+        RegisteredUser loggedInUser = registeredUserRepository.findByUsername(loggedInUsername)
+                .orElseThrow(() -> new IllegalArgumentException("Logged-in user not found"));
+
+        // Pronalaženje grupe na osnovu naziva
+        Optional<ChatGroup> chatGroup = chatGroupRepository.findByName(groupName);
+
+        if (chatGroup.isPresent()) {
+            ChatGroup group = chatGroup.get();
+
+            // Provera da li je ulogovani korisnik administrator grupe
+            boolean isAdmin = group.getAdmin().getId().equals(loggedInUser.getId());
+
+            // Kreiranje odgovora sa informacijom da li je admin
+            Map<String, Object> response = new HashMap<>();
+            response.put("groupName", group.getName());
+            response.put("isAdmin", isAdmin);
+
+            return ResponseEntity.ok(response);
+        }
+
+        // Ako grupa nije pronađena, vraćamo 404 grešku
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", "Group not found"));
+    }
+
 
 
 
