@@ -66,3 +66,20 @@ VALUES
     (9, 5);
 
 
+INSERT INTO chat_group (name, admin_id) VALUES ('Group 1', 4);  -- 4 je ID administrativnog korisnika (tester4)
+INSERT INTO chat_group (name, admin_id) VALUES ('Group 2', 5);  -- 5 je ID administrativnog korisnika (tester5)
+
+
+
+-- Insert članova u grupu 'Group 1' (user_id 4 je 'tester4', user_id 5 je 'tester5', user_id 7 je 'tester7')
+INSERT INTO chat_group_members (group_id, user_id) VALUES (1, 4);  -- tester4 je napravio grupu
+INSERT INTO chat_group_members (group_id, user_id) VALUES (1, 5);  -- tester5 je član
+INSERT INTO chat_group_members (group_id, user_id) VALUES (1, 7);  -- tester7 je član
+
+-- Insert članova u grupu 'Group 2' (user_id 4 je 'tester4', user_id 5 je 'tester5', user_id 7 je 'tester7')
+INSERT INTO chat_group_members (group_id, user_id) VALUES (2, 4);  -- tester4 je napravio grupu
+INSERT INTO chat_group_members (group_id, user_id) VALUES (2, 5);  -- tester5 je član
+INSERT INTO chat_group_members (group_id, user_id) VALUES (2, 7);  -- tester7 je član
+
+
+

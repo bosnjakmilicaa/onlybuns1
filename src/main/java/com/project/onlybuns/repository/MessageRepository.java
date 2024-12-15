@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
     List<Message> findByChatGroupId(Long groupId);
+    List<Message> findTop10ByChatGroupIdOrderByTimestampDesc(Long chatGroupId);
 }
