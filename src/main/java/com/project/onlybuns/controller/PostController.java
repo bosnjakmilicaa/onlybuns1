@@ -544,4 +544,10 @@ public class PostController {
         }
     }
 
+    @GetMapping("/locations")
+    public ResponseEntity<List<PostDTO>> getPostsLocations() {
+        List<PostDTO> locations = postService.getPostsLocations();
+        return ResponseEntity.ok(locations);
+    }
+
 }

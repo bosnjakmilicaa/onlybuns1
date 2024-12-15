@@ -24,8 +24,19 @@ VALUES
     (false, 9, 'content2', '/images/13.png', '2024-12-12 11:30:00'),
     (false, 5, 'content2', '/images/10.png', '2024-11-03 11:30:00'),
     (false, 9, 'content2', '/images/11.png', '2024-12-03 11:30:00'),
-    (false, 9, 'content2', '/images/12.png', '2024-12-12 11:30:00'),
-    (false, 7, 'content1', '/images/14.png', '2024-12-04 13:00:00');
+    (false, 9, 'content2', '/images/12.png', '2024-12-12 11:30:00');
+
+INSERT INTO posts (image_url, description, user_id, is_deleted, created_at, latitude, longitude)
+VALUES (
+    '/images/14.png',   -- URL slike
+    'Post ', -- Opis posta
+    7,                                -- ID korisnika (postojeći user_id iz tabele korisnika)
+    false,                                -- Nije obrisano (false)
+    NOW(),                            -- Trenutno vreme za kreiranje posta
+    45.2539,                          -- Geografska širina (latitude)
+    19.8482
+);
+
 
 -- Insert comments
 INSERT INTO comments (post_id, user_id, content, created_at)

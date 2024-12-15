@@ -1,5 +1,6 @@
 package com.project.onlybuns.service;
 
+import com.project.onlybuns.DTO.PostDTO;
 import com.project.onlybuns.model.Post;
 import com.project.onlybuns.model.PostNotFoundException;
 import com.project.onlybuns.model.RegisteredUser;
@@ -117,6 +118,18 @@ public class PostService {
     }
     public List<Post> findTop10MostLikedPosts() {
         return postRepository.findTop10ByOrderByLikesDesc();
+    }
+
+    public List<PostDTO> getPostsLocations() {
+        List<Post> posts = postRepository.findAll();
+        return posts.stream()
+                .filter(post -> post.getLatitude() != null && post.getLongitude() != null)
+                .map(post -> new PostDTO(
+                        post.getImageUrl(),
+                        post.getLatitude(),
+                        post.getLongitude(),
+                        post.getDescription()))
+                .toList();
     }
 
 

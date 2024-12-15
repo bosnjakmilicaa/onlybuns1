@@ -35,6 +35,14 @@ public class PostDTO {
         this.imageFile = imageFile;
     }
 
+    public PostDTO(String imageUrl, Double latitude, Double longitude, String description) {
+        this.imageUrl = imageUrl;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.description = description;
+
+    }
+
     public MultipartFile getImageFile() {
         return imageFile;
     }
