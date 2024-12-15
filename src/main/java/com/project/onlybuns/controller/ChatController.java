@@ -48,24 +48,65 @@ public class ChatController {
     }
 
     // Endpoint za dodavanje člana u grupu
-    @PostMapping("/add-member/{groupId}/{userId}")
-    public String addMemberToGroup(@PathVariable Long groupId, @PathVariable Long userId) {
-        chatGroupService.addMemberToGroup(groupId, userId);
-        return "User added to the group successfully";
+    @PostMapping("/add-member/{groupName}")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public ResponseEntity<String> addMemberToGroup(
+            @PathVariable String groupName,
+            @RequestBody List<String> usernames,
+            Authentication authentication) {
+
+        // Izvlačenje korisničkog imena iz autentifikacije
+        String loggedInUsername = authentication.getName();
+
+        // Pronalaženje registrovanog korisnika na osnovu korisničkog imena
+        RegisteredUser loggedInUser = registeredUserRepository.findByUsername(loggedInUsername)
+                .orElseThrow(() -> new IllegalArgumentException("Logged-in user not found"));
+
+        // Pronalaženje grupe po imenu
+        ChatGroup group = chatGroupRepository.findByName(groupName)
+                .orElseThrow(() -> new IllegalArgumentException("Group not found"));
+
+        // Proveriti da li je ulogovani korisnik admin
+        if (!group.getAdmin().getUsername().equals(loggedInUsername)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("You are not an admin of this group");
+        }
+
+        // Lista za uspešno dodane korisnike
+        List<String> addedUsers = new ArrayList<>();
+        // Lista za korisnike koji nisu mogli da budu dodani
+        List<String> notFoundUsers = new ArrayList<>();
+
+        for (String username : usernames) {
+            // Pronalaženje korisnika po korisničkom imenu
+            RegisteredUser userToAdd = registeredUserRepository.findByUsername(username)
+                    .orElse(null);
+
+            if (userToAdd != null) {
+                // Dodaj korisnika u grupu ako već nije član
+                if (!group.getMembers().contains(userToAdd)) {
+                    group.getMembers().add(userToAdd);
+                    addedUsers.add(username);
+                }
+            } else {
+                notFoundUsers.add(username);
+            }
+        }
+
+        // Spasiti izmenjenu grupu
+        chatGroupRepository.save(group);
+
+        // Kreirati odgovor na osnovu rezultata
+        if (!addedUsers.isEmpty() && !notFoundUsers.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
+                    .body("Successfully added: " + String.join(", ", addedUsers) +
+                            ". The following users were not found: " + String.join(", ", notFoundUsers));
+        } else if (!addedUsers.isEmpty()) {
+            return ResponseEntity.ok("Successfully added: " + String.join(", ", addedUsers));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("None of the users were found.");
+        }
     }
 
-    // Endpoint za uklanjanje člana iz grupe
-    /*@PostMapping("/remove-member/{groupId}/{userId}")
-    public String removeMemberFromGroup(@PathVariable Long groupId, @PathVariable Long userId) {
-        Optional<ChatGroup> chatGroup = chatGroupRepository.findById(groupId);
-        Optional<RegisteredUser> user = registeredUserRepository.findById(userId);
-        if (chatGroup.isPresent() && user.isPresent()) {
-            chatGroup.get().removeMember(user.get());
-            chatGroupRepository.save(chatGroup.get());
-            return "User removed from the group successfully";
-        }
-        return "Group or user not found";
-    }*/
 
     @DeleteMapping("group/{groupName}/{username}")
     @PreAuthorize("hasRole('REGISTERED')")
@@ -119,7 +160,6 @@ public class ChatController {
 
 
 
-
     @GetMapping("/groups")
     @PreAuthorize("hasRole('REGISTERED')")
     public List<ChatGroupDTO> getUserGroups(Authentication authentication) {
@@ -143,6 +183,7 @@ public class ChatController {
         for (ChatGroup group : userGroups) {
             // Prikupljanje učesnika u grupi
             List<String> participants = group.getMembers().stream()
+                    .filter(member -> !member.getUsername().equals(group.getAdmin().getUsername())) // Izostavi admina
                     .map(RegisteredUser::getUsername)
                     .collect(Collectors.toList());
 
@@ -163,6 +204,7 @@ public class ChatController {
 
         return chatGroupDTOs;
     }
+
     // Metoda koja proverava da li je trenutni ulogovani korisnik administrator grupe
     @PreAuthorize("hasRole('REGISTERED')")
     @GetMapping("/isAdminByGroupName/{groupName}")
