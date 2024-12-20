@@ -277,6 +277,40 @@ public class ChatController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    @PreAuthorize("hasRole('REGISTERED')")
+    @DeleteMapping("/deleteGroup/{groupName}")
+    public ResponseEntity<String> deleteGroup(@PathVariable String groupName, Authentication authentication) {
+        // Izvlačenje korisničkog imena iz autentifikacije
+        String loggedInUsername = authentication.getName();
+
+        // Pronalaženje registrovanog korisnika na osnovu korisničkog imena
+        RegisteredUser loggedInUser = registeredUserRepository.findByUsername(loggedInUsername)
+                .orElseThrow(() -> new IllegalArgumentException("Logged-in user not found"));
+
+        // Pronalaženje grupe na osnovu naziva
+        Optional<ChatGroup> chatGroupOpt = chatGroupRepository.findByName(groupName);
+
+        if (chatGroupOpt.isPresent()) {
+            ChatGroup group = chatGroupOpt.get();
+
+            // Provera da li je ulogovani korisnik administrator grupe
+            if (!group.getAdmin().getId().equals(loggedInUser.getId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body("Only the group admin can delete the group");
+            }
+
+            // Ako je korisnik admin, brišemo grupu
+            chatGroupRepository.delete(group);
+
+            return ResponseEntity.ok("Group deleted successfully");
+        }
+
+        // Ako grupa nije pronađena, vraćamo 404 grešku
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body("Group not found");
+    }
+
+
 
 
 
