@@ -37,6 +37,7 @@ public class SecurityConfig {
                 .requestMatchers("/{followerUsername}/follow/{followedUsername}").hasRole("REGISTERED")
                 .requestMatchers("/{followerUsername}/unfollow/{followedUsername}").hasRole("REGISTERED")
                 .requestMatchers("/{username}/followers").hasRole("REGISTERED")
+                .requestMatchers("/createGroup").hasRole("REGISTERED")
                 .requestMatchers("/{username}/following").hasRole("REGISTERED")
                 .anyRequest().permitAll()
                 .and()

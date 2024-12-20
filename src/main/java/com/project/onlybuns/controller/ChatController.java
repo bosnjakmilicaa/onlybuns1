@@ -244,4 +244,43 @@ public class ChatController {
     public List<Message> getLastMessages(@PathVariable Long groupId) {
         return messageRepository.findTop10ByChatGroupIdOrderByTimestampDesc(groupId);
     }
+
+
+    @PostMapping("/createGroup")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public ResponseEntity<?> createGroup(
+            @RequestBody Map<String, String> requestBody, // Prima telo kao JSON
+            Authentication authentication) {
+
+        // Ekstrakcija parametra iz requestBody mape
+        String groupName = requestBody.get("groupName");
+
+        if (groupName == null || groupName.isBlank()) {
+            return ResponseEntity.badRequest().body("Group name is required");
+        }
+
+        // Izvlačenje korisničkog imena iz autentifikacije
+        String loggedInUsername = authentication.getName();
+
+        // Pronalaženje registrovanog korisnika na osnovu korisničkog imena
+        RegisteredUser loggedInUser = registeredUserRepository.findByUsername(loggedInUsername)
+                .orElseThrow(() -> new IllegalArgumentException("Logged-in user not found"));
+
+        // Kreiranje grupe sa ulogovanim korisnikom kao adminom
+        ChatGroup newGroup = chatGroupService.createGroup(groupName, loggedInUser);
+
+        // Odgovor sa informacijama o grupi
+        Map<String, Object> response = new HashMap<>();
+        response.put("groupName", newGroup.getName());
+        response.put("admin", newGroup.getAdmin().getUsername());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+
+
+
 }
+
+
+
