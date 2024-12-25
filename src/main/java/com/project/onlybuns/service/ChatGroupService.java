@@ -72,4 +72,15 @@ public class ChatGroupService {
                 .limit(10)
                 .collect(Collectors.toList());
     }
+
+    public void deleteGroupByName(String groupName) {
+        // Pronađite grupu prema imenu
+        ChatGroup chatGroup = chatGroupRepository.findByName(groupName)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
+
+
+        // Obrišite grupu
+        chatGroupRepository.delete(chatGroup);
+    }
+
 }

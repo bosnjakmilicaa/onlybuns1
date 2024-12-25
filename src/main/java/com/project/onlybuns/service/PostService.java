@@ -51,6 +51,12 @@ public class PostService {
         LocalDateTime startOfWeek = now.minus(1, ChronoUnit.WEEKS);
         return postRepository.findPostsByDateRange(startOfWeek, now).size();
     }
+    public List<String> getCachedImageUrls() {
+        return postRepository.findAll().stream()
+                .map(Post::getImageUrl)
+                .toList();
+    }
+
 
     public long countPostsForMonth() {
         LocalDateTime now = LocalDateTime.now();

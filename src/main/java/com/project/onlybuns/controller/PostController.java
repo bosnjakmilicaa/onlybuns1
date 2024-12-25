@@ -23,6 +23,7 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -419,6 +420,7 @@ public class PostController {
 
     @PutMapping("/{id}/like")
     @PreAuthorize("hasRole('REGISTERED')")
+    @Transactional
     public ResponseEntity<String> likeOrUnlikePost(@PathVariable Long id) {
         // Pronađi post prema id
         Optional<Post> postOptional = postService.findById(id);
