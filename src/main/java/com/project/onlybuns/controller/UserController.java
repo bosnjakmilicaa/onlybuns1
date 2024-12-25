@@ -5,12 +5,15 @@ import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.model.User;
 import com.project.onlybuns.repository.UserRepository;
 import com.project.onlybuns.service.UserService;
+import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -92,4 +95,22 @@ public class UserController {
         RegisteredUser user = userService.findByUsername(username);
         return (user != null) ? ResponseEntity.ok(user) : ResponseEntity.notFound().build();
     }*/
+
+    @GetMapping("/location/{username}")
+    public ResponseEntity<Map<String, Float>> getUserLocation(@PathVariable String username) {
+        User user = userService.findUserByUsername(username);
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Korisnik nije pronađen
+        }
+
+        // Vraćanje latitude i longitude
+        Map<String, Float> location = new HashMap<>();
+        location.put("latitude", user.getLatitude());
+        location.put("longitude", user.getLongitude());
+
+        return ResponseEntity.ok(location);
+    }
+
+
 }

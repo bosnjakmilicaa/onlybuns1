@@ -39,11 +39,29 @@ public abstract class User {
     private String lastName;
 
     private String address;
+    private Float latitude;
+    private Float longitude;
 
     private boolean isActive; // Da li je nalog aktiviran
 
     @Column(name = "posts_count")
     private Integer postsCount; // Broj objava
+
+    public Float getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Float latitude) {
+        this.latitude = latitude;
+    }
+
+    public Float getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Float longitude) {
+        this.longitude = longitude;
+    }
 
     @Column(name = "followers_count")
     private Integer followersCount;

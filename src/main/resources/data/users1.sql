@@ -1,15 +1,15 @@
 -- Insert users
-INSERT INTO users (email, password, username, user_type, first_name, last_name, address, is_active)
+INSERT INTO users (email, password, username, user_type, first_name, last_name, address, is_active, latitude, longitude)
 VALUES
-    ('testuser2@example.com', 'password123', 'tester2', 'admin', 'Test', 'User2', '456 Test Avenue', TRUE),
-    ('testuser3@example.com', 'password123', 'tester3', 'admin', 'Test', 'User3', '457 Test Avenue', TRUE),
-    ('testuser1@example.com', 'password123', 'tester1', 'registered_user', 'Test', 'User1', '459 Test Avenue', TRUE),
-    ('testuser4@example.com', 'password123', 'tester4', 'registered_user', 'Test', 'User4', '450 Test Avenue', TRUE),
-    ('testuser5@example.com', 'password123', 'tester5', 'registered_user', 'Test', 'User5', '451 Test Avenue', TRUE),
-    ('testuser6@example.com', 'password123', 'tester8', 'registered_user', 'Test', 'User6', '450 Test Avenue', TRUE),
-    ('testuser7@example.com', 'password123', 'tester7', 'registered_user', 'Test', 'User7', '452 Test Avenue', TRUE),
-    ('testuser8@example.com', 'password123', 'tester9', 'registered_user', 'Test', 'User8', '452 Test Avenue', TRUE),
-    ('tanja7bajunovic@gmail.com', 'password123', 'tanja123', 'registered_user', 'Tanja', 'Civic', '452 Test Avenue', TRUE);
+    ('testuser2@example.com', 'password123', 'tester2', 'admin', 'Test', 'User2', '456 Test Avenue', TRUE, 45.2671, 19.8335),
+    ('testuser3@example.com', 'password123', 'tester3', 'admin', 'Test', 'User3', '457 Test Avenue', TRUE, 45.2680, 19.8345),
+    ('testuser1@example.com', 'password123', 'tester1', 'registered_user', 'Test', 'User1', '459 Test Avenue', TRUE, 45.2655, 19.8360),
+    ('testuser4@example.com', 'password123', 'tester4', 'registered_user', 'Test', 'User4', '450 Test Avenue', TRUE, 45.2660, 19.8320),
+    ('testuser5@example.com', 'password123', 'tester5', 'registered_user', 'Test', 'User5', '451 Test Avenue', TRUE, 45.2675, 19.8330),
+    ('testuser6@example.com', 'password123', 'tester8', 'registered_user', 'Test', 'User6', '450 Test Avenue', TRUE, 45.2668, 19.8348),
+    ('testuser7@example.com', 'password123', 'tester7', 'registered_user', 'Test', 'User7', '452 Test Avenue', TRUE, 45.2679, 19.8359),
+    ('testuser8@example.com', 'password123', 'tester9', 'registered_user', 'Test', 'User8', '452 Test Avenue', TRUE, 45.2672, 19.8327),
+    ('tanja7bajunovic@gmail.com', 'password123', 'tanja123', 'registered_user', 'Tanja', 'Civic', '452 Test Avenue', TRUE, 45.2665, 19.8332);
 
 -- Insert posts
 INSERT INTO posts (is_deleted, user_id, description, image_url, created_at)
