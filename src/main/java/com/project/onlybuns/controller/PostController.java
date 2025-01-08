@@ -10,6 +10,7 @@ import com.project.onlybuns.service.ImageUploadService;
 import com.project.onlybuns.service.PostService;
 import com.project.onlybuns.service.CommentService;
 import com.project.onlybuns.service.UserService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import jakarta.servlet.http.HttpSession;
@@ -418,7 +419,7 @@ public class PostController {
 
 
 
-    @PutMapping("/{id}/like")
+  /*  @PutMapping("/{id}/like")
     @PreAuthorize("hasRole('REGISTERED')")
     @Transactional
     public ResponseEntity<String> likeOrUnlikePost(@PathVariable Long id) {
@@ -461,10 +462,22 @@ public class PostController {
             postService.save(post);  // Sačuvaj ažuriranu objavu
             return ResponseEntity.ok("Post liked successfully");
         }
+    } */
+
+
+    @PutMapping("/{id}/like")
+    @PreAuthorize("hasRole('REGISTERED')")
+    public ResponseEntity<String> likeOrUnlikePost(@PathVariable Long id) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        try {
+            String result = postService.likeOrUnlikePost(id, username);
+            return ResponseEntity.ok(result);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
     }
-
-
-
 
 
 

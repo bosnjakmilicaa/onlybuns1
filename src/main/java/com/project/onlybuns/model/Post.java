@@ -35,12 +35,15 @@ public class Post {
     @Column(nullable = true)
     private String description;
 
+    @Version
+    private Integer version;
+    
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonBackReference(value = "post-user")  // Sprečava cikličnu serijalizaciju
     private RegisteredUser user;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JsonManagedReference(value = "post-likes") // Za serijalizaciju Likes
     private List<Like> likes = new ArrayList<>();
 
@@ -82,6 +85,14 @@ public class Post {
 
     public void setLongitude(Double longitude) {
         this.longitude = longitude;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 
     public String getLocation() {
