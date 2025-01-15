@@ -1,5 +1,5 @@
 package com.project.onlybuns.controller;
-
+/*
 import com.project.onlybuns.model.RabbitCareLocation;
 import com.project.onlybuns.service.AdminUserService;
 import com.project.onlybuns.service.CareLocationService;
@@ -31,3 +31,4 @@ public class CareLocationController {
         return careLocationService.getAllLocations();
     }
 }
+*/

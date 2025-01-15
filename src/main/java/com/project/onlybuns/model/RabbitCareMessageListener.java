@@ -1,5 +1,5 @@
 package com.project.onlybuns.model;
-
+/*
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.onlybuns.config.RabbitMQConfig;
 import com.project.onlybuns.repository.CareLocationRepository;
@@ -36,4 +36,4 @@ public class RabbitCareMessageListener {
 
         System.out.println("Lokacija sačuvana: " + location);
     }
-}
+}*/
