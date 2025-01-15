@@ -93,4 +93,12 @@ INSERT INTO chat_group_members (group_id, user_id) VALUES (2, 5);  -- tester5 je
 INSERT INTO chat_group_members (group_id, user_id) VALUES (2, 7);  -- tester7 je član
 
 
+-- Insert messages
+INSERT INTO message (sender_id, chat_group_id, content, timestamp)
+VALUES
+    (4, 1, 'Hello everyone in Group 1!', '2024-11-11 14:35:00'),   -- tester4 u grupi Group 1
+    (5, 1, 'Hey tester4, how are you?', '2024-11-11 14:36:00'),     -- tester5 u grupi Group 1
+    (7, 2, 'Hello Group 2!', '2024-11-11 14:40:00'),               -- tester7 u grupi Group 2
+    (9, 2, 'How are you tester7?', '2024-11-12 10:15:00'),         -- tester9 u grupi Group 2
+    (4, 2, 'Test message from tester4 in Group 2', '2024-12-01 09:30:00'); -- tester4 u grupi Group 2
 
