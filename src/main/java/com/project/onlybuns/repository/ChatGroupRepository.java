@@ -15,5 +15,6 @@ public interface ChatGroupRepository extends JpaRepository<ChatGroup, Long> {
     // Pronalaženje svih grupa kojima je određeni korisnik član
     List<ChatGroup> findByMembersId(Long userId);
 
-    Optional<ChatGroup> findByName(String groupName);
+
+    Optional<ChatGroup> findByName(String name);
 }

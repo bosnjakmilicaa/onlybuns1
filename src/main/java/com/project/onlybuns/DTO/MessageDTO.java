@@ -1,26 +1,34 @@
 package com.project.onlybuns.DTO;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class MessageDTO {
 
     private String content; // Sadržaj poruke
     private String timestamp; // Vreme kada je poruka poslata
     private Long chatGroupId; // ID chat grupe
     private String username; // Korisničko ime pošiljaoca
-
+    private String groupName;
     private Long senderId; // ID pošiljaoca
 
-    // Konstruktor
-    public MessageDTO(String content, String timestamp, Long senderId) {
-        this.content = content;
-        this.timestamp = timestamp;
-        this.senderId = senderId; // Dodeljujemo ID pošiljaoca prilikom kreiranja poruke
-    }
-
-
-    // Konstruktor
+    // Podrazumevani konstruktor (bez parametara)
+    public MessageDTO() {}
+    // Konstruktor sa dva parametra
     public MessageDTO(String content, String timestamp) {
         this.content = content;
         this.timestamp = timestamp;
+    }
+
+
+    // Konstruktor sa parametrima
+    @JsonCreator
+    public MessageDTO(@JsonProperty("content") String content,
+                      @JsonProperty("timestamp") String timestamp,
+                      @JsonProperty("senderId") Long senderId) {
+        this.content = content;
+        this.timestamp = timestamp;
+        this.senderId = senderId;
     }
 
     // Getteri i setteri
@@ -62,5 +70,13 @@ public class MessageDTO {
 
     public void setSenderId(Long senderId) {
         this.senderId = senderId;
+    }
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
     }
 }
