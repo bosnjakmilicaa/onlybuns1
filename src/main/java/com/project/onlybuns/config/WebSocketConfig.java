@@ -18,6 +18,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/chat").withSockJS(); // Endpoint za povezivanje
+        registry.addEndpoint("/chat")
+                .setAllowedOrigins("http://localhost:8081") // Dozvolite CORS sa frontend-a
+                .withSockJS();
     }
+
 }
