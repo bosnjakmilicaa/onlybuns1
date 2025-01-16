@@ -112,6 +112,10 @@ public class ChatController {
     }
 
 
+
+
+
+
     @DeleteMapping("group/{groupName}/{username}")
     @PreAuthorize("hasRole('REGISTERED')")
     public ResponseEntity<String> removeUserFromGroup(
@@ -154,141 +158,6 @@ public class ChatController {
         }
     }
 
-    // Metoda za slanje poruka
-    /*@MessageMapping("/send")
-    public void sendMessage(MessageDTO messageDTO) {
-        // Set timestamp for the message
-        String timestampString = LocalDateTime.now().toString();
-        messageDTO.setTimestamp(timestampString);
-
-        // Kreirajte instancu Message koristeći MessageDTO
-        ChatGroup chatGroup = chatGroupRepository.findById(messageDTO.getChatGroupId())
-                .orElseThrow(() -> new IllegalArgumentException("Group not found"));
-
-        RegisteredUser user = registeredUserRepository.findByUsername(messageDTO.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        Message message = new Message();
-        message.setContent(messageDTO.getContent());
-
-        // Konvertujte timestamp u LocalDateTime
-        LocalDateTime timestamp = LocalDateTime.parse(messageDTO.getTimestamp(), DateTimeFormatter.ISO_DATE_TIME);
-        message.setTimestamp(timestamp);
-
-        message.setChatGroup(chatGroup);
-        message.setSender(user);
-
-        // Spasite poruku u bazi
-        messageRepository.save(message);
-
-        // Pošaljite poruku svim članovima grupe
-        messagingTemplate.convertAndSend("/topic/group/" + messageDTO.getChatGroupId(), messageDTO);
-    }*/
-
-    /*@MessageMapping("/send")
-    public void sendMessage(MessageDTO messageDTO) {
-        // Set timestamp for the message
-        String timestampString = LocalDateTime.now().toString();
-        messageDTO.setTimestamp(timestampString);
-
-        // Kreirajte instancu Message koristeći MessageDTO
-        ChatGroup chatGroup = chatGroupRepository.findById(messageDTO.getChatGroupId())
-                .orElseThrow(() -> new IllegalArgumentException("Group not found"));
-
-        RegisteredUser user = registeredUserRepository.findByUsername(messageDTO.getUsername())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        Message message = new Message();
-        message.setContent(messageDTO.getContent());
-
-        // Konvertujte timestamp u LocalDateTime
-        LocalDateTime timestamp = LocalDateTime.parse(messageDTO.getTimestamp(), DateTimeFormatter.ISO_DATE_TIME);
-        message.setTimestamp(timestamp);
-
-        message.setChatGroup(chatGroup);
-        message.setSender(user);
-
-        // Spasite poruku u bazi
-        messageRepository.save(message);
-
-        // Dodaj korisničko ime u MessageDTO pre slanja
-        messageDTO.setUsername(user.getUsername());
-
-        // Pošaljite poruku svim članovima grupe
-        messagingTemplate.convertAndSend("/topic/group/" + messageDTO.getChatGroupId(), messageDTO);
-    }*/
-
-    /*@MessageMapping("/send")
-    public void sendMessage(MessageDTO messageDTO) {
-        // Set timestamp for the message
-        String timestampString = LocalDateTime.now().toString();
-        messageDTO.setTimestamp(timestampString);
-
-        // Kreirajte instancu ChatGroup
-        ChatGroup chatGroup = chatGroupRepository.findById(messageDTO.getChatGroupId())
-                .orElseThrow(() -> new IllegalArgumentException("Group not found"));
-
-        // Pretražite korisnika na osnovu ID-a (sender_id)
-        RegisteredUser user = registeredUserRepository.findById(messageDTO.getSenderId())  // Korišćenje sender_id iz MessageDTO
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        // Kreirajte novu poruku
-        Message message = new Message();
-        message.setContent(messageDTO.getContent());
-
-        // Konvertujte timestamp u LocalDateTime
-        LocalDateTime timestamp = LocalDateTime.parse(messageDTO.getTimestamp(), DateTimeFormatter.ISO_DATE_TIME);
-        message.setTimestamp(timestamp);
-
-        // Postavite chatGroup i sender (korisnika)
-        message.setChatGroup(chatGroup);
-        message.setSender(user);
-
-        // Spasite poruku u bazi
-        messageRepository.save(message);
-
-        // Dodajte korisničko ime u MessageDTO pre slanja
-        messageDTO.setUsername(user.getUsername());  // Ovde dodajemo korisničko ime u DTO
-
-        // Pošaljite poruku svim članovima grupe
-        messagingTemplate.convertAndSend("/topic/group/" + messageDTO.getChatGroupId(), messageDTO);
-    }*/
-
-    /*@MessageMapping("/send")
-    public void sendMessage(MessageDTO messageDTO) {
-        // Set timestamp for the message
-        String timestampString = LocalDateTime.now().toString();
-        messageDTO.setTimestamp(timestampString);
-
-        // Kreirajte instancu ChatGroup koristeći groupName
-        ChatGroup chatGroup = chatGroupRepository.findByName(messageDTO.getGroupName())
-                .orElseThrow(() -> new IllegalArgumentException("Group not found"));
-
-        // Pretražite korisnika na osnovu ID-a (sender_id)
-        RegisteredUser user = registeredUserRepository.findById(messageDTO.getSenderId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-        // Kreirajte novu poruku
-        Message message = new Message();
-        message.setContent(messageDTO.getContent());
-
-        // Konvertujte timestamp u LocalDateTime
-        LocalDateTime timestamp = LocalDateTime.parse(messageDTO.getTimestamp(), DateTimeFormatter.ISO_DATE_TIME);
-        message.setTimestamp(timestamp);
-
-        // Postavite chatGroup i sender (korisnika)
-        message.setChatGroup(chatGroup);
-        message.setSender(user);
-
-        // Spasite poruku u bazi
-        messageRepository.save(message);
-
-        // Dodajte korisničko ime u MessageDTO pre slanja
-        messageDTO.setUsername(user.getUsername());
-
-        // Pošaljite poruku svim članovima grupe
-        messagingTemplate.convertAndSend("/topic/group/" + messageDTO.getGroupName(), messageDTO);
-    }*/
     @MessageMapping("/send")
     public void sendMessage(@Payload MessageDTO messageDTO) {
         // Set timestamp for the message
@@ -490,6 +359,63 @@ public class ChatController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body("Group not found");
     }
+
+    /*@GetMapping("/groups/{groupName}/messages")
+    public List<MessageDTO> getMessagesByGroupName(@PathVariable String groupName) {
+        // Dohvati poruke koristeći ime grupe
+        List<Message> messages = messageRepository.findMessagesWithSenderByGroupName(groupName);
+
+        // Mapiraj poruke u DTO
+        return messages.stream().map(message -> {
+            MessageDTO dto = new MessageDTO();
+            dto.setContent(message.getContent());
+            dto.setTimestamp(message.getTimestamp().toString());
+
+            // Dodajte logovanje kako biste proverili da li je sender pravilno učitan
+            if (message.getSender() != null) {
+                System.out.println("Sender ID: " + message.getSender().getId()); // Proverite sender ID
+                dto.setSenderId(message.getSender().getId());
+            } else {
+                System.out.println("Sender is null"); // Ako je sender null, logujte to
+                dto.setSenderId(null);
+            }
+
+            return dto;
+        }).collect(Collectors.toList());
+    }*/
+
+    @GetMapping("/groups/{groupName}/messages")
+    public List<MessageDTO> getMessagesByGroupName(@PathVariable String groupName) {
+        // Dohvati poruke koristeći ime grupe
+        List<Message> messages = messageRepository.findMessagesWithSenderByGroupName(groupName);
+
+        // Mapiraj poruke u DTO
+        return messages.stream().map(message -> {
+            MessageDTO dto = new MessageDTO();
+            dto.setContent(message.getContent());
+            dto.setTimestamp(message.getTimestamp().toString());
+
+            // Proverite da li je sender validan
+            if (message.getSender() != null) {
+                // Logovanje Sender ID-a
+                System.out.println("Sender ID: " + message.getSender().getId());
+
+                // Pronalaženje korisnika na osnovu sender ID
+                RegisteredUser sender = message.getSender();
+                dto.setSenderId(sender.getId()); // Postavite senderId u DTO
+
+                // Dodeljivanje username-a u DTO
+                dto.setUsername(sender.getUsername()); // Dodajte username
+            } else {
+                System.out.println("Sender is null");
+                dto.setSenderId(null); // Postavite null ako je sender null
+                dto.setUsername(null); // Postavite null ako sender nije prisutan
+            }
+
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
 
 
 
