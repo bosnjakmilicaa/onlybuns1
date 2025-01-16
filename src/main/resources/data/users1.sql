@@ -6,9 +6,9 @@ VALUES
     ('testuser1@example.com', 'password123', 'tester1', 'registered_user', 'Test', 'User1', '459 Test Avenue', TRUE, 45.2655, 19.8360),
     ('testuser4@example.com', 'password123', 'tester4', 'registered_user', 'Test', 'User4', '450 Test Avenue', TRUE, 45.2660, 19.8320),
     ('testuser5@example.com', 'password123', 'tester5', 'registered_user', 'Test', 'User5', '451 Test Avenue', TRUE, 45.2675, 19.8330),
-    ('testuser6@example.com', 'password123', 'tester8', 'registered_user', 'Test', 'User6', '450 Test Avenue', TRUE, 45.2668, 19.8348),
+    ('testuser6@example.com', 'password123', 'tester6', 'registered_user', 'Test', 'User6', '450 Test Avenue', TRUE, 45.2668, 19.8348),
     ('testuser7@example.com', 'password123', 'tester7', 'registered_user', 'Test', 'User7', '452 Test Avenue', TRUE, 45.2679, 19.8359),
-    ('testuser8@example.com', 'password123', 'tester9', 'registered_user', 'Test', 'User8', '452 Test Avenue', TRUE, 45.2672, 19.8327),
+    ('testuser8@example.com', 'password123', 'tester8', 'registered_user', 'Test', 'User8', '452 Test Avenue', TRUE, 45.2672, 19.8327),
     ('tanja7bajunovic@gmail.com', 'password123', 'tanja123', 'registered_user', 'Tanja', 'Civic', '452 Test Avenue', TRUE, 45.2665, 19.8332);
 
 -- Insert posts

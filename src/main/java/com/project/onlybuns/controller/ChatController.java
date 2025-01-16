@@ -224,9 +224,8 @@ public class ChatController {
 
         // Ako korisnik nije član nijedne grupe, vrati praznu listu
         if (userGroups.isEmpty()) {
-            throw new IllegalArgumentException("No groups found for the user");
+            return new ArrayList<>();
         }
-
         // Mapiranje grupe u DTO
         List<ChatGroupDTO> chatGroupDTOs = new ArrayList<>();
         for (ChatGroup group : userGroups) {
