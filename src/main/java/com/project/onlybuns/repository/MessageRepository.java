@@ -12,8 +12,10 @@ import java.util.List;
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
     List<Message> findByChatGroupId(Long groupId);
-    List<Message> findTop10ByChatGroupIdOrderByTimestampDesc(Long chatGroupId);
-    List<Message> findTop10ByGroupNameOrderByTimestampDesc(String groupName);
+    //List<Message> findTop10ByChatGroupIdOrderByTimestampDesc(Long chatGroupId);
+
+    List<Message> findTop10ByChatGroupNameOrderByTimestampDesc(String groupName);
+
 
 
     @Query("SELECT m FROM Message m JOIN FETCH m.sender JOIN FETCH m.chatGroup WHERE m.chatGroup.name = :groupName")

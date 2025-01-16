@@ -289,10 +289,7 @@ public class ChatController {
 
 
     // Endpoint za poslednje poruke u grupi
-    @GetMapping("/lastMessages/{groupId}")
-    public List<Message> getLastMessages(@PathVariable Long groupId) {
-        return messageRepository.findTop10ByChatGroupIdOrderByTimestampDesc(groupId);
-    }
+
     private static final Logger logger = LoggerFactory.getLogger(ChatController.class);
 
 
