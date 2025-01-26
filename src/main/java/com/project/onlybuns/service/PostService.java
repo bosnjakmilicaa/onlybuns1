@@ -7,9 +7,11 @@ import com.project.onlybuns.model.PostNotFoundException;
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.repository.PostRepository;
 import com.project.onlybuns.repository.RegisteredUserRepository;
+import jakarta.persistence.Cacheable;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 //import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +36,7 @@ public class PostService {
     public PostService(PostRepository postRepository) {
         this.postRepository = postRepository;
     }
+
 
     public List<Post> findAll() {
         return postRepository.findAll();
@@ -126,16 +129,24 @@ public class PostService {
         return postRepository.findByUserUsername(username);
     }
 
+
+    @org.springframework.cache.annotation.Cacheable("Post")
+    public int getTotalPostsCount() {
+        return postRepository.findAll().size();
+    }
+    @org.springframework.cache.annotation.Cacheable("Post")
     public List<Post> findPostsFromLastMonth() {
         LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
         return postRepository.findPostsAfterDate(thirtyDaysAgo);
     }
 
+    @org.springframework.cache.annotation.Cacheable("Post")
     public List<Post> findTop5MostLikedPostsFromLast7Days() {
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
         return postRepository.findTop5ByCreatedAtAfterOrderByLikesDesc(sevenDaysAgo);
     }
 
+    @org.springframework.cache.annotation.Cacheable("Post")
     public List<Post> findTop10MostLikedPosts() {
         return postRepository.findTop10ByOrderByLikesDesc();
     }
@@ -190,7 +201,6 @@ public class PostService {
     }
 
 
-
     /*public void likePost(Long id, RegisteredUser user) {
         // Prvo proveri da li post postoji
         Post post = postRepository.findById(id)
@@ -206,5 +216,6 @@ public class PostService {
         post.getLikedByUsers().add(user);
         postRepository.save(post); // Sačuvaj promene u bazi
     }*/
+
 }
 

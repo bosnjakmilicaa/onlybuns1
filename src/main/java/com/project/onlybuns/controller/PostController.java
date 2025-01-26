@@ -502,7 +502,7 @@ public class PostController {
         // Dohvatanje svih registrovanih korisnika
 
         // Izračunavanje ukupnog broja objava
-        int totalPosts = postService.findAll().size();
+        int totalPosts = postService.getTotalPostsCount();
 
         // Priprema odgovora
         Map<String, Integer> response = new HashMap<>();
