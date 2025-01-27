@@ -1,6 +1,7 @@
 package com.project.onlybuns.service;
 
 import com.project.onlybuns.DTO.UserDTO;
+import com.project.onlybuns.config.JwtAuthenticationFilter;
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.model.User;
 import com.project.onlybuns.model.User;
@@ -9,6 +10,8 @@ import com.project.onlybuns.repository.UserRepository;
 import com.project.onlybuns.repository.RegisteredUserRepository;
 import com.project.onlybuns.repository.UnregisteredUserRepository;
 import jakarta.annotation.PostConstruct;
+import jakarta.mail.MessagingException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -28,11 +31,16 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final RegisteredUserRepository registeredUserRepository;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    private final EmailService emailService;
 
     @Autowired
-    public UserService(UserRepository userRepository, RegisteredUserRepository registeredUserRepository) {
+    public UserService(UserRepository userRepository, RegisteredUserRepository registeredUserRepository, JwtAuthenticationFilter jwtAuthenticationFilter, EmailService emailService) {
         this.userRepository = userRepository;
         this.registeredUserRepository = registeredUserRepository;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.emailService = emailService;
     }
 
 
@@ -85,6 +93,7 @@ public class UserService {
     public void delete(Long id) {
         userRepository.deleteById(id);
     }
+
 
     public boolean existsByUsername(String username) {
         return userRepository.existsByUsername(username);
@@ -206,5 +215,42 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
+    public void registerUser(UserDTO userDTO) throws MessagingException {
+        try {
+            Thread.sleep(1000); // Simulate delay
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        if (userRepository.existsByUsername(userDTO.getUsername())) {
+            throw new IllegalStateException("Username is already taken!");
+        }
 
+        if (userRepository.existsByEmail(userDTO.getEmail())) {
+            throw new IllegalStateException("Email is already in use!");
+        }
+
+        String encodedPassword = new BCryptPasswordEncoder().encode(userDTO.getPassword());
+
+        RegisteredUser registeredUser = new RegisteredUser();
+        registeredUser.setUsername(userDTO.getUsername());
+        registeredUser.setPassword(encodedPassword);
+        registeredUser.setEmail(userDTO.getEmail());
+        registeredUser.setFirstName(userDTO.getFirstName());
+        registeredUser.setLastName(userDTO.getLastName());
+        registeredUser.setAddress(userDTO.getAddress());
+        registeredUser.setActive(false);
+
+        userRepository.save(registeredUser);
+
+        String token = jwtAuthenticationFilter.generateTokenWithExpiration(registeredUser,600000);
+
+        System.out.println("Generisani token: " + token);
+
+
+        emailService.sendActivationEmail(userDTO.getEmail(), token);
+    }
 }
+
+
+

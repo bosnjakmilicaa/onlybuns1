@@ -59,48 +59,28 @@ public class AuthController {
     public AuthController(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
-    @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@Validated @RequestBody UserDTO userDTO, BindingResult bindingResult)throws MessagingException {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> errorMessages = new HashMap<>();
-            bindingResult.getFieldErrors().forEach(error ->
-                    errorMessages.put(error.getField(), error.getDefaultMessage())
-            );
-            return ResponseEntity.badRequest().body(errorMessages);
+
+
+
+        @PostMapping("/register")
+        public ResponseEntity<?> registerUser(@Validated @RequestBody UserDTO userDTO, BindingResult bindingResult) {
+            if (bindingResult.hasErrors()) {
+                Map<String, String> errorMessages = new HashMap<>();
+                bindingResult.getFieldErrors().forEach(error ->
+                        errorMessages.put(error.getField(), error.getDefaultMessage())
+                );
+                return ResponseEntity.badRequest().body(errorMessages);
+            }
+
+            try {
+                userService.registerUser(userDTO);
+                return ResponseEntity.ok(Collections.singletonMap("message", "User registered successfully! Please check your email for the activation link."));
+            } catch (IllegalStateException | MessagingException e) {
+                return ResponseEntity.badRequest().body(Collections.singletonMap("error", e.getMessage()));
+            }
         }
 
-        if (userService.existsByUsername(userDTO.getUsername())) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("username", "Error: Username is already taken!"));
-        }
 
-        if (userService.existsByEmail(userDTO.getEmail())) {
-            return ResponseEntity.badRequest().body(Collections.singletonMap("email", "Error: Email is already in use!"));
-        }
-
-        String encodedPassword = passwordEncoder.encode(userDTO.getPassword());
-
-        RegisteredUser registeredUser = new RegisteredUser();
-        registeredUser.setUsername(userDTO.getUsername());
-        registeredUser.setPassword(encodedPassword);
-        registeredUser.setEmail(userDTO.getEmail());
-        registeredUser.setFirstName(userDTO.getFirstName());
-        registeredUser.setLastName(userDTO.getLastName());
-        registeredUser.setAddress(userDTO.getAddress());
-
-        // Korisnik je inicijalno inaktiviran
-        registeredUser.setActive(false);
-        userService.save(registeredUser);
-
-        // Generiši token za aktivaciju
-        String token = jwtAuthenticationFilter.generateTokenWithExpiration(registeredUser,600000);
-
-        System.out.println("Generisani token: " + token);
-
-
-        emailService.sendActivationEmail(userDTO.getEmail(), token);
-
-        return ResponseEntity.ok(Collections.singletonMap("message", "User registered successfully! Please check your email for activation link."));
-    }
 
     @GetMapping("/activate")
     public ResponseEntity<?> activateUser(@RequestParam("token") String token) {
