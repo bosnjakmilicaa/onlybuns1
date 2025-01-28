@@ -2,28 +2,22 @@ package com.project.onlybuns.service;
 
 import com.project.onlybuns.DTO.UserDTO;
 import com.project.onlybuns.config.JwtAuthenticationFilter;
+import com.project.onlybuns.model.BloomFilter;
 import com.project.onlybuns.model.RegisteredUser;
 import com.project.onlybuns.model.User;
-import com.project.onlybuns.model.User;
-import com.project.onlybuns.repository.AdminUserRepository;
 import com.project.onlybuns.repository.UserRepository;
 import com.project.onlybuns.repository.RegisteredUserRepository;
-import com.project.onlybuns.repository.UnregisteredUserRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.awt.print.Pageable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -34,13 +28,15 @@ public class UserService {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private final EmailService emailService;
+    private final BloomFilter bloomFilter;
 
     @Autowired
-    public UserService(UserRepository userRepository, RegisteredUserRepository registeredUserRepository, JwtAuthenticationFilter jwtAuthenticationFilter, EmailService emailService) {
+    public UserService(UserRepository userRepository, RegisteredUserRepository registeredUserRepository, JwtAuthenticationFilter jwtAuthenticationFilter, EmailService emailService, BloomFilter bloomFilter) {
         this.userRepository = userRepository;
         this.registeredUserRepository = registeredUserRepository;
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.emailService = emailService;
+        this.bloomFilter =  new BloomFilter(1000, 3);
     }
 
 
@@ -222,13 +218,20 @@ public class UserService {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-        if (userRepository.existsByUsername(userDTO.getUsername())) {
-            throw new IllegalStateException("Username is already taken!");
+        if (bloomFilter.contains(userDTO.getUsername())) {
+            // The username is likely taken, so check in the database as well
+            if (userRepository.existsByUsername(userDTO.getUsername())) {
+                throw new RuntimeException("Username is already taken.");
+            }
         }
+
+        // Add the username to the Bloom filter
+
 
         if (userRepository.existsByEmail(userDTO.getEmail())) {
             throw new IllegalStateException("Email is already in use!");
         }
+        bloomFilter.add(userDTO.getUsername());
 
         String encodedPassword = new BCryptPasswordEncoder().encode(userDTO.getPassword());
 
