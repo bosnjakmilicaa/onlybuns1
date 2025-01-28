@@ -1,5 +1,5 @@
 package com.project.onlybuns.config;
-/*
+
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.DirectExchange;
@@ -35,5 +35,5 @@ public class RabbitMQConfig {
         return binding;
     }
 
-}*/
+}
 

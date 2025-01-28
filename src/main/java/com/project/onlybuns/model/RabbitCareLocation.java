@@ -1,6 +1,6 @@
 package com.project.onlybuns.model;
 
-/*
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Entity;
@@ -17,12 +17,8 @@ public class RabbitCareLocation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /*public RabbitCareLocation(String name, double latitude, double longitude) {
-        this.name = name;
-        this.latitude = latitude;
-        this.longitude = longitude;
-    }*/
-    /*@JsonCreator
+
+    @JsonCreator
     public RabbitCareLocation(
             @JsonProperty("name") String name,
             @JsonProperty("latitude") double latitude,
@@ -67,4 +63,4 @@ public class RabbitCareLocation {
     public Long getId() {
         return id;
     }
-}*/
+}

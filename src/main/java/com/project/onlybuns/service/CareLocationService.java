@@ -1,5 +1,5 @@
 package com.project.onlybuns.service;
-/*
+
 import com.project.onlybuns.model.RabbitCareLocation;
 import com.project.onlybuns.repository.CareLocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,4 +28,3 @@ public class CareLocationService {
         return repository.findAll();
     }
 }
-*/
