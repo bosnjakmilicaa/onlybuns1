@@ -31,6 +31,8 @@ public class ChatGroupService {
         chatGroup.setName(groupName);
         chatGroup.setAdmin(admin);
         chatGroup.getMembers().add(admin); // Admin je uvek član grupe
+
+
         return chatGroupRepository.save(chatGroup);
     }
     public void addMemberToGroup(Long groupId, Long userId) {

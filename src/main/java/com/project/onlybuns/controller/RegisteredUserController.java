@@ -327,6 +327,29 @@ public class RegisteredUserController {
         return ResponseEntity.ok(dtoPage);
     }
 
+    @GetMapping("/allRegisteredUsers1")
+    public ResponseEntity<List<RegisteredUserDTO>> getAllRegisteredUsers() {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("User: " + authentication.getName() + " with roles: " + authentication.getAuthorities());
+
+        // Dohvati sve korisnike bez paginacije
+        List<RegisteredUser> allUsers = registeredUserService.findAll();
+
+        // Mapiranje na DTO listu
+        List<RegisteredUserDTO> userDTOs = allUsers.stream().map(user -> new RegisteredUserDTO(
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getUsername(),
+                user.getPosts().size(),
+                user.getFollowing().size(),
+                user.getFollowers().size()
+        )).toList();
+
+        return ResponseEntity.ok(userDTOs);
+    }
+
     @GetMapping("/registered-users")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<RegisteredUserDTO>> getRegisteredUsers(
