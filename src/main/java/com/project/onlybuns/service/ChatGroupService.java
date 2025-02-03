@@ -35,54 +35,24 @@ public class ChatGroupService {
 
         return chatGroupRepository.save(chatGroup);
     }
-    public void addMemberToGroup(Long groupId, Long userId) {
-        // Pronađi grupu
-        ChatGroup chatGroup = chatGroupRepository.findById(groupId).orElseThrow(() -> new RuntimeException("Group not found"));
+    public ChatGroup createOrFindPrivateChat(RegisteredUser sender, RegisteredUser recipient) {
+        String privateChatName = sender.getUsername() + "-" + recipient.getUsername();
 
-        // Pronađi korisnika
-        RegisteredUser user = registeredUserRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        // Proveri da li već postoji čet između ova dva korisnika
+        Optional<ChatGroup> existingChat = chatGroupRepository.findByName(privateChatName);
 
-        // Dodaj korisnika u grupu
-        chatGroup.addMember(user);
-
-        // Spasite promene
-        chatGroupRepository.save(chatGroup);
-    }
-
-    public void addMemberToGroup(Long groupId, RegisteredUser user) {
-        Optional<ChatGroup> chatGroupOpt = chatGroupRepository.findById(groupId);
-        if (chatGroupOpt.isPresent()) {
-            ChatGroup chatGroup = chatGroupOpt.get();
-            chatGroup.getMembers().add(user);
-            chatGroupRepository.save(chatGroup);
+        if (existingChat.isPresent()) {
+            return existingChat.get();
         }
-    }
 
-    public void removeMemberFromGroup(Long groupId, RegisteredUser user) {
-        Optional<ChatGroup> chatGroupOpt = chatGroupRepository.findById(groupId);
-        if (chatGroupOpt.isPresent()) {
-            ChatGroup chatGroup = chatGroupOpt.get();
-            chatGroup.getMembers().remove(user);
-            chatGroupRepository.save(chatGroup);
-        }
-    }
+        // Kreiraj novi privatni čet
+        ChatGroup privateChat = new ChatGroup();
+        privateChat.setName(privateChatName);
+        privateChat.setAdmin(sender);
+        privateChat.getMembers().add(sender);
+        privateChat.getMembers().add(recipient);
 
-    // Funkcija za dohvat prethodnih 10 poruka
-    public List<Message> getRecentMessages(Long groupId) {
-        return messageService.getMessagesForGroup(groupId) // Poziv metode iz MessageService
-                .stream()
-                .limit(10)
-                .collect(Collectors.toList());
-    }
-
-    public void deleteGroupByName(String groupName) {
-        // Pronađite grupu prema imenu
-        ChatGroup chatGroup = chatGroupRepository.findByName(groupName)
-                .orElseThrow(() -> new RuntimeException("Group not found"));
-
-
-        // Obrišite grupu
-        chatGroupRepository.delete(chatGroup);
+        return chatGroupRepository.save(privateChat);
     }
 
 }

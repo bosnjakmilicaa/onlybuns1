@@ -1,5 +1,6 @@
 package com.project.onlybuns.controller;
 
+import com.project.onlybuns.DTO.PrivateChatResponseDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.project.onlybuns.DTO.ChatGroupDTO;
@@ -20,6 +21,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
@@ -322,6 +324,45 @@ public class ChatController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+    @PostMapping("/createPrivateChat")
+    public ResponseEntity<?> createPrivateChat(
+            @RequestBody Map<String, String> requestBody,
+            Authentication authentication) {
+
+        String recipientUsername = requestBody.get("participant");
+
+        // Provera da li je uneto korisničko ime primaoca
+        if (recipientUsername == null || recipientUsername.isBlank()) {
+            return ResponseEntity.badRequest().body("Recipient username is required");
+        }
+
+        String senderUsername = authentication.getName();
+
+        // Pronalaženje korisnika na osnovu username
+        RegisteredUser sender = registeredUserRepository.findByUsername(senderUsername)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sender not found"));
+
+        RegisteredUser recipient = registeredUserRepository.findByUsername(recipientUsername)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recipient not found"));
+
+        // Kreiranje ili pronalaženje privatnog chata između dva korisnika
+        ChatGroup chatGroup = chatGroupService.createOrFindPrivateChat(sender, recipient);
+
+        // Setovanje naziva grupe na osnovu korisničkog imena
+        chatGroup.setName(recipientUsername);
+
+        chatGroupRepository.save(chatGroup);
+
+        // Kreiranje DTO odgovora sa željenim podacima
+        PrivateChatResponseDTO chatResponseDTO = new PrivateChatResponseDTO();
+        chatResponseDTO.setSenderUsername(sender.getUsername());
+        chatResponseDTO.setRecipientUsername(recipient.getUsername());
+        chatResponseDTO.setGroupName(chatGroup.getName());
+
+        return ResponseEntity.ok(chatResponseDTO); // Vraća samo potrebne podatke
+    }
+
+
 
     @PreAuthorize("hasRole('REGISTERED')")
     @DeleteMapping("/deleteGroup/{groupName}")

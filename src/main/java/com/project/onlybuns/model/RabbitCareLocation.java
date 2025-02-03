@@ -1,5 +1,5 @@
 package com.project.onlybuns.model;
-
+/*
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -64,3 +64,4 @@ public class RabbitCareLocation {
         return id;
     }
 }
+*/

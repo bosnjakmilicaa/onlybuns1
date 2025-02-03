@@ -1,5 +1,5 @@
 package com.project.onlybuns.service;
-
+/*
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.onlybuns.config.RabbitMQConfig;
 import com.project.onlybuns.model.RabbitCareLocation;
@@ -24,4 +24,4 @@ public class RabbitCareMessageSender {
         }
     }
 
-}
+}*/

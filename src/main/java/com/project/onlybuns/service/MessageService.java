@@ -22,4 +22,5 @@ public class MessageService {
     public List<Message> getMessagesForGroup(Long groupId) {
         return messageRepository.findByChatGroupId(groupId);
     }
+
 }
