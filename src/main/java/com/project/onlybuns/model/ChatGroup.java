@@ -2,6 +2,7 @@ package com.project.onlybuns.model;
 
 import jakarta.persistence.*;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Entity
@@ -24,10 +25,21 @@ public class ChatGroup {
             joinColumns = @JoinColumn(name = "group_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<RegisteredUser> members = new HashSet<>(); // Članovi grupe
+    private Set<RegisteredUser> members = new HashSet<>(); // Članovi
+
 
     @OneToMany(mappedBy = "chatGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Message> messages = new HashSet<>(); // Poruke u grupi
+    @Column(name = "flag")
+    private Integer flag =0; // Dodaj flag
+
+    public Integer getFlag() {
+        return Optional.ofNullable(flag).orElse(0); // Ako je flag null, vraća 0
+    }
+
+    public void setFlag(Integer flag) {
+        this.flag = flag;
+    }
 
     // Getteri i setteri
     public Long getId() {

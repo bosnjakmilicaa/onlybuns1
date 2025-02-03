@@ -8,6 +8,27 @@ public class ChatGroupDTO {
     private String adminName; // Ime admina
     private List<String> participants; // Lista korisničkih imena članova
     private List<MessageDTO> messages; // Lista poruka u grupi
+    private int flag;  // Dodajemo flag
+
+    // Konstruktor, getter-i, setter-i i ostale metode
+
+    public ChatGroupDTO(String groupName, String adminUsername, List<String> participants, List<MessageDTO> messages, int flag) {
+        this.groupName = groupName;
+        this.adminName = adminUsername;
+        this.participants = participants;
+        this.messages = messages;
+        this.flag = flag;
+    }
+
+    // Getter i setter za flag
+    public int getFlag() {
+        return flag;
+    }
+
+    public void setFlag(int flag) {
+        this.flag = flag;
+    }
+
 
     // Konstruktor
     public ChatGroupDTO(String groupName, String adminName, List<String> participants, List<MessageDTO> messages) {

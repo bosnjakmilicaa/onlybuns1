@@ -210,7 +210,6 @@ public class ChatController {
 
 
 
-
     @GetMapping("/groups")
     @PreAuthorize("hasRole('REGISTERED')")
     public List<ChatGroupDTO> getUserGroups(Authentication authentication) {
@@ -228,6 +227,7 @@ public class ChatController {
         if (userGroups.isEmpty()) {
             return new ArrayList<>();
         }
+
         // Mapiranje grupe u DTO
         List<ChatGroupDTO> chatGroupDTOs = new ArrayList<>();
         for (ChatGroup group : userGroups) {
@@ -242,18 +242,22 @@ public class ChatController {
                     .map(message -> new MessageDTO(message.getContent(), message.getTimestamp().toString())) // Pretvori datum u string
                     .collect(Collectors.toList());
 
-            // Kreiranje DTO objekta za grupu
+
+
+            // Kreiranje DTO objekta za grupu, uključujući flag
             ChatGroupDTO groupDTO = new ChatGroupDTO(
                     group.getName(),
                     group.getAdmin().getUsername(), // Admin je korisnik grupe
                     participants,
-                    messages
+                    messages,
+                    group.getFlag()  // Dodajemo flag vrednost
             );
             chatGroupDTOs.add(groupDTO);
         }
 
         return chatGroupDTOs;
     }
+
 
     // Metoda koja proverava da li je trenutni ulogovani korisnik administrator grupe
     @PreAuthorize("hasRole('REGISTERED')")
@@ -293,7 +297,6 @@ public class ChatController {
 
     private static final Logger logger = LoggerFactory.getLogger(ChatController.class);
 
-
     @PostMapping("/createGroup")
     @PreAuthorize("hasRole('REGISTERED')")
     public ResponseEntity<?> createGroup(
@@ -317,13 +320,21 @@ public class ChatController {
         // Kreiranje grupe sa ulogovanim korisnikom kao adminom
         ChatGroup newGroup = chatGroupService.createGroup(groupName, loggedInUser);
 
+        // Postavljanje flag vrednosti na 0
+        newGroup.setFlag(0);
+
+        // Čuvanje grupe u bazi
+        chatGroupRepository.save(newGroup);
+
         // Odgovor sa informacijama o grupi
         Map<String, Object> response = new HashMap<>();
         response.put("groupName", newGroup.getName());
         response.put("admin", newGroup.getAdmin().getUsername());
+        response.put("flag", newGroup.getFlag()); // Dodavanje vrednosti flag-a u odgovor
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
     @PostMapping("/createPrivateChat")
     public ResponseEntity<?> createPrivateChat(
             @RequestBody Map<String, String> requestBody,
@@ -350,6 +361,7 @@ public class ChatController {
 
         // Setovanje naziva grupe na osnovu korisničkog imena
         chatGroup.setName(recipientUsername);
+        chatGroup.setFlag(1); // Postavljanje flag-a na 1 za privatne chatove
 
         chatGroupRepository.save(chatGroup);
 
@@ -358,6 +370,7 @@ public class ChatController {
         chatResponseDTO.setSenderUsername(sender.getUsername());
         chatResponseDTO.setRecipientUsername(recipient.getUsername());
         chatResponseDTO.setGroupName(chatGroup.getName());
+        chatResponseDTO.setFlag(chatGroup.getFlag());  // Dodaj flag u odgovor
 
         return ResponseEntity.ok(chatResponseDTO); // Vraća samo potrebne podatke
     }

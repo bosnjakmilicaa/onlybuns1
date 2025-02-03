@@ -5,6 +5,16 @@ public class PrivateChatResponseDTO {
     private String senderUsername;
     private String recipientUsername;
     private String groupName;
+    private Integer flag;  // Dodaj flag polje
+
+    // Getters and Setters
+    public Integer getFlag() {
+        return flag;
+    }
+
+    public void setFlag(Integer flag) {
+        this.flag = flag;
+    }
 
     // Getteri i setteri
     public String getSenderUsername() {
